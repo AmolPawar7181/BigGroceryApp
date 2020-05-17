@@ -1,0 +1,57 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button *ngIf="ios" (click)="dismiss()">Cancel</ion-button>
+      <ion-button *ngIf="!ios" (click)="selectAll(false)">Reset</ion-button>
+    </ion-buttons>
+
+    <ion-title>
+      Filter products
+    </ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="applyFilters()" strong>Done</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item-group>
+      <ion-item-divider>
+        <ion-label>Categories</ion-label>
+      </ion-item-divider>
+
+    <ion-item *ngFor="let category of categories" [attr.category]="category.name | lowercase">
+      <!-- <ion-icon *ngIf="ios" slot="start" [name]="track.icon" color="medium"></ion-icon> -->
+      <ion-label>{{category.name}}</ion-label>
+      <ion-checkbox [(ngModel)]="category.isChecked"></ion-checkbox>
+    </ion-item>
+  </ion-item-group>
+
+  <ion-item-group>
+    <ion-item-divider>
+      <ion-label>Brands</ion-label>
+    </ion-item-divider>
+
+  <ion-item *ngFor="let brand of brands" [attr.brand]="brand.name | lowercase">
+    <!-- <ion-icon *ngIf="ios" slot="start" [name]="track.icon" color="medium"></ion-icon> -->
+    <ion-label>{{brand.name}}</ion-label>
+    <ion-checkbox [(ngModel)]="brand.isChecked"></ion-checkbox>
+  </ion-item>
+</ion-item-group>
+
+  </ion-list>
+
+</ion-content>
+
+<ion-footer translucent="true" *ngIf="ios">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="selectAll(false)">Deselect All</ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="selectAll(true)">Select All</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

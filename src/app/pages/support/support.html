@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <!-- <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons> -->
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>Message</ion-title>
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+  <form #submitForm="ngForm" novalidate (ngSubmit)="submit(submitForm)">
+    <ion-list >
+    <ion-item>
+      <ion-label>Date and Time</ion-label>
+      <ion-datetime [(ngModel)]="supportMessage.datenTime" display-format="YYYY-MM-DDTHH:mm" value="1990-02-19" placeholder="Select date and time" name="ondate" #ondate="ngModel" required></ion-datetime>
+      <!-- <ion-datetime [(ngModel)]="supportMessage.onDate" value="1990-02-19" placeholder="Select on date" name="ondate" #ondate="ngModel" required></ion-datetime> -->
+    </ion-item>
+    <ion-text color="danger">
+      <p
+        [hidden]="ondate.valid || submitted == false"
+        class="ion-padding-start"
+      >
+        Date and Time is required
+      </p>
+    </ion-text>
+    <!-- <ion-item>
+      <ion-label>Time</ion-label> -->
+      <!-- <ion-datetime [(ngModel)]="supportMessage.onTime"  value="1990-02-19" placeholder="Select on time" name="onTime" #ontime="ngModel" required></ion-datetime> -->
+      <!-- <ion-datetime [(ngModel)]="supportMessage.onTime" display-format="hh:mm A" picker-format="hh:mm A" value="07:43Z" placeholder="Select on time" name="onTime" #ontime="ngModel" required></ion-datetime>
+    </ion-item>
+    <ion-text color="danger">
+      <p [hidden]="ontime.valid || submitted == false"
+        class="ion-padding-start"
+      >
+        on Time is required
+      </p>
+    </ion-text> -->
+    <ion-item>
+      <ion-label position="stacked" color="primary">Enter your support message below</ion-label>
+      <ion-textarea [(ngModel)]="supportMessage.msg" name="supportQuestion" #supportQuestion="ngModel" rows="6" required></ion-textarea>
+    </ion-item>
+    <ion-text color="danger">
+      <p [hidden]="supportQuestion.valid || submitted === false" class="ion-padding-start">
+        Message is required
+      </p>
+    </ion-text>
+    
+  </ion-list>
+    <!-- <ion-list lines="none">
+      <ion-item>
+        <ion-label position="stacked" color="primary">Enter your support message below</ion-label>
+        <ion-textarea [(ngModel)]="supportMessage" name="supportQuestion" #supportQuestion="ngModel" rows="6" required></ion-textarea>
+      </ion-item>
+    </ion-list>
+
+    <ion-text color="danger">
+      <p [hidden]="supportQuestion.valid || submitted === false" class="ion-padding-start">
+        Support message is required
+      </p>
+    </ion-text> -->
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit">Submit</ion-button>
+    </div>
+  </form>
+</ion-content>

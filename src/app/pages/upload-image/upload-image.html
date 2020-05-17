@@ -1,0 +1,42 @@
+<ion-header translucent="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>
+      Upload Image
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+ 
+<ion-content padding>
+  <ion-text *ngIf="images.length == 0" class="ion-text-center">
+    <h5 text-center>Please Select Image!</h5>
+  </ion-text>
+ 
+  <ion-list>
+    <ion-item *ngFor="let img of images; index as pos" text-wrap>
+      <ion-thumbnail slot="start">
+        <ion-img [src]="img.path"></ion-img>
+      </ion-thumbnail>
+      <ion-label>
+        {{ img.name }} 
+      </ion-label>
+      <ion-label>
+        {{uploadComplete}}
+      </ion-label>
+      <ion-button slot="end" fill="clear" (click)="startUpload(img,pos)">
+        <ion-icon slot="icon-only" name="cloud-upload"></ion-icon>
+      </ion-button>
+      <ion-button slot="end" fill="clear" (click)="deleteImage(img, pos)">
+        <ion-icon slot="icon-only" name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+  <!-- <ion-text>imgData {{imgData}}</ion-text> -->
+</ion-content>
+ 
+
+<ion-button expand="full" color="primary" (click)="selectImage()">
+  <ion-icon slot="start" name="camera"></ion-icon>
+  Select Image</ion-button>

@@ -1,0 +1,110 @@
+<ion-header translucent="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>
+      Update product
+    </ion-title>
+  </ion-toolbar>  
+</ion-header>
+
+<ion-content padding>
+  <ion-card>
+    <!-- <ion-text *ngIf="images.length == 0" class="ion-text-center">
+      <h5 text-center>Please Select Image!</h5>
+    </ion-text> -->
+
+    <ion-list>
+      <ion-row>
+      <ion-col size="6" *ngFor="let img of product.img; index as pos" text-wrap>
+            <ion-img [src]="img"></ion-img>
+          </ion-col>
+        </ion-row>
+        <!-- <ion-thumbnail slot="start">
+          
+        </ion-thumbnail> -->
+        <!-- <ion-label>
+          {{ img.img_name }}
+        </ion-label> -->
+      
+      <div class="ion-text-center">
+        <ion-button
+          color="primary"
+          (click)="presentUploadPage()"
+        >
+          <ion-icon slot="start" name="camera"></ion-icon>
+          Add more images </ion-button>
+      </div>
+      <ion-text>images {{ images}}</ion-text>
+    </ion-list>
+  </ion-card>
+
+
+  <form #productForm="ngForm" novalidate>
+    <ion-list>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Name</ion-label>
+        <ion-input [(ngModel)]="product.name" name="name" type="text" #name="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="name.valid || submitted == false" class="ion-padding-start">
+          Name is required
+        </p>
+      </ion-text>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Price</ion-label>
+        <ion-input [(ngModel)]="product.price" name="price" type="text" #price="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="price.valid || submitted == false" class="ion-padding-start">
+          Price is required
+        </p>
+      </ion-text>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Quantity</ion-label>
+        <ion-input [(ngModel)]="product.pricePerQuantity" name="pricePerQuantity" type="text" #pricePerQuantity="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="pricePerQuantity.valid || submitted == false" class="ion-padding-start">
+          Quantity is required
+        </p>
+      </ion-text>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Category</ion-label>
+        <ion-input [(ngModel)]="product.category" name="category" type="text" #category="ngModel" spellcheck="false" autocapitalize="off"
+          required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="category.valid || submitted == false" class="ion-padding-start">
+          Category is required
+        </p>
+      </ion-text>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Brand</ion-label>
+        <ion-input [(ngModel)]="product.brand" name="brand" type="text" #brand="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="brand.valid || submitted == false" class="ion-padding-start">
+          Brand is required
+        </p>
+      </ion-text>
+    </ion-list>
+
+    <ion-row>
+      <ion-col>
+        <ion-button (click)="updateProduct(productForm)" type="submit" expand="block">Update product</ion-button>
+      </ion-col>
+    </ion-row>
+  </form>
+</ion-content>

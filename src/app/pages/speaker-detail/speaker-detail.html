@@ -1,0 +1,68 @@
+<ion-content>
+  <ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-buttons slot="start" >
+        <ion-menu-button ></ion-menu-button>
+      </ion-buttons>
+     
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="about-header"> 
+    <!-- Instead of loading an image each time the select changes, use opacity to transition them -->
+    <div class="about-image madison" >
+      <img src="/assets/img/about/IFT.png" alt="IFT"/>
+    </div>
+    <!-- <div class="about-image madison" [ngStyle]="location === 'madison' && {'opacity': '1'}"></div> -->
+    <!-- <div class="about-image austin" [ngStyle]="location === 'austin' && {'opacity': '1'}"></div>
+    <div class="about-image chicago" [ngStyle]="location === 'chicago' && {'opacity': '1'}"></div>
+    <div class="about-image seattle" [ngStyle]="location === 'seattle' && {'opacity': '1'}"></div> -->
+  </div>
+
+  <div class="about-info ion-padding-left ion-padding-right">
+    <h3 class="ion-padding-top ion-padding-start mont-semibold">India Fast Technology</h3>
+    
+    <p class="ion-padding-start ion-padding-end"> 
+      We are a service based company and our main objective is to create IT products for smalll and medium enterprises.
+    </p>
+    <p class="ion-padding-start ion-padding-end">
+      Our Mission iS understanding our clients’ needs and adding values to their organisations, we deliver accessible reliable and innovative messaging solutions by delivering quality service through our people, processes, products and platforms.
+    </p>
+
+    <h3 class="ion-padding-top ion-padding-start">Contact us</h3>
+
+    <ion-list lines="none">
+      <ion-item>
+        <ion-icon slot="start" color="danger" name="location-outline"></ion-icon>
+        <ion-label class="ion-text-wrap">          
+          <h3>E-102,Level 1,Sai Nisarg,Swaraj Chowk,Pimple Saudagar,<br> Pimpri-Chinchwad,Pune</h3>
+        </ion-label>
+      </ion-item>
+      <ion-item >
+        <ion-icon slot="start" color="danger" name="call"></ion-icon>
+        <ion-label>
+          <p><span (click)="makeACall('917030228080')">+917030228080 </span> | <span (click)="makeACall('919765517181')">+919765517181 </span> </p>
+        </ion-label>
+      </ion-item>
+      <ion-item >
+        <ion-icon slot="start" color="danger" name="mail"></ion-icon>
+        <ion-label>
+          <h3>sandippatil.vfx@gmail.com</h3>
+        </ion-label>
+      </ion-item>
+
+      <ion-item >
+        <ion-icon slot="start" color="danger" name="analytics-outline"></ion-icon>
+        <ion-label> Designed by <span class="mont-semibold">Sandip Patil</span> </ion-label>
+      </ion-item>
+
+      <ion-item >
+        <ion-icon slot="start" color="danger" name="desktop-outline"></ion-icon>
+        <ion-label> Developed by <span class="mont-semibold">Amol Pawar</span> </ion-label>
+      </ion-item>
+
+
+    </ion-list>
+
+  </div>
+</ion-content>

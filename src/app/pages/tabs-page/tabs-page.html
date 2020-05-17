@@ -1,0 +1,26 @@
+<ion-tabs>
+
+  <ion-tab-bar slot="bottom" id="myTabBar">
+    <ion-tab-button tab="schedule">
+      <ion-icon name="home"></ion-icon>
+      <ion-label class="mont-semibold">Products</ion-label>
+    </ion-tab-button>
+
+    <!-- <ion-tab-button tab="speakers">
+      <ion-icon name="people"></ion-icon>
+      <ion-label class="mont-semibold">Speakers</ion-label>
+    </ion-tab-button> -->
+
+    <!-- <ion-tab-button tab="map">
+      <ion-icon name="location"></ion-icon>
+      <ion-label>Map</ion-label>
+    </ion-tab-button> -->
+
+    <ion-tab-button tab="cart">
+      <ion-icon name="cart"></ion-icon>
+      <ion-badge [hidden]="cartItemCount === 0" color="primary">{{cartItemCount}}</ion-badge>
+      <ion-label class="mont-semibold">Cart</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+
+</ion-tabs>

@@ -1,0 +1,14 @@
+img {
+  max-width: 140px;
+  border-radius: 50%;
+}
+
+.profileContent.card-content-md {
+  background: var(--danger,#eb445a) !important;
+  ion-list {
+    background: var(--danger,#eb445a) !important;
+    ion-item.profileName {
+      --background: var(--danger,#eb445a) !important;
+    }
+  }
+}

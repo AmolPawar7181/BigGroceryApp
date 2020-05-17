@@ -1,0 +1,412 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/app/tabs/schedule"></ion-back-button>
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      {{addingProduct? 'Add product' : 'Orders'}}
+    </ion-title>
+  </ion-toolbar>
+  <ion-toolbar [hidden]="addingProduct">
+    <ion-segment [(ngModel)]="segment" value="pending">
+      <ion-segment-button value="pending">
+        <ion-label>Pending</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Completed</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <!-- Ongoing Orders -->
+  <ion-card [hidden]="addingProduct" class="ion-no-padding ion-no-margin" *ngIf="segment === 'pending'">
+    <ion-card-header>
+      <ion-card-title>Ongoing Orders: {{activeOrdersCount}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding ion-no-margin">
+
+      <ion-card class="" *ngFor="let order of activeOrders; index as pos">
+          <ion-card-header>
+            <ion-item lines="full" class="ion-no-padding ion-no-margin">
+              <ion-label>
+                <ion-note>Ordered On: {{order.orders.order.createdAt._seconds * 1000 | date:'medium' }}</ion-note>
+                <h3 class="mont-semibold">User: {{order.userData.username}}</h3>
+                <h3 class="ion-float-left mont-semibold" color="success">Rs {{order.orders.order.total}}</h3>               
+              </ion-label>
+            </ion-item>
+          </ion-card-header>
+          <ion-card-content class="ion-no-padding ion-no-margin">
+            <ion-list>
+              <ion-item *ngFor="let product of order.orders.order.products">
+                <ion-thumbnail slot="start">
+                  <ion-slides>
+                    <fiv-gallery-toolbar position="top">
+                      <ion-toolbar color="transparent">
+                        <ion-buttons slot="end">
+                          <ion-button (click)="gallery.close()">
+                            <ion-icon slot="icon-only" name="close"></ion-icon>
+                          </ion-button>
+                        </ion-buttons>
+                      </ion-toolbar>
+                    </fiv-gallery-toolbar>
+                    <fiv-gallery #gallery>
+                      <ion-row>
+                        <ion-col *ngFor="let image of product.details.img">
+                          <ion-slide>
+                            <fiv-gallery-image
+                              [src]="image ? image : '../assets/img/no_image.jpg'"
+                            ></fiv-gallery-image>
+                          </ion-slide>
+                        </ion-col>
+                      </ion-row>
+                    </fiv-gallery>
+                  </ion-slides>
+                </ion-thumbnail>
+                <ion-label>
+                  <h3>Product: {{product.details.name}}</h3>
+                  <h3>Brand: {{product.details.brand}}</h3>
+                  <h3>Quantity: {{product.count}}</h3>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+            <ion-card-header>
+              <ion-item>
+                <ion-label>
+                  <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>{{order.userData.address}}</h3>
+                  <h3><span class="mont-semibold">Mob no: </span> {{order.userData.phone}}</h3>
+                </ion-label>
+              </ion-item>
+              <!-- <ion-item> -->
+                <ion-grid class="ion-no-padding ion-no-margin ion-padding-top">
+                  <ion-row>
+                    <ion-col>
+                      <ion-chip color="success" button (click)="setOrderStatus(order.orders.orderId,'delivered', pos)">                  
+                        <ion-icon name="checkmark-done-circle"></ion-icon>
+                        <ion-label>Mark as delivered</ion-label>
+                      </ion-chip>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col>
+                      <div *ngIf="order.orders.order.message">
+                        <ion-note>Given time: {{order.orders.order.message[0].dateTime | date:'medium'}}</ion-note>
+                    </div>
+                      <ion-chip color="danger" button (click)="presentMessageUserPage(order.orders.orderId)">
+                        <ion-icon name="notifications-circle"></ion-icon>
+                        <ion-label>Notify user about order</ion-label>
+                      </ion-chip>
+                      </ion-col>
+                    </ion-row>
+
+                </ion-grid>
+                
+
+                
+
+              <!-- </ion-item> -->
+            </ion-card-header>
+          </ion-card-content>
+        </ion-card>
+        <ion-item lines="full" >
+          <ion-label *ngIf="activeOrders?.length === 0">
+            <h3>No ongoing orders</h3>
+          </ion-label>
+        </ion-item>
+    </ion-card-content>
+  </ion-card>
+  <!-- Ongoing Orders end -->
+
+  <!-- Completed Orders -->
+  <ion-card [hidden]="addingProduct" class="ion-no-padding ion-no-margin" *ngIf="segment === 'completed'">
+    <ion-card-header>
+      <ion-card-title>Custom Orders</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form #filterForm="ngForm" novalidate>
+      <ion-list>
+        <ion-item>
+          <ion-label>{{status}}</ion-label>
+          <ion-toggle name="status" (ionChange)="toggleStatus($event.detail.checked)"></ion-toggle>
+        </ion-item>
+      <ion-item>
+        <ion-label>From Date</ion-label>
+        <ion-datetime [(ngModel)]="fromDate" value="1990-02-19" placeholder="Select from date" name="fromdate" #fromdate="ngModel" required></ion-datetime>
+      </ion-item>
+      <ion-text color="danger">
+        <p
+          [hidden]="fromdate.valid || filterDataSubmitted == false"
+          class="ion-padding-start"
+        >
+          From Date is required
+        </p>
+      </ion-text>
+      <ion-item>
+        <ion-label>To Date</ion-label>
+        <ion-datetime [(ngModel)]="toDate"  value="1990-02-19" placeholder="Select to Date" name="todate" #todate="ngModel" required></ion-datetime>
+      </ion-item>
+      <ion-text color="danger">
+        <p
+          [hidden]="todate.valid || filterDataSubmitted == false"
+          class="ion-padding-start"
+        >
+          To Date is required
+        </p>
+      </ion-text>
+      <ion-row>
+        <ion-col>
+          <ion-button
+            (click)="getOrdersByDate(filterForm)"
+            type="submit"
+            expand="block"
+            >Get orders</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </ion-list>
+      </form>
+
+      <ion-card [hidden]="addingProduct" class="ion-no-padding ion-no-margin" *ngIf="filteredOrders.length > 0">
+        <ion-card-header>
+          <ion-card-title>Filtered Orders</ion-card-title>
+        </ion-card-header>
+        <ion-card-content >
+    
+          <ion-card class="" *ngFor="let order of filteredOrders; index as pos" class="ion-no-padding ion-no-margin ion-margin-bottom">
+              <ion-card-header >
+                <ion-item lines="full" class="ion-no-padding ion-no-margin">
+                  <ion-label>
+                    <ion-note>Ordered: {{order.orders.order.createdAt._seconds * 1000 | date:'medium' }}</ion-note><br/>
+                    <ion-note *ngIf="order.orders.order.deliveredAt">Delivered: {{order.orders.order.deliveredAt?._seconds * 1000 | date:'medium' }}</ion-note>
+                    <h3 class="mont-semibold">User: {{order.userData.username}}</h3>
+                    <h3 class="mont-semibold success">Total: Rs {{order.orders.order.total}}</h3>
+                        
+                  </ion-label>
+                </ion-item>
+              </ion-card-header>
+              <ion-card-content class="ion-no-padding ion-no-margin">
+                <ion-list>
+                  <ion-item *ngFor="let product of order.orders.order.products">
+                    <ion-thumbnail slot="start">
+                      <ion-slides>
+                        <fiv-gallery-toolbar position="top">
+                          <ion-toolbar color="transparent">
+                            <ion-buttons slot="end">
+                              <ion-button (click)="gallery.close()">
+                                <ion-icon slot="icon-only" name="close"></ion-icon>
+                              </ion-button>
+                            </ion-buttons>
+                          </ion-toolbar>
+                        </fiv-gallery-toolbar>
+                        <fiv-gallery #gallery>
+                          <ion-row>
+                            <ion-col *ngFor="let image of product.details.img">
+                              <ion-slide>
+                                <fiv-gallery-image
+                                  [src]="image ? image : '../assets/img/no_image.jpg'"
+                                ></fiv-gallery-image>
+                              </ion-slide>
+                            </ion-col>
+                          </ion-row>
+                        </fiv-gallery>
+                      </ion-slides>
+                    </ion-thumbnail>
+                    <ion-label>
+                      <h3>Product: {{product.details.name}}</h3>
+                      <h3>Brand: {{product.details.brand}}</h3>
+                      <h3>Quantity: {{product.count}}</h3>
+                    </ion-label>
+                  </ion-item>
+                </ion-list>
+                <ion-card-header>
+                  <ion-item>
+                    <ion-label>
+                      <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>{{order.userData.address}}</h3>
+                      <h3><span class="mont-semibold">Mob no: </span> {{order.userData.phone}}</h3>
+                    </ion-label>
+                  </ion-item>
+                </ion-card-header>
+              </ion-card-content>
+            </ion-card>
+            <ion-item lines="full" >
+              <ion-label *ngIf="filteredOrders?.length === 0">
+                <h3>No orders</h3>
+              </ion-label>
+            </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </ion-card-content>
+  </ion-card>
+  <!-- Completed Orders end -->
+
+  
+
+  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingProduct">
+    <ion-card>
+      <ion-text *ngIf="images.length == 0" class="ion-text-center">
+        <h5 text-center>Please Select Image!</h5>
+      </ion-text>
+
+      <ion-list>
+        <ion-row>
+          <ion-col size="6" *ngFor="let img of images; index as pos" text-wrap>
+            <ion-img [src]="img"></ion-img>
+          </ion-col>
+        </ion-row>
+        <!-- <ion-thumbnail slot="start">
+          
+        </ion-thumbnail> -->
+        <!-- <ion-label>
+          {{ img.img_name }}
+        </ion-label> -->
+
+        <div class="ion-text-center">
+          <ion-button
+            *ngIf="images.length === 0"
+            color="primary"
+            (click)="presentUploadPage()"
+          >
+            <ion-icon slot="start" name="camera"></ion-icon>
+            Add images</ion-button
+          >
+        </div>
+        <!-- <ion-text>images {{ images}}</ion-text> -->
+      </ion-list>
+    </ion-card>
+
+    <form #productForm="ngForm" novalidate>
+      <ion-list>
+        <ion-item>
+          <ion-label position="stacked" color="primary">Name</ion-label>
+          <ion-input
+            [(ngModel)]="product.name"
+            name="name"
+            type="text"
+            #name="ngModel"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="name.valid || submitted == false"
+            class="ion-padding-start"
+          >
+            Name is required
+          </p>
+        </ion-text>
+
+        <ion-item>
+          <ion-label position="stacked" color="primary">Price</ion-label>
+          <ion-input
+            [(ngModel)]="product.price"
+            name="price"
+            type="text"
+            #price="ngModel"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="price.valid || submitted == false"
+            class="ion-padding-start"
+          >
+            Price is required
+          </p>
+        </ion-text>
+
+        <ion-item>
+          <ion-label position="stacked" color="primary">Quantity</ion-label>
+          <ion-input
+            [(ngModel)]="product.pricePerQuantity"
+            name="pricePerQuantity"
+            type="text"
+            #pricePerQuantity="ngModel"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="pricePerQuantity.valid || submitted == false"
+            class="ion-padding-start"
+          >
+            Quantity is required
+          </p>
+        </ion-text>
+
+        <ion-item>
+          <ion-label position="stacked" color="primary">Category</ion-label>
+          <ion-input
+            [(ngModel)]="product.category"
+            name="category"
+            type="text"
+            #category="ngModel"
+            spellcheck="false"
+            autocapitalize="off"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="category.valid || submitted == false"
+            class="ion-padding-start"
+          >
+            Category is required
+          </p>
+        </ion-text>
+
+        <ion-item>
+          <ion-label position="stacked" color="primary">Brand</ion-label>
+          <ion-input
+            [(ngModel)]="product.brand"
+            name="brand"
+            type="text"
+            #brand="ngModel"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="brand.valid || submitted == false"
+            class="ion-padding-start"
+          >
+            Brand is required
+          </p>
+        </ion-text>
+      </ion-list>
+
+      <ion-row>
+        <ion-col>
+          <ion-button
+            (click)="addProduct(productForm)"
+            type="submit"
+            expand="block"
+            >Add product</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </form>
+  </ion-card>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button
+      (click)="addingProduct = !addingProduct"
+      [hidden]="addingProduct"
+    >
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+
+    <ion-fab-button
+      color="danger"
+      (click)="addingProduct = !addingProduct"
+      [hidden]="!addingProduct"
+    >
+      <ion-icon name="close"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

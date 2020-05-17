@@ -1,0 +1,146 @@
+<ion-app [class.dark-theme]="dark" class="mont-regular">
+  <ion-split-pane contentId="main-content">
+ 
+    <ion-menu contentId="main-content">
+      <ion-content>
+        <ion-header *ngIf="profileData">
+          <ion-toolbar>
+          <ion-title >Welcome, {{profileData.username}} </ion-title>
+        </ion-toolbar>
+        </ion-header>
+        
+        <ion-list lines="none">
+          <!-- <ion-list-header class="mont-medium">
+            Bhavani Kirana store
+          </ion-list-header> -->
+          <ion-menu-toggle autoHide="false" *ngFor="let p of appPages; let i = index">
+            <ion-item [routerLink]="p.url" routerLinkActive="selected" routerDirection="root" detail="false">
+              <ion-icon slot="start" [name]="p.icon + '-outline'"></ion-icon>
+              <ion-label>
+                {{p.title}}
+              </ion-label>
+            </ion-item>
+
+          </ion-menu-toggle>
+        </ion-list>
+
+        <ion-list *ngIf="loggedIn" lines="none">
+          <ion-list-header>
+            Account
+          </ion-list-header>
+
+          <ion-menu-toggle autoHide="false" *ngIf="isAdmin">
+            <ion-item routerLink="/admin" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="people"></ion-icon>
+              <ion-label>
+                Admin
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/account" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="briefcase"></ion-icon>
+              <ion-label>
+                My account
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <!-- <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/support" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="help"></ion-icon>
+              <ion-label>
+                Support
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle> -->
+
+          <ion-menu-toggle autoHide="false">
+            <ion-item button (click)="logout()" detail="false">
+              <ion-icon slot="start" name="log-out"></ion-icon>
+              <ion-label>
+                Logout
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+        </ion-list>
+
+        <ion-list *ngIf="!loggedIn" lines="none">
+          <ion-list-header>
+            My account
+          </ion-list-header>
+
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/login" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="log-in"></ion-icon>
+              <ion-label>
+                Login
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <!-- <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/support" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="help"></ion-icon>
+              <ion-label>
+                Support
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle> -->
+
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/signup" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="person-add"></ion-icon>
+              <ion-label>
+                Signup
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          
+        </ion-list>
+
+        <ion-list lines="none">
+          <ion-list-header>
+            About
+          </ion-list-header>
+
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/about" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="information-circle"></ion-icon>
+              <ion-label>
+                About us
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/about-company" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="information-circle"></ion-icon>
+              <ion-label>
+                About Developers
+              </ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          
+
+          <!-- <ion-item>
+            <ion-icon slot="start" name="moon-outline"></ion-icon>
+            <ion-label>
+              Dark Mode
+            </ion-label>
+            <ion-toggle [(ngModel)]="dark"></ion-toggle>
+          </ion-item> -->
+        </ion-list>
+
+      </ion-content>
+    </ion-menu>
+
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+
+  </ion-split-pane>
+
+</ion-app>

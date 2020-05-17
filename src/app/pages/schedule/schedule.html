@@ -1,0 +1,119 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-buttons *ngIf="!showSearchbar" slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
+    <ion-title *ngIf="!showSearchbar">Products</ion-title>
+    <ion-searchbar
+      *ngIf="showSearchbar"
+      showCancelButton="always"
+      [(ngModel)]="queryText"
+      (ionChange)="searchProduct($event.target.value)"
+      (ionCancel)="cancelSearch()"
+      placeholder="Search" 
+      debounce="1000"
+    ></ion-searchbar>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="!showSearchbar" (click)="showSearchbar = true">
+        <ion-icon slot="icon-only" name="search"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="!showSearchbar" (click)="presentFilter()">
+        <span>
+          <ion-icon slot="icon-only" name="options"></ion-icon>
+        </span>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen="true">
+  <ion-refresher slot="fixed" (ionRefresh)="updateSchedule($event)">
+    <ion-refresher-content
+      pullingIcon="arrow-dropdown"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Products</ion-title>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-searchbar
+        [(ngModel)]="queryText"
+        (ionChange)="searchProduct($event.target.value)"
+        placeholder="Search"
+      ></ion-searchbar>
+    </ion-toolbar>
+  </ion-header> -->
+
+  <ion-list #scheduleList [hidden]="products === 0">
+    <ion-item-sliding *ngFor="let product of products" [hidden]="product.hide" >
+    <!-- <ion-item-group > -->
+      <ion-item >
+        
+        <ion-thumbnail slot="start">
+        <fiv-gallery #gallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
+          <ion-slides [options]="slideOpts">
+            
+            <fiv-gallery-toolbar position="top">
+              <ion-toolbar color="transparent">
+                <ion-buttons slot="start">
+                  <ion-button (click)="gallery.close()">
+                    <ion-icon slot="icon-only" name="close"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+              </ion-toolbar>
+            </fiv-gallery-toolbar>
+            
+              <!-- <ion-row> -->
+                <!-- <ion-col > -->
+                  <ion-slide *ngFor="let image of product.img">
+                    <fiv-gallery-image
+                      [src]="image ? image : '../assets/img/no_image.jpg'"
+                    ></fiv-gallery-image>
+                  </ion-slide>
+                <!-- </ion-col> -->
+              <!-- </ion-row> -->
+            
+          </ion-slides>
+          <!-- <img class="place_holder" [src]="product.img ? product.img : '../assets/img/no_image.jpg'"> -->
+        </fiv-gallery>
+        </ion-thumbnail>
+      
+      
+        <ion-label class="ion-text-wrap">
+          <ion-note>{{product.brand}}</ion-note>
+          <h3>{{product.name}}</h3>
+          <h3 class="quantity">{{product.pricePerQuantity}}</h3>
+          <h3 class="price mont-semibold">Rs {{product.price}}</h3>
+        </ion-label>
+        <ion-button class="addButton" *ngIf="product.available"
+          size="small"
+          slot="end"
+          (click)="addToCart(product.productId)"
+          >ADD</ion-button>
+          
+          <ion-chip color="danger" class="notAvailable" [hidden]="product.available">
+            <ion-icon name="alert-outline" ></ion-icon>
+            <ion-label>Not available</ion-label>
+          </ion-chip>
+
+      </ion-item>
+      <ion-item-options side="end" *ngIf="isAdmin">
+        <ion-item-option color="success" (click)="setAvaibility(product)" >Set {{product.available? 'Unavailable' : 'Available'}}</ion-item-option>
+        <ion-item-option color="primary" (click)="presentProductAdmin(product)" >Edit</ion-item-option>
+        <ion-item-option color="danger" (click)="deleteProduct(product)">Delete</ion-item-option>
+      </ion-item-options>
+
+    </ion-item-sliding>
+    <!-- </ion-item-group> -->
+  </ion-list>
+
+  <ion-list-header [hidden]="products.length !== 0">
+    No products found
+  </ion-list-header>
+</ion-content>

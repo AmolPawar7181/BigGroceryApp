@@ -1,0 +1,80 @@
+import { Component } from '@angular/core';
+import { ModalController, NavParams } from '@ionic/angular';
+import { NgForm } from '@angular/forms';
+
+import { ProductData } from '../../providers/product-data';
+import { ModelService } from '../../providers/models/model-service';
+import { ProductOptions } from '../../interfaces/product-options';
+import { UploadImagePage } from '../upload-image/upload-image';
+
+@Component({
+  selector: 'page-product-admin',
+  templateUrl: 'product-admin.html',
+  styleUrls: ['./product-admin.scss'],
+})
+export class ProductAdminPage {
+  images = [];
+  imgData: any;
+  product: ProductOptions = {
+    name: '', brand: '', category: '', img: [], price: null, pricePerQuantity: ''
+  };
+  submitted = false;
+  constructor(
+    public modalCtrl_: ModalController,
+    public navParams: NavParams,
+    public productData: ProductData,
+    public modelService: ModelService
+  ) {}
+
+  ionViewWillEnter() {
+    this.product = {name: '', brand: '', category: '', img: [], price: null, pricePerQuantity: ''};
+    // passed in array of track names that should be excluded (unchecked)
+    const productDetails = this.navParams.get('productDetails');
+    console.log('productDetails ', productDetails);
+    this.product = productDetails;
+  }
+
+  async presentUploadPage() {
+    const modal = await this.modalCtrl_.create({
+      component: UploadImagePage,
+      swipeToClose: true,
+      componentProps: { images: this.images },
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      console.log(data);
+      for(let i=0; i< data.length; i++) {
+        this.product.img.push(data[i].img_url);
+      }
+    }
+  }
+
+  updateProduct(form: NgForm) {
+    this.submitted = true;
+    if (this.product.img.length > 0) {
+      if (form.valid) {
+        this.modelService.presentLoading('Please wait...');
+        this.productData.updateProduct(this.product)
+            .subscribe((product: any) => {
+              this.modelService.dismissLoading();
+              if (product.success) {
+                this.modelService.presentToast(product.msg, 2000, 'success');
+                this.dismiss(product.data);
+              } else {
+                this.modelService.presentToast(product.msg, 2000, 'danger');
+              }
+            });
+      }
+    } else {
+      this.modelService.presentToast('Please select image', 2000, 'danger');
+    }
+  }
+
+  dismiss(data?: any) {
+    // using the injected ModalController this page
+    // can "dismiss" itself and pass back data
+    this.modalCtrl_.dismiss(data);
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "grocery-app",
+  "type": "angular",
+  "integrations": {
+    "cordova": {},
+    "capacitor": {}
+  }
+}
