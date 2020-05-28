@@ -4,3 +4,56 @@ ion-toggle {
 --handle-background: #69bb7b;
 --handle-background-checked: #eb445a;
   }
+
+ion-toggle[name="showOnHome"] {
+--background: #F7B2BB;
+--background-checked: #B2DDBB;
+--handle-background: #eb445a;
+--handle-background-checked: #69bb7b;
+  }
+
+  :host ion-fab-button.myButton > button.button-native {
+    --overflow: visible;
+    --position: relative;
+
+    ion-label.myLabel {
+        position: absolute;
+        top: -8px;
+        right: 40px;
+
+        color: white;
+        background-color: rgba(0,0,0,0.7);
+        line-height: 24px;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    contain: layout;
+}
+
+ion-fab[vertical="bottom"][horizontal="end"] ion-fab-list {
+    right: 0;
+    align-items: flex-end;
+  }
+  
+  ion-fab-button[size="small"] {
+    --size: 32px;
+  }
+  
+  .custom-fab {
+    display: flex;
+    align-items: center;
+  }
+  ion-fab[horizontal="start"] .custom-fab {
+    flex-direction: row-reverse;
+  }
+  .custom-fab ion-button {
+    --height: 25px;
+    text-transform: none;
+  }
+  
+  ion-slide ion-icon {
+    font-size: 50px;
+    position: absolute;
+    top: 0px;    
+    right: 0;
+  }

@@ -17,7 +17,7 @@ const routes: Routes = [
             component: SchedulePage,
           },
           {
-            path: 'session/:sessionId',
+            path: 'session/:filterBy/:field',
             loadChildren: () => import('../session-detail/session-detail.module').then(m => m.SessionDetailModule)
           }
         ]
@@ -35,7 +35,7 @@ const routes: Routes = [
           },
           {
             path: 'speaker-details/:speakerId',
-            loadChildren: () => import('../speaker-detail/speaker-detail.module').then(m => m.SpeakerDetailModule)
+            loadChildren: () => import('../about-company/about-company.module').then(m => m.AboutCompanyModule)
           }
         ]
       },
@@ -45,6 +45,25 @@ const routes: Routes = [
           {
             path: '',
             loadChildren: () => import('../cart/cart.module').then(m => m.CartModule),
+            canActivate: [AuthGuard]
+          }
+        ]
+      },
+      {
+        path: 'map',
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('../map/map.module').then(m => m.MapModule)
+          }
+        ]
+      },
+      {
+        path: 'allproducts',
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('../product-category/product-category.module').then(m => m.ProductModule),
             canActivate: [AuthGuard]
           }
         ]

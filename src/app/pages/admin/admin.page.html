@@ -8,7 +8,7 @@
       {{addingProduct? 'Add product' : 'Orders'}}
     </ion-title>
   </ion-toolbar>
-  <ion-toolbar [hidden]="addingProduct">
+  <ion-toolbar [hidden]="showClose">
     <ion-segment [(ngModel)]="segment" value="pending">
       <ion-segment-button value="pending">
         <ion-label>Pending</ion-label>
@@ -22,7 +22,7 @@
 
 <ion-content padding>
   <!-- Ongoing Orders -->
-  <ion-card [hidden]="addingProduct" class="ion-no-padding ion-no-margin" *ngIf="segment === 'pending'">
+  <ion-card [hidden]="showClose" class="ion-no-padding ion-no-margin" *ngIf="segment === 'pending'">
     <ion-card-header>
       <ion-card-title>Ongoing Orders: {{activeOrdersCount}}</ion-card-title>
     </ion-card-header>
@@ -120,7 +120,7 @@
   <!-- Ongoing Orders end -->
 
   <!-- Completed Orders -->
-  <ion-card [hidden]="addingProduct" class="ion-no-padding ion-no-margin" *ngIf="segment === 'completed'">
+  <ion-card [hidden]="addingProduct || addingCategory" class="ion-no-padding ion-no-margin" *ngIf="segment === 'completed'">
     <ion-card-header>
       <ion-card-title>Custom Orders</ion-card-title>
     </ion-card-header>
@@ -168,7 +168,7 @@
     </ion-list>
       </form>
 
-      <ion-card [hidden]="addingProduct" class="ion-no-padding ion-no-margin" *ngIf="filteredOrders.length > 0">
+      <ion-card [hidden]="addingProduct || addingCategory" class="ion-no-padding ion-no-margin" *ngIf="filteredOrders.length > 0">
         <ion-card-header>
           <ion-card-title>Filtered Orders</ion-card-title>
         </ion-card-header>
@@ -242,7 +242,7 @@
   <!-- Completed Orders end -->
 
   
-
+ <!-- Add product -->
   <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingProduct">
     <ion-card>
       <ion-text *ngIf="images.length == 0" class="ion-text-center">
@@ -340,7 +340,10 @@
 
         <ion-item>
           <ion-label position="stacked" color="primary">Category</ion-label>
-          <ion-input
+          <ion-select interface="popover" [(ngModel)]="product.category"  name="category " #category="ngModel" required>
+            <ion-select-option *ngFor="let category of categories" value="{{category.category}}">{{category.category}}</ion-select-option>
+          </ion-select>
+          <!-- <ion-input
             [(ngModel)]="product.category"
             name="category"
             type="text"
@@ -349,7 +352,7 @@
             autocapitalize="off"
             required
           >
-          </ion-input>
+          </ion-input> -->
         </ion-item>
         <ion-text color="danger">
           <p
@@ -362,14 +365,17 @@
 
         <ion-item>
           <ion-label position="stacked" color="primary">Brand</ion-label>
-          <ion-input
+          <ion-select interface="popover" [(ngModel)]="product.brand"  name="brand " #brand="ngModel" required>
+            <ion-select-option *ngFor="let brand of brands" value="{{brand.brand}}">{{brand.brand}}</ion-select-option>
+          </ion-select>
+          <!-- <ion-input
             [(ngModel)]="product.brand"
             name="brand"
             type="text"
             #brand="ngModel"
             required
           >
-          </ion-input>
+          </ion-input> -->
         </ion-item>
         <ion-text color="danger">
           <p
@@ -393,8 +399,331 @@
       </ion-row>
     </form>
   </ion-card>
+  <!-- Add product END -->
+
+
+  <!-- Add Category -->
+  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingCategory">
+    <ion-card>
+      <ion-text *ngIf="catimages.length == 0" class="ion-text-center">
+        <h5 text-center>Please Select Image!</h5>
+      </ion-text>
+
+      <ion-list>
+        <ion-row>
+          <ion-col size="6" *ngFor="let img of catimages; index as pos" text-wrap>
+            <ion-img [src]="img"></ion-img>
+          </ion-col>
+        </ion-row>
+
+        <div class="ion-text-center">
+          <ion-button
+            *ngIf="catimages.length === 0"
+            color="primary"
+            (click)="presentCatUploadPage()"
+          >
+            <ion-icon slot="start" name="camera"></ion-icon>
+            Add images</ion-button
+          >
+        </div>
+        <!-- <ion-text>images {{ images}}</ion-text> -->
+      </ion-list>
+    </ion-card>
+
+    <form #categoryForm="ngForm" novalidate>
+      <ion-list>
+        <ion-item>
+          <ion-label position="stacked" color="primary">Category</ion-label>
+          <ion-input
+            [(ngModel)]="categoryData.category"
+            name="category"
+            type="text"
+            #category="ngModel"
+            spellcheck="false"
+            autocapitalize="off"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="category.valid || catSubmitted == false"
+            class="ion-padding-start"
+          >
+            Category is required
+          </p>
+        </ion-text>
+        <ion-item>
+          <ion-label>Show on home page: {{categoryData.showOnHome}}</ion-label>
+          <ion-toggle name="showOnHome" (ionChange)="categoryData.showOnHome = $event.detail.checked"></ion-toggle>
+        </ion-item>
+       
+      </ion-list>
+
+      <ion-row>
+        <ion-col>
+          <ion-button
+            (click)="addCategory(categoryForm)"
+            type="submit"
+            expand="block"
+            >Add Category</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </form>
+  </ion-card>
+  <!-- Add Category END -->
+
+  <!-- Add Brand -->
+  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingBrand">
+    <ion-card>
+      <ion-text *ngIf="brandimages.length == 0" class="ion-text-center">
+        <h5 text-center>Please Select Image!</h5>
+      </ion-text>
+
+      <ion-list>
+        <ion-row>
+          <ion-col size="6" *ngFor="let img of brandimages; index as pos" text-wrap>
+            <ion-img [src]="img"></ion-img>
+          </ion-col>
+        </ion-row>
+
+        <div class="ion-text-center">
+          <ion-button
+            *ngIf="brandimages.length === 0"
+            color="primary"
+            (click)="presentBrandUploadPage()"
+          >
+            <ion-icon slot="start" name="camera"></ion-icon>
+            Add images</ion-button
+          >
+        </div>
+        <!-- <ion-text>images {{ images}}</ion-text> -->
+      </ion-list>
+    </ion-card>
+
+    <form #brandForm="ngForm" novalidate>
+      <ion-list>
+        <ion-item>
+          <ion-label position="stacked" color="primary">Brand</ion-label>
+          <ion-input
+            [(ngModel)]="brandData.brand"
+            name="brand"
+            type="text"
+            #brand="ngModel"
+            spellcheck="false"
+            autocapitalize="off"
+            required
+          >
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="brand.valid || brandSubmitted == false"
+            class="ion-padding-start"
+          >
+            Brand is required
+          </p>
+        </ion-text>
+        <ion-item>
+          <ion-label>Show on home page: {{brandData.showOnHome}}</ion-label>
+          <ion-toggle name="showOnHome" (ionChange)="brandData.showOnHome = $event.detail.checked"></ion-toggle>
+        </ion-item>
+
+       
+      </ion-list>
+
+      <ion-row>
+        <ion-col>
+          <ion-button
+            (click)="addBrand(brandForm)"
+            type="submit"
+            expand="block"
+            >Add Brand</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </form>
+  </ion-card>
+  <!-- Add Brand END -->
+
+
+  <!-- Add Homepage images -->
+  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingHome">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>First banner images</ion-card-title>
+        <!-- <ion-card-subtitle>Maximum 3 images are allowed</ion-card-subtitle> -->
+      </ion-card-header>
+      <ion-text  class="ion-text-center">
+        <h5 *ngIf="homePageData.firstCarousel.img.length === 0" text-center>Please Select Image!</h5>
+        
+      </ion-text>
+
+      <ion-grid *ngIf="homePageData.firstCarousel.img.length > 0">
+        <ion-row>
+          <ion-col size="12">    
+            <ion-slides pager="true" [options]="slideOptsOne" #slideWithNav>
+              <ion-slide *ngFor="let image of homePageData.firstCarousel.img; index as pos">
+                <ion-icon name="close-circle" color="danger" (click)="deleteImage('firstCarousel', image, pos)"></ion-icon>
+                <img [src]="image ? image : '../assets/img/no_image.jpg'">
+                <!-- <span class="slide-text">Slide id {{s.id}}</span> -->
+              </ion-slide>
+            </ion-slides>
+          </ion-col>    
+        </ion-row>
+        <ion-row>
+          <div class="ion-text-center">
+            <ion-button
+            [hidden]="homePageData.firstCarousel.img.length === 3"
+              color="primary"
+              (click)="presentUploadForHome('firstCarousel')"
+            >
+              <ion-icon slot="start" name="camera"></ion-icon>
+              Add images</ion-button
+            >
+          </div>
+          <div>
+            <ion-button (click)="addHomePageData('firstCarousel','img')">
+                Update First banner
+            </ion-button>
+          </div>
+        </ion-row>
+      </ion-grid>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Second banner images</ion-card-title>
+        <!-- <ion-card-subtitle>Maximum 3 images are allowed</ion-card-subtitle> -->
+      </ion-card-header>
+      <ion-text  class="ion-text-center">
+        <h5 *ngIf="homePageData.secondCarousel.img.length === 0" text-center>Please Select Image!</h5>
+        
+      </ion-text>
+
+      <ion-grid *ngIf="homePageData.secondCarousel.img.length > 0">
+        <ion-row>
+          <ion-col size="12">    
+            <ion-slides pager="true" [options]="slideOptsOne" #slideWithNav>
+              <ion-slide *ngFor="let image of homePageData.secondCarousel.img; index as pos">
+                <ion-icon name="close-circle" color="danger" (click)="deleteImage('secondCarousel', image, pos)"></ion-icon>
+                <img [src]="image ? image : '../assets/img/no_image.jpg'">
+                <!-- <span class="slide-text">Slide id {{s.id}}</span> -->
+              </ion-slide>
+            </ion-slides>
+          </ion-col>    
+        </ion-row>
+        <ion-row>
+          <div class="ion-text-center">
+            <ion-button
+              [hidden]="homePageData.secondCarousel.img.length === 3"
+              color="primary"
+              (click)="presentUploadForHome('secondCarousel')"
+            >
+              <ion-icon slot="start" name="camera"></ion-icon>
+              Add images</ion-button
+            >
+          </div>
+          <div>
+            <ion-button (click)="addHomePageData('secondCarousel','img')">
+                Update Second banner
+            </ion-button>
+          </div>
+        </ion-row>
+      </ion-grid>
+    </ion-card>
+    <!-- second banner end -->
+
+    <!-- categories -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Categories to show on home page </ion-card-title>
+        <ion-card-subtitle>Maximum 4 categories are allowed</ion-card-subtitle>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <ion-list>
+            <ion-item *ngFor="let cat of newCategories; index as pos" [attr.category]="cat.name | lowercase">
+              <!-- <ion-icon *ngIf="ios" slot="start" [name]="track.icon" color="medium"></ion-icon> -->
+              <ion-label>{{cat.name}}</ion-label>
+              <ion-checkbox slot="end" [(ngModel)]="cat.isChecked" (ionChange)="ionCheckboxChange(cat.name,pos,$event,cat.id)"></ion-checkbox>
+            </ion-item>
+          
+            <ion-button (click)="addHomePageData('showCategorys','category')">
+              Update categories
+          </ion-button>          
+          </ion-list>
+      </ion-card-content>
+    </ion-card>
+    <!-- Categories end -->
+
+    <!-- brand -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Brands to show on home page </ion-card-title>
+        <ion-card-subtitle>Maximum 4 brands are allowed</ion-card-subtitle>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <ion-list>
+            <ion-item *ngFor="let brand of newBrands; index as pos" [attr.brand]="brand.name | lowercase">
+              <!-- <ion-icon *ngIf="ios" slot="start" [name]="track.icon" color="medium"></ion-icon> -->
+              <ion-label>{{brand.name}}</ion-label>
+              <ion-checkbox slot="end" [(ngModel)]="brand.isChecked" (ionChange)="ionCheckBrandsChange(brand.name,pos,$event,brand.id)"></ion-checkbox>
+            </ion-item>
+          
+            <ion-button (click)="addHomePageData('showBrands','brands')">
+              Update brands
+          </ion-button>          
+          </ion-list>
+      </ion-card-content>
+    </ion-card>
+    <!-- brand end -->
+
+  </ion-card>
+  <!-- Add HomePage END -->
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button [hidden]="showClose">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <div class="custom-fab" (click)="showAdding('product')">
+        <ion-button>Product</ion-button>
+        <ion-fab-button size="small" color="light">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </div>
+      <div class="custom-fab" (click)="showAdding('category')">
+        <ion-button color="danger">Category</ion-button>
+        <ion-fab-button size="small" color="danger">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </div>
+      <div class="custom-fab" (click)="showAdding('brand')">
+        <ion-button>Brand</ion-button>
+        <ion-fab-button size="small" color="light">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </div>
+      <div class="custom-fab" (click)="showAdding('homePage')">
+        <ion-button>Home page</ion-button>
+        <ion-fab-button size="small" color="light">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </div>
+    </ion-fab-list>
+
     <ion-fab-button
+      color="danger"
+      (click)="closeAllAdding()"
+      [hidden]="!showClose"
+    >
+      <ion-icon name="close"></ion-icon>
+    </ion-fab-button>
+
+    <!-- <ion-fab-button
       (click)="addingProduct = !addingProduct"
       [hidden]="addingProduct"
     >
@@ -407,6 +736,6 @@
       [hidden]="!addingProduct"
     >
       <ion-icon name="close"></ion-icon>
-    </ion-fab-button>
+    </ion-fab-button> -->
   </ion-fab>
 </ion-content>

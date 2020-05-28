@@ -42,7 +42,7 @@ const routes: Routes = [
   },
   {
     path: 'about-company',
-    loadChildren: () => import('./pages/speaker-detail/speaker-detail.module').then( m => m.SpeakerDetailModule)
+    loadChildren: () => import('./pages/about-company/about-company.module').then( m => m.AboutCompanyModule)
   }
 ];
 

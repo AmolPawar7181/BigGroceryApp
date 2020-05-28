@@ -37,6 +37,11 @@
 </ion-content>
  
 
-<ion-button expand="full" color="primary" (click)="selectImage()">
+<ion-button expand="full" color="primary" (click)="selectImage()" 
+    [hidden]="images.length === limitUpload"  >
   <ion-icon slot="start" name="camera"></ion-icon>
   Select Image</ion-button>
+
+<ion-button expand="full" color="primary"  
+  *ngIf="images.length === limitUpload"  >
+You can only upload {{limitUpload}} images</ion-button>

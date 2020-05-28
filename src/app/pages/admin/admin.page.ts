@@ -5,7 +5,7 @@ import { finalize } from 'rxjs/operators';
 import { AdminData } from '../../providers/admin-data';
 import { ModelService } from '../../providers/models/model-service';
 import { UploadImagePage } from '../upload-image/upload-image';
-import { ProductOptions } from '../../interfaces/product-options';
+import { ProductOptions, CategoryOptions, BrandOptions, HomePageData } from '../../interfaces/product-options';
 import { NgForm } from '@angular/forms';
 import { ProductData } from '../../providers/product-data';
 import { UserData } from '../../providers/user-data';
@@ -24,6 +24,14 @@ export class AdminPage implements OnInit {
   product: ProductOptions = {
     name: '', brand: '', category: '', img: this.images, price: null, pricePerQuantity: ''
   };
+  catimages = [];
+  categoryData: CategoryOptions = {category: '', img: this.catimages, showOnHome: false};
+  catSubmitted = false;
+
+  brandimages = [];
+  brandData: BrandOptions = {brand: '', img: this.brandimages, showOnHome: false};
+  brandSubmitted = false;
+
   submitted = false;
   addingProduct = false;
   activeOrders: any;
@@ -37,6 +45,20 @@ export class AdminPage implements OnInit {
   activeOrdersCount = 0;
   deliveredOrdersCount = 0;
   status: any = 'delivered';
+  addingCategory = false;
+  addingBrand = false;
+  showClose = false;
+  slideOptsOne = {
+    initialSlide: 0,
+    slidesPerView: 1
+  };
+
+  categories: any;
+  brands: any;
+  addingHome = false;
+  newCategories: { id: string; name: string; isChecked: boolean }[] = [];
+  newBrands: { id: string; name: string; isChecked: boolean }[] = [];
+  homePageData: HomePageData = { firstCarousel : '', secondCarousel : '', showCategorys : this.newCategories, showBrands: this.newBrands };
 
   constructor(private adminData: AdminData, private modelService: ModelService,
               private modalCtrl: ModalController, private routerOutlet: IonRouterOutlet,
@@ -47,6 +69,7 @@ export class AdminPage implements OnInit {
     //  console.log('this.userData.isAdmin ', this.userData.isAdmin);
     //  if (this.userData.isAdmin) {
       this.getOrdersByStatus('active');
+      this.getHomePageData();
     //  } else {
     //   this.router.navigateByUrl('/app/tabs/schedule', { replaceUrl: true });
     //  }
@@ -54,6 +77,48 @@ export class AdminPage implements OnInit {
 
   toggleStatus(event: any) {
     this.status = event ? 'active' : 'delivered';
+  }
+
+  ionCheckboxChange(name: any, pos: any, event: any, id: any) {
+    this.newCategories[pos].isChecked = event.target.checked;
+    const index =  this.homePageData.showCategorys.category.indexOf(id);
+    if (index !== -1) {
+      this.homePageData.showCategorys.category.splice(index, 1);
+    } else {
+      if (event.target.checked) {
+        this.homePageData.showCategorys.category.push(id);
+      }
+    }
+    // console.log('this.newCategories ', this.newCategories);
+    // console.log('this.homeData ', this.homePageData.showCategorys);
+  }
+
+  ionCheckBrandsChange(name: any, pos: any, event: any, id: any) {
+    this.newBrands[pos].isChecked = event.target.checked;
+    const index =  this.homePageData.showBrands.brands.indexOf(id);
+    if (index !== -1) {
+      this.homePageData.showBrands.brands.splice(index, 1);
+    } else {
+      if (event.target.checked) {
+        this.homePageData.showBrands.brands.push(id);
+      }
+    }
+    // console.log('this.homePageData.showBrands ', this.homePageData.showBrands);
+  }
+
+  deleteImage(module: any, content: any, pos: any) {
+    // console.log(content, content);
+    this.modelService.presentLoading('Deleting please wait...');
+    this.adminData.deleteFromHome(module, content)
+        .subscribe((res: any) => {
+          this.modelService.dismissLoading();
+          if (res.success) {
+            this.homePageData.firstCarousel.img.splice(pos, 1);
+            this.modelService.presentToast(res.msg, 2000, 'success');
+          } else {
+            this.modelService.presentToast(res.msg, 2000, 'danger');
+          }
+        });
   }
 
   getOrdersByDate(form: NgForm) {
@@ -64,7 +129,7 @@ export class AdminPage implements OnInit {
     this.modelService.presentLoading('Please wait...');
     this.adminData.getOrdersByDate(fromdate, todate, this.status)
         .subscribe((orders: any) => {
-          console.log('filtered orders ', orders);
+          // console.log('filtered orders ', orders);
           this.modelService.dismissLoading();
           if (orders.success) {
             this.filteredOrders = orders.data;
@@ -89,6 +154,73 @@ export class AdminPage implements OnInit {
       });
   }
 
+  getHomePageData() {
+    this.adminData.getHomePageData()
+      .subscribe((homePage: any) => {
+        // console.log('homePage ', homePage);
+        if (homePage.success) {
+          this.homePageData.firstCarousel = homePage.homePage[0].content;
+          this.homePageData.secondCarousel = homePage.homePage[1].content;
+          this.homePageData.showCategorys = homePage.homePage[3].content;
+          this.homePageData.showBrands = homePage.homePage[2].content;
+
+          // will check in local storage
+          this.productData.getFiltersData()
+              .then((filters: any) => {
+              // if found
+              if (filters.success) {
+                this.categories = filters.filterData.categories;
+                this.brands = filters.filterData.brands;
+                this.generateData(this.categories, this.homePageData.showCategorys, 'category');
+                this.generateData(this.brands, this.homePageData.showBrands, 'brand');
+              } else {
+              // else will get from database
+                this.productData.getAllFilters()
+                   .subscribe((filtersData: any) => {
+                      if (filtersData.success) {
+                        this.categories = filtersData.filterData.categories;
+                        this.brands = filtersData.filterData.brands;
+                        this.generateData(this.categories, this.homePageData.showCategorys, 'category');
+                        this.generateData(this.brands, this.homePageData.showBrands, 'brand');
+                      }
+                   });
+              }
+            });
+
+         // console.log('this.homePageData ', this.homePageData);
+        } else {
+          this.modelService.presentToast(homePage.msg, 2000, 'danger');
+        }
+      });
+  }
+
+
+  generateData(content: any, alreadyExists: any, field: any) {
+    if (field === 'category') {
+      content.forEach((category: any, index: any) => {
+        const isChecked = alreadyExists.category.includes(category.id);
+        this.newCategories.push({
+          id: category.id,
+          name: category.category,
+          isChecked
+        });
+      });
+    } else if (field === 'brand') {
+     //  console.log(content, alreadyExists, field);
+      content.forEach((brand: any, index: any) => {
+        const isChecked = alreadyExists.brands.includes(brand.id);
+        this.newBrands.push({
+          id: brand.id,
+          name: brand.brand,
+          isChecked
+        });
+      });
+    }
+    // console.log('this.newBrands ', this.newBrands);
+  }
+
+
+
   setOrderStatus(orderId: any, status: any, pos: any) {
     this.modelService.presentLoading('Please wait...');
     this.adminData.setOrderStatus(status, orderId)
@@ -103,6 +235,27 @@ export class AdminPage implements OnInit {
         });
   }
 
+  closeAllAdding() {
+    this.addingProduct = false;
+    this.addingCategory = false;
+    this.addingBrand = false;
+    this.showClose = false;
+    this.addingHome = false;
+  }
+
+  showAdding(mode: any) {
+    if (mode === 'product') {
+      this.addingProduct = true;
+    } else if (mode === 'category') {
+      this.addingCategory = true;
+    } else if (mode === 'brand') {
+      this.addingBrand = true;
+    } else if (mode === 'homePage') {
+      this.addingHome = true;
+    }
+    this.showClose = true;
+  }
+
   async presentUploadPage() {
     const modal = await this.modalCtrl.create({
       component: UploadImagePage,
@@ -114,7 +267,7 @@ export class AdminPage implements OnInit {
 
     const { data } = await modal.onWillDismiss();
     if (data) {
-      for(let i=0; i< data.length; i++) {
+      for (let i = 0; i < data.length; i++) {
         this.images.push(data[i].img_url);
       }
     }
@@ -137,7 +290,55 @@ export class AdminPage implements OnInit {
     // }
   }
 
+
+  async presentUploadForHome(module: any) {
+    const imgLength = this.homePageData[module].img.length;
+    const limit = 3 - imgLength;
+    if (imgLength < 3) {
+    const modal = await this.modalCtrl.create({
+      component: UploadImagePage,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { limitUpload:  limit},
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      for (let i = 0; i < data.length; i++) {
+        // this.images.push(data[i].img_url);
+        this.homePageData[module].img.push(data[i].img_url);
+      }
+    }
+   } else {
+     this.modelService.presentToast('Maximum 3 images are allowed', 2000, 'danger');
+   }
+  }
+
+  addHomePageData(module: any, field: any) {
+    const data = {
+        module,
+        content: this.homePageData[module]
+    };
+
+    if (this.homePageData[module][field].length >= 2) {
+      this.modelService.presentLoading('Please wait...');
+      this.adminData.addHomeData(data)
+          .subscribe((res: any) => {
+            this.modelService.dismissLoading();
+            if (res.success) {
+              this.modelService.presentToast(res.msg, 2000, 'success');
+            } else {
+              this.modelService.presentToast(res.msg, 2000, 'danger');
+            }
+          });
+    } else {
+      this.modelService.presentToast(`Atleast 2 ${field}'s required`, 2000, 'danger');
+    }
+  }
+
   addProduct(form: NgForm) {
+
     this.submitted = true;
     if (this.images.length > 0) {
       if (form.valid) {
@@ -160,4 +361,89 @@ export class AdminPage implements OnInit {
       this.modelService.presentToast('Please select image', 2000, 'danger');
     }
   }
+
+  async presentCatUploadPage() {
+    const modal = await this.modalCtrl.create({
+      component: UploadImagePage,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { limitUpload: 1 },
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      for (let i = 0; i < data.length; i++) {
+        this.catimages.push(data[i].img_url);
+      }
+    }
+  }
+
+  addCategory(form: NgForm) {
+    this.catSubmitted = true;
+    if (this.catimages.length > 0) {
+    if (form.valid) {
+        this.modelService.presentLoading('Please wait...');
+        this.productData.addCategory(this.categoryData)
+            .subscribe((category: any) => {
+              this.modelService.dismissLoading();
+              if (category.success) {
+                this.catimages = [];
+                form.resetForm();
+                this.catSubmitted = false;
+                this.categoryData = {category: '', img: this.catimages, showOnHome: false};
+                this.modelService.presentToast(category.msg, 2000, 'success');
+              } else {
+                this.modelService.presentToast(category.msg, 2000, 'danger');
+              }
+            });
+          }
+    } else {
+     this.modelService.presentToast('Please select image', 2000, 'danger');
+    }
+  }
+
+  async presentBrandUploadPage() {
+    const modal = await this.modalCtrl.create({
+      component: UploadImagePage,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { limitUpload: 1 },
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      for (let i = 0; i < data.length; i++) {
+        this.brandimages.push(data[i].img_url);
+      }
+    }
+  }
+
+  addBrand(form: NgForm) {
+    this.brandSubmitted = true;
+    if (this.brandimages.length > 0) {
+      if (form.valid) {
+        this.modelService.presentLoading('Please wait...');
+        this.productData.addBrand(this.brandData)
+            .subscribe((brand: any) => {
+              this.modelService.dismissLoading();
+              if (brand.success) {
+                this.brandimages = [];
+                form.resetForm();
+                this.brandSubmitted = false;
+                this.brandData = {brand: '', img: this.brandimages, showOnHome: false};
+                this.modelService.presentToast(brand.msg, 2000, 'success');
+              } else {
+                this.modelService.presentToast(brand.msg, 2000, 'danger');
+              }
+            });
+      }
+    } else {
+      this.modelService.presentToast('Please select image', 2000, 'danger');
+    }
+  }
+
+
+
 }

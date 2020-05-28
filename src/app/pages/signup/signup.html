@@ -74,6 +74,17 @@
       </ion-text>
 
       <ion-item>
+        <ion-label position="stacked" color="primary">Email</ion-label>
+        <ion-input [(ngModel)]="signup.email" name="email" type="email" #email="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="email.valid || signupSubmitted == false" class="ion-padding-start">
+          Email is required
+        </p>
+      </ion-text>
+
+      <ion-item>
         <ion-label position="stacked" color="primary">Address</ion-label>
         <ion-textarea [(ngModel)]="signup.address" name="address" type="text" #address="ngModel" required>
         </ion-textarea>

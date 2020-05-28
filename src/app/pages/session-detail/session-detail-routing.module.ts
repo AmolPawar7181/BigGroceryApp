@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { SessionDetailPage } from './session-detail';
+import { FivGalleryModule } from '@fivethree/core';
 
 const routes: Routes = [
   {
@@ -11,7 +12,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), FivGalleryModule],
   exports: [RouterModule]
 })
 export class SessionDetailPageRoutingModule { }

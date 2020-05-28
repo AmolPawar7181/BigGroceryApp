@@ -32,6 +32,7 @@ export class UploadImagePage {
   images = [];
   imgData = [];
   uploadComplete = 1;
+  limitUpload = 4;
   constructor(
     private camera: Camera,
     private file: File,
@@ -46,8 +47,17 @@ export class UploadImagePage {
     private filePath: FilePath,
     private adminData: AdminData,
     private modelService: ModelService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private navParams: NavParams
   ) {}
+
+  ionViewWillEnter() {
+    const limitPassed = this.navParams.get('limitUpload');
+    console.log('limitPassed ', limitPassed);
+    if (limitPassed) {
+      this.limitUpload = limitPassed;
+    }
+  }
 
 
   loadStoredImages() {
@@ -216,7 +226,7 @@ export class UploadImagePage {
   async uploadImageData(formData: FormData) {
     // const loading = await this.loadingController.create({
     //     message: 'Uploading image...',
-    // }); 
+    // });
     // await loading.present();
     this.modelService.presentLoading('Uploading image...');
     console.log('formData ', formData);
@@ -225,7 +235,8 @@ export class UploadImagePage {
 
       this.imgData.push(imagesData);
       this.uploadComplete = this.uploadComplete + 1;
-      this.modelService.presentConfirm('Attention', 'Do you want to add another image?', 'No', 'Yes')
+      if (this.images.length <= this.limitUpload) {
+        this.modelService.presentConfirm('Attention', 'Do you want to add another image?', 'No', 'Yes')
           .then(res => {
               if (res === 'cancel') {
                 this.dismiss();
@@ -233,6 +244,7 @@ export class UploadImagePage {
                 this.selectImage();
               }
             });
+      }
     });
   }
 

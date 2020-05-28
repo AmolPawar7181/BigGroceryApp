@@ -16,9 +16,17 @@ export class ProductAdminPage {
   images = [];
   imgData: any;
   product: ProductOptions = {
-    name: '', brand: '', category: '', img: [], price: null, pricePerQuantity: ''
+    name: '',
+    brand: '',
+    category: '',
+    img: [],
+    price: null,
+    pricePerQuantity: '',
   };
   submitted = false;
+  categories: any;
+  brands: any;
+
   constructor(
     public modalCtrl_: ModalController,
     public navParams: NavParams,
@@ -27,11 +35,50 @@ export class ProductAdminPage {
   ) {}
 
   ionViewWillEnter() {
-    this.product = {name: '', brand: '', category: '', img: [], price: null, pricePerQuantity: ''};
+    this.product = {
+      name: '',
+      brand: '',
+      category: '',
+      img: [],
+      price: null,
+      pricePerQuantity: '',
+    };
     // passed in array of track names that should be excluded (unchecked)
     const productDetails = this.navParams.get('productDetails');
     console.log('productDetails ', productDetails);
     this.product = productDetails;
+    // will check in local storage
+    this.productData.getFiltersData().then((filters: any) => {
+      if (filters) {
+        // if found
+        if (filters.success) {
+          this.categories = filters.filterData.categories;
+          this.brands = filters.filterData.brands;
+        } else {
+          // else will get from database
+          this.modelService.presentLoading('Please wait...');
+          this.productData.getAllFilters().subscribe((filtersData: any) => {
+            this.modelService.dismissLoading();
+            if (filtersData.success) {
+              this.categories = filtersData.filterData.categories;
+              this.brands = filtersData.filterData.brands;
+              this.productData.setFiltersData(filtersData);
+            }
+          });
+        }
+      } else {
+        // else will get from database
+        this.modelService.presentLoading('Please wait...');
+        this.productData.getAllFilters().subscribe((filtersData: any) => {
+          this.modelService.dismissLoading();
+          if (filtersData.success) {
+            this.categories = filtersData.filterData.categories;
+            this.brands = filtersData.filterData.brands;
+            this.productData.setFiltersData(filtersData);
+          }
+        });
+      }
+    });
   }
 
   async presentUploadPage() {
@@ -45,7 +92,7 @@ export class ProductAdminPage {
     const { data } = await modal.onWillDismiss();
     if (data) {
       console.log(data);
-      for(let i=0; i< data.length; i++) {
+      for (let i = 0; i < data.length; i++) {
         this.product.img.push(data[i].img_url);
       }
     }
@@ -56,16 +103,17 @@ export class ProductAdminPage {
     if (this.product.img.length > 0) {
       if (form.valid) {
         this.modelService.presentLoading('Please wait...');
-        this.productData.updateProduct(this.product)
-            .subscribe((product: any) => {
-              this.modelService.dismissLoading();
-              if (product.success) {
-                this.modelService.presentToast(product.msg, 2000, 'success');
-                this.dismiss(product.data);
-              } else {
-                this.modelService.presentToast(product.msg, 2000, 'danger');
-              }
-            });
+        this.productData
+          .updateProduct(this.product)
+          .subscribe((product: any) => {
+            this.modelService.dismissLoading();
+            if (product.success) {
+              this.modelService.presentToast(product.msg, 2000, 'success');
+              this.dismiss(product.data);
+            } else {
+              this.modelService.presentToast(product.msg, 2000, 'danger');
+            }
+          });
       }
     } else {
       this.modelService.presentToast('Please select image', 2000, 'danger');

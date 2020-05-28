@@ -36,7 +36,7 @@
           <ion-icon slot="start" name="camera"></ion-icon>
           Add more images </ion-button>
       </div>
-      <ion-text>images {{ images}}</ion-text>
+      <!-- <ion-text>images {{ images}}</ion-text> -->
     </ion-list>
   </ion-card>
 
@@ -77,28 +77,36 @@
         </p>
       </ion-text>
 
-      <ion-item>
+      <ion-item *ngIf="categories">
         <ion-label position="stacked" color="primary">Category</ion-label>
-        <ion-input [(ngModel)]="product.category" name="category" type="text" #category="ngModel" spellcheck="false" autocapitalize="off"
-          required>
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger">
-        <p [hidden]="category.valid || submitted == false" class="ion-padding-start">
-          Category is required
-        </p>
-      </ion-text>
+        <ion-select interface="popover" [(ngModel)]="product.category"  name="category " #category="ngModel" value="{{product.category}}" required>
+          <ion-select-option *ngFor="let category of categories" value="{{category.category}}">{{category.category}}</ion-select-option>
+        </ion-select>
 
-      <ion-item>
-        <ion-label position="stacked" color="primary">Brand</ion-label>
-        <ion-input [(ngModel)]="product.brand" name="brand" type="text" #brand="ngModel" required>
-        </ion-input>
+        <!-- <ion-input [(ngModel)]="product.category" name="category" type="text" #category="ngModel" spellcheck="false" autocapitalize="off"
+          required>
+        </ion-input> -->
+        <ion-text color="danger" >
+          <p [hidden]="category.valid || submitted == false" class="ion-padding-start">
+            Category is required
+          </p> 
+        </ion-text>
       </ion-item>
-      <ion-text color="danger">
-        <p [hidden]="brand.valid || submitted == false" class="ion-padding-start">
-          Brand is required
-        </p>
-      </ion-text>
+      
+
+      <ion-item *ngIf="brands">
+        <ion-label position="stacked" color="primary">Brand</ion-label>
+        <ion-select interface="popover" [(ngModel)]="product.brand"  name="brand " #brand="ngModel" value="{{product.brand}}" required>
+          <ion-select-option *ngFor="let brand of brands" value="{{brand.brand}}">{{brand.brand}}</ion-select-option>
+        </ion-select>
+        <!-- <ion-input [(ngModel)]="product.brand" name="brand" type="text" #brand="ngModel" required>
+        </ion-input> -->
+        <ion-text color="danger">
+          <p [hidden]="brand.valid || submitted == false" class="ion-padding-start">
+            Brand is required
+          </p>
+        </ion-text>
+      </ion-item>
     </ion-list>
 
     <ion-row>

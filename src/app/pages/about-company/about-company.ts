@@ -7,10 +7,10 @@ import { CallNumber } from '@ionic-native/call-number/ngx';
 
 @Component({
   selector: 'page-speaker-detail',
-  templateUrl: 'speaker-detail.html',
-  styleUrls: ['./speaker-detail.scss'],
+  templateUrl: 'about-company.html',
+  styleUrls: ['./about-company.scss'],
 })
-export class SpeakerDetailPage {
+export class AboutCompanyPage {
   speaker: any;
 
   constructor(

@@ -4,4 +4,5 @@ export interface UserOptions {
   password: string;
   phone?: number;
   address?: string;
+  email?: string;
 }

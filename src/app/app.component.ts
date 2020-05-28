@@ -72,6 +72,7 @@ export class AppComponent implements OnInit {
     console.log(this.checkLoginStatus());
     this.checkLoginStatus();
     this.listenForLoginEvents();
+    this.setFilterData();
 
     this.swUpdate.available.subscribe(async res => {
       const toast = await this.toastCtrl.create({
@@ -185,5 +186,12 @@ export class AppComponent implements OnInit {
         this.profileData = null;
       }
     });
+  }
+
+  setFilterData() {
+    this.productData.getAllFilters()
+        .subscribe((filters: any) => {
+          this.productData.setFiltersData(filters);
+      });
   }
 }

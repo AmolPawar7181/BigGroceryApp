@@ -5,9 +5,9 @@ import { IonicModule } from '@ionic/angular';
 import { FivGalleryModule } from '@fivethree/core';
 
 import { SchedulePage } from './schedule';
-import { ScheduleFilterPage } from '../schedule-filter/schedule-filter';
+// import { ScheduleFilterPage } from '../schedule-filter/schedule-filter';
 import { SchedulePageRoutingModule } from './schedule-routing.module';
-import { ProductAdminPage } from '../product-admin/product-admin';
+// import { ProductAdminPage } from '../product-admin/product-admin';
 import { AdminPageModule } from '../admin/admin.module';
 
 @NgModule({
@@ -21,12 +21,12 @@ import { AdminPageModule } from '../admin/admin.module';
   ],
   declarations: [
     SchedulePage,
-    ScheduleFilterPage,
-    ProductAdminPage,
+    // ScheduleFilterPage,
+    // ProductAdminPage,
   ],
   entryComponents: [
-    ScheduleFilterPage,
-    ProductAdminPage,
+    // ScheduleFilterPage,
+    // ProductAdminPage,
   ]
 })
 export class ScheduleModule { }

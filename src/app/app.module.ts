@@ -19,6 +19,9 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { FormsModule } from '@angular/forms';
 
+import { Geolocation } from '@ionic-native/geolocation/ngx';
+import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -34,7 +37,9 @@ import { FormsModule } from '@angular/forms';
   ],
   declarations: [AppComponent],
   providers: [InAppBrowser, SplashScreen, StatusBar,
-              Camera, File, WebView, FilePath, CallNumber],
+              Camera, File, WebView, FilePath, CallNumber,
+              Geolocation, NativeGeocoder
+            ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

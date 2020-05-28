@@ -20,15 +20,15 @@ import { ProductData } from '../../providers/product-data';
 import { ModelService } from '../../providers/models/model-service';
 import { CartService } from '../../providers/cart-service';
 import { ProductAdminPage } from '../product-admin/product-admin';
-import { HomePageData } from '../../interfaces/product-options';
+
 
 
 @Component({
   selector: 'page-schedule',
-  templateUrl: 'schedule.html',
-  styleUrls: ['./schedule.scss'],
+  templateUrl: 'product-category.html',
+  styleUrls: ['./product-category.scss'],
 })
-export class SchedulePage implements OnInit {
+export class ProductCategoryPage implements OnInit {
   // Gets a reference to the list element
   @ViewChild('scheduleList', { static: true }) scheduleList: IonList;
   @ViewChild('gallery', { static: true }) gallery: FivGallery;
@@ -55,12 +55,6 @@ export class SchedulePage implements OnInit {
   backBtnSub: any;
   lastProduct: any;
   productNo = 0;
-  homePageData: HomePageData = { firstCarousel : '', secondCarousel : '', showCategorys : '', showBrands: '' };
-  slideOptsOne = {
-    initialSlide: 0,
-    slidesPerView: 1,
-    autoplay: true
-  };
 
   constructor(
     public alertCtrl: AlertController,
@@ -84,30 +78,11 @@ export class SchedulePage implements OnInit {
     this.setUserId('ngOnInit');
     this.ios = this.config.get('mode') === 'ios';
     this.setIsAdmin();
-    this.getHomePage();
   }
 
   ionViewWillEnter() {
     this.setIsAdmin();
     console.log('excludedFilterNames ', this.excludedFilterNames);
-  }
-
-  viewAll() {
-    this.router.navigateByUrl('/app/tabs/allproducts');
-  }
-
-  getHomePage() {
-    this.product.getHomePageData()
-        .subscribe((data: any) => {
-          console.log(data);
-          if (data.success) {
-            this.homePageData.firstCarousel = data.homePage[0].content;
-            this.homePageData.secondCarousel = data.homePage[1].content;
-            this.homePageData.showCategorys = data.homePage[2].content;
-            this.homePageData.showBrands = data.homePage[3].content;
-          }
-          console.log(this.homePageData.showCategorys);
-        });
   }
 
   setIsAdmin() {
@@ -214,7 +189,6 @@ export class SchedulePage implements OnInit {
     this.closeSlidingItems();
     // enable infinite scroll
     this.enableInfiniteScroll();
-    console.log('homePageData ', this.homePageData.firstCarousel);
     this.modelService.presentLoading('Please wait...');
     this.product.getProductsByNumber('0', this.lastProduct).subscribe((data: any) => {
       this.modelService.dismissLoading();

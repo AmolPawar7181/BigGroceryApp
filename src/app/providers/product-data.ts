@@ -17,6 +17,55 @@ export class ProductData {
 
   constructor(public storage: Storage, public http: HttpClient) {}
 
+  getHomePageData() {
+    return this.http
+      .get(`${backEnd}/getHomePageData`)
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
+  addBrand(brandData: any) {
+    return this.http.post(`${backEnd}/addBrand`, brandData, this.httpHeader)
+                .pipe(map(res => {
+                 return res;
+                }),
+                catchError(err => {
+                  const res = {
+                    success: false,
+                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                  };
+                  return of(res);
+                })
+                );
+  }
+
+  addCategory(categoryData: any) {
+    return this.http.post(`${backEnd}/addCategory`, categoryData, this.httpHeader)
+                .pipe(map(res => {
+                 return res;
+                }),
+                catchError(err => {
+                  const res = {
+                    success: false,
+                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                  };
+                  return of(res);
+                })
+                );
+  }
+
   addProduct(productData: any) {
     return this.http.post(`${backEnd}/addProducts`, productData, this.httpHeader)
                 .pipe(map(res => {
@@ -84,8 +133,52 @@ export class ProductData {
                 );
   }
 
+  getProductsByCatBrand(filterBy: any, field: any, productNo: any, last: any) {
+    const data = {
+      productNo,
+      last,
+      field,
+      filterBy
+    };
+    return this.http.post(`${backEnd}/getProductsByCatBrand`, data).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg:
+            err.error.error ||
+            'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
   getAllProducts() {
     return this.http.get(`${backEnd}/getProducts`).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg:
+            err.error.error ||
+            'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  getProductsByNumber(productNo: any, last: any) {
+    const data = {
+      productNo,
+      last
+    };
+    return this.http.post(`${backEnd}/getProductsByNumber`, data).pipe(
       map((res) => {
         return res;
       }),

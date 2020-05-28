@@ -4,6 +4,10 @@ import { UserData } from '../../providers/user-data';
 import { CartService } from '../../providers/cart-service';
 import { ModelService } from '../../providers/models/model-service';
 import { ProductData } from '../../providers/product-data';
+import { AdminData } from '../../providers/admin-data';
+
+declare var RazorpayCheckout: any;
+
 @Component({
   selector: 'app-cart',
   templateUrl: './cart.page.html',
@@ -15,15 +19,52 @@ export class CartPage implements OnInit {
   cartItems: any = [];
   total = 0;
   saved = 0;
+  userData: any;
+  razorData: any = { currency: '', key: '', name: '', description: ''};
 
   constructor(public user: UserData, public cartService: CartService,
               public modelService: ModelService, public router: Router,
-              public productData: ProductData
+              public productData: ProductData, public adminData: AdminData
     ) { }
 
   ngOnInit() {
     this.listenForEvents();
     this.setUserId();
+    this.getUserData();
+    this.setRazorData();
+  }
+
+  payWithRazorpay() {
+    const options = {
+      description: this.razorData.description,
+      currency: this.razorData.currency, // your 3 letter currency code
+      key: this.razorData.key, // your Key Id from Razorpay dashboard
+      amount: this.total * 100, // Payment amount in smallest denomiation e.g. cents for USD
+      name: this.razorData.name,
+      prefill: {
+        email: this.userData.email,
+        contact: this.userData.phone,
+        name: this.userData.username
+      },
+      modal: {
+        ondismiss() {
+          console.log('modal dismissed');
+        }
+      }
+    };
+
+    const successCallback = (paymentId: any) =>  {
+      // alert('payment_id: ' + paymentId);
+      console.log('success ', paymentId);
+      this.checkOut(paymentId);
+    };
+
+    const cancelCallback = (error: any) => {
+      this.modelService.presentToast(`${error.description} (Error ${error.code})`, 3000, 'danger');
+      console.log('error cancelCallBack', error);
+    };
+
+    RazorpayCheckout.open(options, successCallback, cancelCallback);
   }
 
   addToCart(productId: any) {
@@ -95,14 +136,15 @@ export class CartPage implements OnInit {
     });
   }
 
-  checkOut() {
+  checkOut(paymentId: any) {
     const order = {
       userId: this.userId,
       total: this.total,
-      products: this.cartItems
+      products: this.cartItems,
+      paymentId
     };
     console.log('order ', order);
-    this.modelService.presentLoading('Please wait...');
+    this.modelService.presentLoading('Confirming order, Please wait...');
     this.cartService.placeOrder(order)
     .subscribe((orderDetails: any) => {
       this.modelService.dismissLoading();
@@ -127,6 +169,22 @@ export class CartPage implements OnInit {
     for (let i = 0; i < cartDetails.length; i++) {
         this.total = this.total + (cartDetails[i].details.price * cartDetails[i].count);
     }
+  }
+
+  getUserData() {
+    this.user.getUserData()
+        .then((user: any) => {
+          this.userData = user;
+          console.log(this.userData);
+        });
+  }
+
+  setRazorData() {
+    this.adminData.getRazorData()
+        .subscribe((razor: any) => {
+          this.razorData = razor;
+          console.log(this.razorData);
+        });
   }
 
   setUserId() {

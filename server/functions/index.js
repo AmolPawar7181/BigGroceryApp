@@ -52,6 +52,170 @@ const { admin_ } = require("./middleware/admin");
 ///////////////////////
 //const { User } = require("./models/user");
 const SECRET = "SUPERSECRETPASSWORD123";
+let lastObject = "";
+
+////////////////////////
+///// HOME PAGE
+///////////////////////
+
+// this will return data for home page 
+app.get("/getHomePageData", (req, res) => {
+  db.collection("homeTable")
+    .get()
+    .then((data) => {
+      let homePage = [];
+      data.forEach((doc) => {
+        homePage.push({ homePageId: doc.id, content: doc.data() });
+      });
+      return homePage;
+      // will return all the data in the table 
+    })
+    .then((homePage) => {
+      const category = [];
+      // will fetch categories from category table by id
+      for (let i = 0; i < homePage[3].content.category.length; i++) {
+        category.push(
+          db.doc(`/categoryTable/${homePage[3].content.category[i]}`)
+            .get()
+            .then((doc) => {
+               const homePageData = {
+                homePage,
+                data: doc.data()
+               }
+                return homePageData;
+            })
+        )
+      }
+      return Promise.all(category);
+    })
+    .then((homePageData) => {
+      const homePage = [];
+      homePage.push(homePageData[0].homePage[0]);
+      homePage.push(homePageData[0].homePage[1]);
+
+      const categories = {homePageId: "showCategorys", content: []};
+
+      for (let i = 0; i < homePageData.length; i++) {
+        categories.content.push(homePageData[i].data);
+      }
+      homePage.push(categories);
+
+      const brands = [];
+      // will fetch brands from brand table by id
+      for (let i = 0; i < homePageData[0].homePage[2].content.brands.length; i++) {
+        brands.push(
+          db.doc(`/brandTable/${homePageData[0].homePage[2].content.brands[i]}`)
+            .get()
+            .then((doc) => {
+               const homePageNewData = {
+                homePage,
+                data: doc.data()
+               }
+               
+                return homePageNewData;
+            })
+        )
+      }
+
+      return Promise.all(brands);
+    })
+    .then((finalData)=>{
+      // organize data correctly 
+      const homePage = [];
+      homePage.push(finalData[0].homePage[0]);
+      homePage.push(finalData[0].homePage[1]);
+      homePage.push(finalData[0].homePage[2]);
+
+      const brands = {homePageId: "showBrands", content: []};
+
+      for (let i = 0; i < finalData.length; i++) {
+        brands.content.push(finalData[i].data);
+      }
+      homePage.push(brands);
+
+      res.json({success: true, homePage});
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
+});
+
+// this will return data for admin page 
+app.get("/getHomePage", (req, res) => {
+  db.collection("homeTable")
+    .get()
+    .then((data) => {
+      let homePage = [];
+      data.forEach((doc) => {
+        homePage.push({ homePageId: doc.id, content: doc.data() });
+      });
+      
+      return res.json({success: true, homePage});
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
+});
+
+app.post("/addHomeData", (req, res) => {
+  const module = req.body.module;
+  const content = req.body.content;
+  db.collection("homeTable")
+    .doc(module)
+    .update(content)
+    .then(() => {
+      res.json({success: true, msg: `${module} Updated successfully`});
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
+});
+
+app.put("/deleteFromHome", (req, res) => {
+  const module = req.query.module;
+  const content = req.query.content;
+  let deleteFrom = ''
+  if (module === 'showCategorys') {
+    db.collection("homeTable")
+      .doc(module)
+      .update({
+        category: admin.firestore.FieldValue.arrayRemove(content)
+      })
+      .then(() => {
+        res.json({success: true, msg: 'Deleted successfully'});
+      })
+      .catch((err) => {
+        res
+          .status(500)
+          .json({ success: false, error: "Something went wrong", err: err });
+      });
+  } else {
+    db.collection("homeTable")
+        .doc(module)
+        .update({
+          img: admin.firestore.FieldValue.arrayRemove(content)
+        })
+        .then(() => {
+          const link = content.split('/o/').pop();
+          const file = link.substr(0, link.indexOf('?'));
+          bucket.file(file).delete();
+          res.json({success: true, msg: 'Deleted successfully'});
+        })
+        .catch((err) => {
+          res
+            .status(500)
+            .json({ success: false, error: "Something went wrong", err: err });
+        });
+  }
+    
+})
+
 
 ////////////////////////
 ///// ORDER
@@ -62,6 +226,7 @@ app.post("/addOrder", (req, res) => {
     userId: req.body.userId,
     total: req.body.total,
     products: req.body.products,
+    paymentId: req.body.paymentId,
     status: "active",
     createdAt: admin.firestore.Timestamp.fromDate(new Date()),
   };
@@ -69,7 +234,10 @@ app.post("/addOrder", (req, res) => {
     .add(newOrder)
     .then((doc) => {
       const orderId = doc.id;
-      res.json({ success: true, msg: `Order placed successfully. Check notifications under My Account for order update` });
+      res.json({
+        success: true,
+        msg: `Order placed successfully. Check notifications under My Account for order update`,
+      });
       return orderId;
     })
     .then((orderId) => {
@@ -220,7 +388,6 @@ app.put("/setOrderStatus", (req, res) => {
 });
 
 app.put("/setOrderMsg", (req, res) => {
-
   const message = req.body.msg;
   const orderId = req.body.orderId;
 
@@ -495,7 +662,6 @@ app.get("/getPurchaseHistory", (req, res) => {
     })
     .then((historyData) => {
       if (historyData.length > 0) {
-
         // res.json({ success: true, data: collections });
 
         const historyDetails = [];
@@ -505,12 +671,11 @@ app.get("/getPurchaseHistory", (req, res) => {
               .doc(`/orderTable/${historyData[i].orderId}`)
               .get()
               .then((doc) => {
-                if(doc.exists) {
+                if (doc.exists) {
                   return doc.data();
                 } else {
                   return;
                 }
-                 
               })
           );
         }
@@ -519,8 +684,8 @@ app.get("/getPurchaseHistory", (req, res) => {
         res.json({ success: false, msg: "Nothing in history" });
       }
     })
-    .then((data)=>{
-      res.json({success: true, data})
+    .then((data) => {
+      res.json({ success: true, data });
     })
     .catch((err) => {
       console.error(err);
@@ -791,6 +956,7 @@ app.post("/addUser", (req, res) => {
   const newUser = {
     username: req.body.username,
     password: req.body.password,
+    email: req.body.email,
     phone: req.body.phone,
     address: req.body.address,
     role: 0,
@@ -911,6 +1077,81 @@ app.get("/getUserById", (req, res) => {
 ///// PRODUCTS
 ///////////////////////
 
+app.get("/getProductsByBrand", (req, res) => {
+  const brand = req.query.brand;
+  
+    db.collection("productTable")
+      .where("brand", "==", brand)
+      .get()
+      .then((data) => {
+        let products = [];
+        data.forEach((doc) => {
+          let product = {
+            productId: doc.id,
+            ...doc.data(),
+          };
+          products.push(product);
+        });
+        return res.json({ success: true, data: products });
+      })
+      .catch((err) => {
+        res
+          .status(500)
+          .json({ success: false, error: "Something went wrong", err: err });
+      });
+  
+});
+
+app.post("/getProductsByCatBrand", (req, res) => {
+  // this will be the name of the category or brand
+  const field = req.body.field;
+  // this will be category or brand
+  const filterBy = req.body.filterBy;
+  const productNo = req.body.productNo;
+
+  let productRef = "";
+  if (productNo !== "0") {
+    const lastProduct = req.body.last;
+    productRef = db
+      .collection("productTable")
+      .where(filterBy, "==", field)
+      .orderBy("productNo", "desc")
+      .startAfter(lastProduct.productNo);
+  } else {
+    productRef = db
+        .collection("productTable")
+        .where(filterBy, "==", field)
+        .orderBy("productNo", "desc")
+  }
+    productRef
+      .limit(2)
+      .get()
+      .then(snapshot => {
+          if(snapshot.empty) {
+            return res.json({ success: false, msg:"No products found" });
+          }
+
+            let products = [];
+            snapshot.forEach((doc) => {
+              let product = {
+                productId: doc.id,
+                ...doc.data(),
+              };
+              products.push(product);
+            });
+            const last = {
+              productNo: snapshot.docs[snapshot.docs.length - 1].data().productNo
+            };
+            return res.json({ success: true, products, last });
+      })
+      .catch((err) => {
+        res
+          .status(500)
+          .json({ success: false, error: "Something went wrong", err: err });
+      });
+  
+});
+
 app.get("/search", (req, res) => {
   const searchString = req.query.searchString;
   db.collection("productTable")
@@ -1009,7 +1250,7 @@ app.get("/getAllFilters", (req, res) => {
     .then((data) => {
       let categories = [];
       data.forEach((doc) => {
-        categories.push(doc.data());
+        categories.push({id: doc.id, category: doc.data().category});
       });
       return categories;
     })
@@ -1019,7 +1260,7 @@ app.get("/getAllFilters", (req, res) => {
         .then((data) => {
           let brands = [];
           data.forEach((doc) => {
-            brands.push(doc.data());
+            brands.push({id: doc.id, brand: doc.data().brand});
           });
           let filterData = { categories, brands };
           return res.json({ success: true, filterData });
@@ -1030,6 +1271,78 @@ app.get("/getAllFilters", (req, res) => {
 
 app.get("/getProducts", (req, res) => {
   db.collection("productTable")
+    .get()
+    .then((data) => {
+      let products = [];
+      data.forEach((doc) => {
+        let product = {
+          productId: doc.id,
+          ...doc.data(),
+        };
+        products.push(product);
+      });
+      return res.json(products);
+    })
+    .catch((err) => console.error(err));
+});
+
+app.post("/getProductsByNumber", (req, res) => {
+  const productNo = req.body.productNo;
+  const lastProduct = req.body.last;
+  console.log("req.body ", req.body);
+
+  let productRef = "";
+  if (productNo !== "0") {
+    productRef = db
+      .collection("productTable")
+      .orderBy("productNo", "desc")
+      .startAfter(lastProduct.productNo);
+  } else {
+    console.log("inside else ", productNo);
+    productRef = db.collection("productTable").orderBy("productNo", "desc");
+  }
+  productRef
+    .limit(5)
+    .get()
+    .then((data) => {
+      let products = [];
+
+      data.forEach((doc) => {
+        let product = {
+          productId: doc.id,
+          ...doc.data(),
+        };
+        products.push(product);
+      });
+      // Get the last document
+      const last = {
+        productNo: data.docs[data.docs.length - 1].data().productNo,
+      };
+
+      return res.json({ products, last });
+    })
+    .catch((err) => console.error(err));
+});
+
+app.post("/getProductsByTimestamp", (req, res) => {
+  const isStart = req.body.isStart;
+  const lastProduct = req.body.last;
+  let productRef = "";
+
+  if (isStart !== "true") {
+    console.log("inside if");
+    // const startAfterTime = new Date(timeStamp);
+
+    productRef = db
+      .collection("productTable")
+      .orderBy("createdAt", "desc")
+      .startAfter(lastProduct.createdAt);
+  } else {
+    console.log("inside else");
+    productRef = db.collection("productTable").orderBy("createdAt", "desc");
+  }
+  productRef
+    .limit(5)
     .get()
     .then((data) => {
       let products = [];
@@ -1083,12 +1396,12 @@ app.put("/setAvaibility", (req, res) => {
   const productId = req.body.productId;
   db.collection("productTable")
     .doc(productId)
-    .set(
-      { available },
-      { merge: true }
-    )
+    .set({ available }, { merge: true })
     .then(() => {
-      return res.json({ success: true, msg: "Available status updated successfully" });
+      return res.json({
+        success: true,
+        msg: "Available status updated successfully",
+      });
     })
     .catch((err) => {
       res
@@ -1125,60 +1438,45 @@ app.post("/deleteProductById", (req, res) => {
     });
 });
 
-app.post("/addProducts", (req, res) => {
-  const newProduct = {
-    category: req.body.category,
-    brand: req.body.brand,
-    name: req.body.name,
-    price: req.body.price,
-    pricePerQuantity: req.body.pricePerQuantity,
-    img: req.body.img,
-    available: true,
-    createdAt: admin.firestore.Timestamp.fromDate(new Date()),
-  };
-  db.collection("productTable")
-    .add(newProduct)
-    .then((doc) => {
-      // add category to the category table
-      // only unique categories will be allowed
-      // we can use this for filtering in app
-      db.collection("categoryTable")
-        .where("category", "==", req.body.category)
-        .get()
-        .then((snapshot) => {
-          // if category not found
-          if (snapshot.empty) {
-            const category = {
-              category: req.body.category,
-            };
-            db.collection("categoryTable")
-              .add(category)
-              .then(() => {
-                return true;
-              });
-          }
-        });
+app.post("/addBrand", (req, res) => {
+  // add brand to the brand table
+  // only unique brands will be allowed
+  db.collection("brandTable")
+    .where("brand", "==", req.body.brand)
+    .get()
+    .then((snapshot) => {
+      // if brand not found
+      if (snapshot.empty) {
+        const brand = {
+          brand: req.body.brand,
+          img: req.body.img,          
+          showOnHome: req.body.showOnHome,
+          createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+        };
 
-      // add brand to the brand table
-      // only unique brands will be allowed
-      db.collection("brandTable")
-        .where("brand", "==", req.body.brand)
-        .get()
-        .then((snapshot) => {
-          // if category not found
-          if (snapshot.empty) {
-            const brand = {
-              brand: req.body.brand,
-            };
-            db.collection("brandTable")
-              .add(brand)
-              .then(() => {
-                return true;
-              });
-          }
-        });
-
-      res.json({ success: true, msg: `Product added successfully` });
+        db.collection("brandTable")
+          .add(brand)
+          .then((doc) => {
+            if(brand.showOnHome){
+              const brandId = doc.id;
+              db.collection("homeTable")
+                .doc("showBrands")
+                .update({
+                  brands: admin.firestore.FieldValue.arrayUnion(brandId)
+                })
+              }
+            res.json({ success: true, msg: `Brand added successfully` });
+          })
+          .catch((err) => {
+            res.status(500).json({
+              success: false,
+              msg: "Something went wrong, Please try again",
+              err: err,
+            });
+          });
+      } else {
+        res.json({ success: false, msg: `Brand already exists` });
+      }
     })
     .catch((err) => {
       res.status(500).json({
@@ -1186,6 +1484,90 @@ app.post("/addProducts", (req, res) => {
         msg: "Something went wrong, Please try again",
         err: err,
       });
+    });
+});
+
+app.post("/addCategory", (req, res) => {
+  // add category to the category table
+  // only unique categories will be allowed
+  // we can use this for filtering in app
+  db.collection("categoryTable")
+    .where("category", "==", req.body.category)
+    .get()
+    .then((snapshot) => {
+      // if category not found
+      if (snapshot.empty) {
+        const category = {
+          category: req.body.category,
+          img: req.body.img,
+          showOnHome: req.body.showOnHome,
+          createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+        };
+
+        db.collection("categoryTable")
+          .add(category)
+          .then((doc) => {
+            if(category.showOnHome){
+            const categoryId = doc.id;
+            db.collection("homeTable")
+              .doc("showCategorys")
+              .update({
+                category: admin.firestore.FieldValue.arrayUnion(categoryId)
+              })
+            }
+
+            res.json({ success: true, msg: `Category added successfully` });
+          })
+          .catch((err) => {
+            res.status(500).json({
+              success: false,
+              msg: "Something went wrong, Please try again",
+              err: err,
+            });
+          });
+      } else {
+        res.json({ success: false, msg: `Category already exists` });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        success: false,
+        msg: "Something went wrong, Please try again",
+        err: err,
+      });
+    });
+});
+
+app.post("/addProducts", (req, res) => {
+  let counter = 0;
+  db.collection("productTable")
+    .get()
+    .then((snap) => {
+      console.log("size ", snap.size);
+      counter = snap.size + 1;
+      const newProduct = {
+        category: req.body.category,
+        brand: req.body.brand,
+        name: req.body.name,
+        price: req.body.price,
+        pricePerQuantity: req.body.pricePerQuantity,
+        img: req.body.img,
+        available: true,
+        createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+        productNo: counter,
+      };
+      db.collection("productTable")
+        .add(newProduct)
+        .then((doc) => {
+          res.json({ success: true, msg: `Product added successfully` });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            success: false,
+            msg: "Something went wrong, Please try again",
+            err: err,
+          });
+        });
     });
 });
 

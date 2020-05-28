@@ -16,6 +16,63 @@ export class AdminData {
 
   constructor(public storage: Storage, public http: HttpClient) {}
 
+  addHomeData(data: any) {
+    return this.http
+      .post(`${backEnd}/addHomeData`, data)
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
+  deleteFromHome(module: any, content: any) {
+    return this.http
+    .put(`${backEnd}/deleteFromHome?module=${module}&content=${content}`, '')
+    .pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg:
+            err.error.error ||
+            'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  getHomePageData() {
+    return this.http
+      .get(`${backEnd}/getHomePage`)
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
   messageUser(data: any) {
     return this.http
       .put(`${backEnd}/setOrderMsg`, data)
@@ -44,6 +101,16 @@ export class AdminData {
           })
         );
   }
+
+  getRazorData(): any {
+    return this.http
+      .get('assets/data/razorpay.json')
+      .pipe(
+        map((res) => {
+          return res;
+        })
+      );
+}
 
   getOrdersByDate(fromDate: any, toDate: any, status: any) {
     return this.http

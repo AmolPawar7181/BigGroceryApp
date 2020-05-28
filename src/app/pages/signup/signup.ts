@@ -16,7 +16,7 @@ import { ModelService } from '../../providers/models/model-service';
 })
 export class SignupPage {
   phoneNumber = null;
-  signup: UserOptions = { username: '', password: '', phone : this.phoneNumber, address : '' };
+  signup: UserOptions = { username: '', password: '', phone : this.phoneNumber, address : '', email : '' };
   otp = null;
   optVerified = false;
   optSent = false;
@@ -66,8 +66,7 @@ export class SignupPage {
                   this.router.navigateByUrl('/login');
                 }, 2000);
               } else {
-                this.modelService.presentToast(res.message, 2000, 'danger');
-                console.log(res.message);
+                this.modelService.presentToast(res.msg, 2000, 'danger');
               }
           });
 
@@ -76,7 +75,7 @@ export class SignupPage {
   }
 
   sendOTP(form: NgForm) {
-    // this.sendOTPSubmitted = true;
+    this.sendOTPSubmitted = true;
 
     this.modelService.presentToast('This is a trial version, you can find contact info from About Developers page!!!', '4000', 'danger');
 

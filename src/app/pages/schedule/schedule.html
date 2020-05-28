@@ -1,11 +1,11 @@
-<ion-header translucent="true">
+<ion-header >
   <ion-toolbar>
-    <ion-buttons *ngIf="!showSearchbar" slot="start">
+    <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
 
-    <ion-title *ngIf="!showSearchbar">Products</ion-title>
-    <ion-searchbar
+    <ion-title>Home </ion-title>
+    <!-- <ion-searchbar
       *ngIf="showSearchbar"
       showCancelButton="always"
       [(ngModel)]="queryText"
@@ -13,8 +13,8 @@
       (ionCancel)="cancelSearch()"
       placeholder="Search" 
       debounce="1000"
-    ></ion-searchbar>
-    <ion-buttons slot="end">
+    ></ion-searchbar> -->
+    <!-- <ion-buttons slot="end">
       <ion-button *ngIf="!showSearchbar" (click)="showSearchbar = true">
         <ion-icon slot="icon-only" name="search"></ion-icon>
       </ion-button>
@@ -23,36 +23,85 @@
           <ion-icon slot="icon-only" name="options"></ion-icon>
         </span>
       </ion-button>
-    </ion-buttons>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
-
+ 
 <ion-content fullscreen="true">
-  <ion-refresher slot="fixed" (ionRefresh)="updateSchedule($event)">
+   <ion-grid *ngIf="homePageData.firstCarousel.img" class="ion-no-padding ion-no-margin ion-margin-top">
+      <ion-row>
+        <ion-col size="12">    
+          <ion-slides pager="true" [options]="slideOptsOne" #slideWithNav>
+            <ion-slide *ngFor="let image of homePageData.firstCarousel.img; index as pos">
+              <img [src]="image ? image : '../assets/img/no_image.jpg'">
+            </ion-slide>
+          </ion-slides>
+        </ion-col>    
+      </ion-row>
+    </ion-grid>
+
+    <ion-text class="ion-margin-top">Shop by Category</ion-text>
+    <ion-grid *ngIf="homePageData.showCategorys" class="ion-no-padding ion-no-margin ion-margin-top">
+      <ion-row>
+        <ion-col size="6" *ngFor="let category of homePageData.showCategorys; index as pos">    
+          <ion-card routerLink="/app/tabs/schedule/session/category/{{category.category}}">
+            <img [src]="category.img ? category.img : '../assets/img/no_image.jpg'">
+            <ion-card-header>
+              <ion-card-title>{{category.category}}</ion-card-title>
+            </ion-card-header>
+          </ion-card>
+        </ion-col>    
+      </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="homePageData.secondCarousel.img" class="ion-no-padding ion-no-margin ion-margin-top">
+      <ion-row>
+        <ion-col size="12">    
+          <ion-slides pager="true" [options]="slideOptsOne" #slideWithNav>
+            <ion-slide *ngFor="let image of homePageData.secondCarousel.img; index as pos">
+              <img [src]="image ? image : '../assets/img/no_image.jpg'">
+            </ion-slide>
+          </ion-slides>
+        </ion-col>    
+      </ion-row>
+    </ion-grid>
+
+    <ion-text class="ion-margin-top">Shop by Brands</ion-text>
+    <ion-grid *ngIf="homePageData.showBrands" class="ion-no-padding ion-no-margin ion-margin-top">
+      <ion-row>
+        <ion-col size="6" *ngFor="let brand of homePageData.showBrands; index as pos">    
+          <ion-card routerLink="/app/tabs/schedule/session/brand/{{brand.brand}}">
+            <img [src]="brand.img ? brand.img : '../assets/img/no_image.jpg'">
+            <ion-card-header>
+              <ion-card-title>{{brand.brand}}</ion-card-title>
+            </ion-card-header>
+          </ion-card>
+        </ion-col>    
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="ion-margin-bottom" style="margin-bottom:60px">
+      <ion-row>
+        <ion-col>
+          <div>
+          <ion-button size="small" routerLink="/app/tabs/allproducts" >VIEW ALL</ion-button>
+        </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    
+
+  <!-- <ion-refresher slot="fixed" (ionRefresh)="updateSchedule($event)">
     <ion-refresher-content
       pullingIcon="arrow-dropdown"
       pullingText="Pull to refresh"
       refreshingSpinner="circles"
       refreshingText="Refreshing...">
     </ion-refresher-content>
-  </ion-refresher>
+  </ion-refresher> -->
 
-  <!-- <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Products</ion-title>
-    </ion-toolbar>
-    <ion-toolbar>
-      <ion-searchbar
-        [(ngModel)]="queryText"
-        (ionChange)="searchProduct($event.target.value)"
-        placeholder="Search"
-      ></ion-searchbar>
-    </ion-toolbar>
-  </ion-header> -->
-
-  <ion-list #scheduleList [hidden]="products === 0">
+  <!-- <ion-list #scheduleList [hidden]="products === 0">
     <ion-item-sliding *ngFor="let product of products" [hidden]="product.hide" >
-    <!-- <ion-item-group > -->
+    
       <ion-item >
         
         <ion-thumbnail slot="start">
@@ -69,23 +118,22 @@
               </ion-toolbar>
             </fiv-gallery-toolbar>
             
-              <!-- <ion-row> -->
-                <!-- <ion-col > -->
+          
                   <ion-slide *ngFor="let image of product.img">
                     <fiv-gallery-image
                       [src]="image ? image : '../assets/img/no_image.jpg'"
                     ></fiv-gallery-image>
                   </ion-slide>
-                <!-- </ion-col> -->
-              <!-- </ion-row> -->
+          
             
           </ion-slides>
-          <!-- <img class="place_holder" [src]="product.img ? product.img : '../assets/img/no_image.jpg'"> -->
+          
         </fiv-gallery>
         </ion-thumbnail>
       
       
         <ion-label class="ion-text-wrap">
+          <ion-note *ngIf="product.createdAt">{{product.createdAt._seconds * 1000 | date:'medium'  }}</ion-note><br/>
           <ion-note>{{product.brand}}</ion-note>
           <h3>{{product.name}}</h3>
           <h3 class="quantity">{{product.pricePerQuantity}}</h3>
@@ -110,10 +158,17 @@
       </ion-item-options>
 
     </ion-item-sliding>
-    <!-- </ion-item-group> -->
+    
   </ion-list>
 
   <ion-list-header [hidden]="products.length !== 0">
     No products found
   </ion-list-header>
+
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll> -->
 </ion-content>
