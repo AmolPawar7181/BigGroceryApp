@@ -75,6 +75,7 @@
   <div [hidden]="cartItems.length > 0">
     <img src="../assets/img/empty-cart.png" />
   </div>
+  <ion-text *ngIf="upiData">upiData {{upiData}}</ion-text>
 </ion-content>
 
 <ion-footer>
@@ -82,27 +83,13 @@
     <ion-grid class="ion-no-padding">
       <ion-row class="ion-no-padding">
         <ion-col class="ion-no-padding">
-          <!-- <ion-text color="success">
-            <h4>Total: Rs {{total}}</h4>
-          </ion-text>
-          <ion-text color="success">
-            <h4>Saved Rs {{saved}}</h4>
-          </ion-text> -->
           <ion-title class="ion-no-padding ion-no-margin">
             <ion-grid>
               <ion-row>
                 Total: Rs {{total}}
               </ion-row>
-              <!-- <ion-row>
-                <ion-text color="success" class="saved">
-                  Saved Rs {{saved}}
-                </ion-text>                
-              </ion-row> -->
             </ion-grid>
           </ion-title>
-          <!-- <ion-title size="small" color="success" class="ion-no-padding ion-no-margin">
-            
-          </ion-title> -->
         </ion-col>
         <ion-col class="ion-no-padding">
           <ion-button

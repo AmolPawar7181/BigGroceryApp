@@ -27,12 +27,10 @@ export class SupportPage {
 
   ionViewWillEnter() {
     this.orderId = this.navParams.get('orderId');
-    console.log('this.userId ', this.orderId);
   }
 
   submit(form: NgForm) {
     this.submitted = true;
-    console.log(this.supportMessage);
 
     if (form.valid) {
       this.modelService.presentLoading('Please wait...');
@@ -45,7 +43,6 @@ export class SupportPage {
         orderId: this.orderId,
         msg: this.orderMessage
       };
-      console.log(data);
       this.adminData.messageUser(data)
           .subscribe((res: any) => {
             this.modelService.dismissLoading();
@@ -64,25 +61,4 @@ export class SupportPage {
   dismiss() {
     this.modalCtrl.dismiss();
   }
-  // If the user enters text in the support question and then navigates
-  // without submitting first, ask if they meant to leave the page
-  // async ionViewCanLeave(): Promise<boolean> {
-  //   // If the support message is empty we should just navigate
-  //   if (!this.supportMessage || this.supportMessage.trim().length === 0) {
-  //     return true;
-  //   }
-
-  //   return new Promise((resolve: any, reject: any) => {
-  //     const alert = await this.alertCtrl.create({
-  //       title: 'Leave this page?',
-  //       message: 'Are you sure you want to leave this page? Your support message will not be submitted.',
-  //       buttons: [
-  //         { text: 'Stay', handler: reject },
-  //         { text: 'Leave', role: 'cancel', handler: resolve }
-  //       ]
-  //     });
-
-  //     await alert.present();
-  //   });
-  // }
 }

@@ -26,9 +26,14 @@ export class AppComponent implements OnInit {
   @ViewChild(IonRouterOutlet, {static: false}) routerOutlet: IonRouterOutlet;
   appPages = [
     {
-      title: 'Products',
+      title: 'Home',
       url: '/app/tabs/schedule',
       icon: 'home'
+    },
+    {
+      title: 'Products',
+      url: '/app/tabs/allproducts',
+      icon: 'albums'
     },
     {
       title: 'Cart',
@@ -73,6 +78,7 @@ export class AppComponent implements OnInit {
     this.checkLoginStatus();
     this.listenForLoginEvents();
     this.setFilterData();
+    this.setAllowedZipCodes();
 
     this.swUpdate.available.subscribe(async res => {
       const toast = await this.toastCtrl.create({
@@ -98,7 +104,8 @@ export class AppComponent implements OnInit {
 
   initializeApp() {
     this.platform.ready().then(() => {
-      this.statusBar.styleLightContent();
+      // this.statusBar.styleLightContent();
+      this.statusBar.backgroundColorByHexString('#3880ff');
       this.splashScreen.hide();
       console.log(this.userData.isLoggedIn());
       if (this.userData.isLoggedIn()) {
@@ -117,6 +124,8 @@ export class AppComponent implements OnInit {
                   navigator['app'].exitApp();
                 }
               });
+        } else if (this.router.url === '/login') {
+          navigator['app'].exitApp();
         } else {
           history.back();
         }
@@ -192,6 +201,13 @@ export class AppComponent implements OnInit {
     this.productData.getAllFilters()
         .subscribe((filters: any) => {
           this.productData.setFiltersData(filters);
+      });
+  }
+
+  setAllowedZipCodes() {
+    this.userData.getZipCodes()
+        .subscribe((codes: any) => {
+          this.userData.setZipCodes(codes);
       });
   }
 }

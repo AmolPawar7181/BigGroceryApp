@@ -1,12 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CheckLogin } from './providers/check-login.service';
+import { CheckTutorial } from './providers/check-tutorial.service';
 import { AuthGuard } from './providers/guards/auth-guard-service';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: '/login',
+    redirectTo: '/tutorial',
     pathMatch: 'full'
   },
   {
@@ -43,6 +44,11 @@ const routes: Routes = [
   {
     path: 'about-company',
     loadChildren: () => import('./pages/about-company/about-company.module').then( m => m.AboutCompanyModule)
+  },
+  {
+    path: 'tutorial',
+    loadChildren: () => import('./pages/tutorial/tutorial.module').then(m => m.TutorialModule),
+    canLoad: [CheckTutorial]
   }
 ];
 

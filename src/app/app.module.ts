@@ -21,6 +21,10 @@ import { FormsModule } from '@angular/forms';
 
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
+import { NgOtpInputModule } from 'ng-otp-input';
+// import { WebIntent } from '@ionic-native/web-intent/ngx';
+import { SmsRetriever } from '@ionic-native/sms-retriever/ngx';
+import { HTTP } from '@ionic-native/http/ngx';
 
 @NgModule({
   imports: [
@@ -33,12 +37,14 @@ import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
     IonicStorageModule.forRoot(),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production
-    })
+    }),
+    NgOtpInputModule
   ],
   declarations: [AppComponent],
   providers: [InAppBrowser, SplashScreen, StatusBar,
               Camera, File, WebView, FilePath, CallNumber,
-              Geolocation, NativeGeocoder
+              Geolocation, NativeGeocoder, SmsRetriever,
+              HTTP
             ],
   bootstrap: [AppComponent]
 })

@@ -10,6 +10,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const https = require('https');
 //const bcrypt = require("bcrypt");
 //const jwt = require("jsonwebtoken");
 //const crypto = require('crypto');
@@ -248,7 +249,8 @@ app.post("/addOrder", (req, res) => {
       db.doc(`/userTable/${newOrder.userId}`)
         .collection("history")
         .doc()
-        .create({ orderId: orderId })
+        .create({ orderId: orderId,
+                  createdAt: admin.firestore.Timestamp.fromDate(new Date()) })
         .then(() => {
           return true;
         });
@@ -652,6 +654,7 @@ app.get("/getPurchaseHistory", (req, res) => {
   const userId = req.query.userId;
   db.doc(`/userTable/${userId}`)
     .collection("history")
+    .orderBy("createdAt", "desc")
     .get()
     .then((querySnapshot) => {
       let collections = [];
@@ -951,6 +954,67 @@ app.post("/addToCart", (req, res) => {
       return res.json({ catchError: err });
     });
 });
+
+app.get("/checkNumber", (req, res) => {
+  const phone = parseInt(req.query.phone);
+  console.log('phone ', phone);
+  db.collection("userTable")
+    .where("phone", "==", phone)
+    .get()
+    .then((snapshot) => {
+      if (snapshot.empty) {
+          // const apiKey = 'YEEIqHvOpDk-aKTD4KGyqhuZImjTnPLxah98P6OMdd';
+          // const message = `Please use ${otp} to verify phone number`;
+          // const otp = Math.floor(1000 + Math.random() * 9000);
+          // const url = `https://api.textlocal.in/send/?apikey=${apiKey}&numbers=91${phone}&message=${message}&sender=TXTLCL`;
+
+          // https.get(url);
+          res.json({success: true, msg: 'OTP sent'});
+          return;
+        }  
+
+        res.json({success: false, msg: 'Phone number already registered'});
+      })
+      .catch((err) => {
+        res.status(500).json({ error: "Something went wrong", err: err });
+      });
+
+
+});
+
+app.get("/getZipCodes", (req,res)=> {
+  
+    db.collection("zipTable")
+      .doc("zip")
+      .get()
+      .then((doc) => {
+        res.json({success: true, data: doc.data()})
+      })
+      .catch((err) => {
+        res
+          .status(500)
+          .json({ success: false, error: "Something went wrong", err: err });
+      });
+                
+})
+
+app.post("/setZipCodes", (req,res)=> {
+  const zipCodes = req.body.zipCodes;
+
+  db.collection("zipTable")
+    .doc("zip")
+    .update(zipCodes)
+    .then((doc) => {
+      res.json({success: true, msg:'ZIP codes updated successfully'});
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
+              
+})
+
 
 app.post("/addUser", (req, res) => {
   const newUser = {
@@ -1319,9 +1383,13 @@ app.post("/getProductsByNumber", (req, res) => {
         productNo: data.docs[data.docs.length - 1].data().productNo,
       };
 
-      return res.json({ products, last });
+      return res.json({ success: true, products, last });
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
 });
 
 app.post("/getProductsByTimestamp", (req, res) => {

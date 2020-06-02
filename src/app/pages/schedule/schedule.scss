@@ -54,3 +54,38 @@ $categories: (
 .price {
   padding-top: 10px;
  }
+
+ ion-slides {
+   height: 150px;
+   --bullet-background: #000000;
+   --bullet-background-active: #ffffff;
+   ion-slide img{
+      width: 100%;
+      -o-object-fit: cover;
+      object-fit: cover;
+   }
+ }
+
+
+//  ion-card img{
+//   min-height: 160px;
+//   max-height: 160px;
+//  }
+ .firstCarousel {
+  margin-top: 10px;
+ }
+//  ion-card {
+//   position: relative;
+//   text-align: center;
+  
+//   ion-card-header {
+//     position: absolute;
+//     top: 52%;
+//     width: 100%;
+//     ion-card-subtitle{
+//       font-size: 1.0em;
+//       color: #fff;
+//     }
+    
+//   }
+//  }

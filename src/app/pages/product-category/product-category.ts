@@ -82,12 +82,10 @@ export class ProductCategoryPage implements OnInit {
 
   ionViewWillEnter() {
     this.setIsAdmin();
-    console.log('excludedFilterNames ', this.excludedFilterNames);
   }
 
   setIsAdmin() {
     this.user.getIsAdmin().subscribe((isAdmin: boolean) => {
-      console.log('isAdmin', isAdmin);
       this.isAdmin = isAdmin;
     });
   }
@@ -171,17 +169,6 @@ export class ProductCategoryPage implements OnInit {
         }
       }
     });
-
-    // setTimeout(() => {
-    //   console.log('Done');
-    //   event.target.complete();
-
-    //   // App logic to determine if all data is loaded
-    //   // and disable the infinite scroll
-    //   // if (data.length == 1000) {
-    //   //   event.target.disabled = true;
-    //   // }
-    // }, 500);
   }
 
   updateSchedule(event?: any) {
@@ -195,23 +182,22 @@ export class ProductCategoryPage implements OnInit {
       if (event) {
         event.target.complete();
       }
-
-      if (data.products.length > 0) {
-        this.products = data.products;
-        this.lastProduct = data.last;
-        this.productNo++;
-      } else {
-        if (!data.success) {
-          this.modelService.presentToast(data.msg, 3000, 'danger');
+      if (data.success) {
+        if (data.products.length > 0) {
+          this.products = data.products;
+          this.lastProduct = data.last;
+          this.productNo++;
+        } else {
+          this.modelService.presentToast('No products found', 3000, 'danger');
         }
-      }
+      } else {
+        this.modelService.presentToast(data.msg, 3000, 'danger');
+    }
     });
   }
 
   setAvaibility(product: any) {
-    console.log(product);
     const avaibility = product.available ? false : true;
-    console.log(avaibility);
     // Close any open sliding items when the schedule updates
     this.closeSlidingItems();
 
@@ -229,7 +215,6 @@ export class ProductCategoryPage implements OnInit {
   }
 
   searchProduct(value: any) {
-    console.log(value);
     this.modelService.presentLoading('Please wait...');
     this.product.getproductBySearch(value).subscribe((response: any) => {
       this.modelService.dismissLoading();
@@ -251,7 +236,6 @@ export class ProductCategoryPage implements OnInit {
   }
 
   onImageOpen() {
-    console.log('onImageOpen ');
     this.backBtnSub = this.platform.backButton.subscribeWithPriority(1, () => {
       this.closeImagePopup();
     });
@@ -291,7 +275,6 @@ export class ProductCategoryPage implements OnInit {
   setUserId(from: any) {
     this.user.getUserId()
       .subscribe((userId) => {
-        console.log('subscribe to userid ', userId);
         if (userId) {
          this.userId = userId;
         } else {
@@ -437,17 +420,4 @@ export class ProductCategoryPage implements OnInit {
     await loading.onWillDismiss();
     fab.close();
   }
-
-  // listenForLoginEvents() {
-  //   window.addEventListener('user:login', () => {
-  //     console.log('user:login event');
-  //     this.getUserData();
-  //     this.setUserId('user:login');
-  //   });
-
-  //   window.addEventListener('user:logout', () => {
-  //     console.log('user:logout event');
-  //     this.userId = null;
-  //   });
-  // }
 }

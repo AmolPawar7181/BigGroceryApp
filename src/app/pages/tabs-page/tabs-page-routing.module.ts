@@ -50,14 +50,24 @@ const routes: Routes = [
         ]
       },
       {
-        path: 'map',
+        path: 'account',
         children: [
           {
             path: '',
-            loadChildren: () => import('../map/map.module').then(m => m.MapModule)
+            loadChildren: () => import('../account/account.module').then(m => m.AccountModule),
+            canActivate: [AuthGuard]
           }
         ]
       },
+      // {
+      //   path: 'map',
+      //   children: [
+      //     {
+      //       path: '',
+      //       loadChildren: () => import('../map/map.module').then(m => m.MapModule)
+      //     }
+      //   ]
+      // },
       {
         path: 'allproducts',
         children: [

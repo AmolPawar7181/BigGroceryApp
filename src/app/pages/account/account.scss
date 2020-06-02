@@ -3,12 +3,23 @@ img {
   border-radius: 50%;
 }
 
+// .profileContent.card-content-md {
+//   background: var(--danger,#eb445a) !important;
+//   ion-list {
+//     background: var(--danger,#eb445a) !important;
+//     ion-item.profileName {
+//       --background: var(--danger,#eb445a) !important;
+//     }
+//   }
+// }
+
+
 .profileContent.card-content-md {
-  background: var(--danger,#eb445a) !important;
+  background: #dfdfdf !important;
   ion-list {
-    background: var(--danger,#eb445a) !important;
+    background: var(--primary-tint,#4c8dff) !important;
     ion-item.profileName {
-      --background: var(--danger,#eb445a) !important;
+      --background: var(--primary-tint,#4c8dff) !important;
     }
   }
 }

@@ -53,7 +53,6 @@ export class UploadImagePage {
 
   ionViewWillEnter() {
     const limitPassed = this.navParams.get('limitUpload');
-    console.log('limitPassed ', limitPassed);
     if (limitPassed) {
       this.limitUpload = limitPassed;
     }
@@ -157,13 +156,11 @@ export class UploadImagePage {
           this.updateStoredImages(newFileName);
         },
         (error) => {
-          console.log('Error while storing file.');
           this.modelService.presentToast(
             'Error while storing file.',
             3000,
             'danger'
           );
-          // this.presentToast('Error while storing file.');
         }
       );
   }
@@ -200,13 +197,11 @@ export class UploadImagePage {
         (<FileEntry>entry).file((file) => this.readFile(file));
       })
       .catch((err) => {
-        console.log('Error while reading file.');
         this.modelService.presentToast(
           'Error while reading file.',
           3000,
           'danger'
         );
-        // this.presentToast('Error while reading file.');
       });
   }
 
@@ -224,12 +219,7 @@ export class UploadImagePage {
   }
 
   async uploadImageData(formData: FormData) {
-    // const loading = await this.loadingController.create({
-    //     message: 'Uploading image...',
-    // });
-    // await loading.present();
     this.modelService.presentLoading('Uploading image...');
-    console.log('formData ', formData);
     this.adminData.addProductImage(formData).subscribe((imagesData: any) => {
       this.modelService.dismissLoading();
 

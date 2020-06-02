@@ -1,0 +1,27 @@
+  <ion-content fullscreen="true">
+    <ion-slides #slides (ionSlideWillChange)="onSlideChangeStart($event)" pager="true">
+      <ion-slide class="slide_1">
+        <img src="assets/img/tutorial/shop.png" class="slide-image" />
+        <h2 class="slide-title">
+          Welcome to <br/><br/>
+        </h2>
+        <h3>Bhavani Enterprises</h3>
+      </ion-slide>
+  
+      <ion-slide class="slide_2">
+        <img src="assets/img/tutorial/no_lines.jpg" class="slide-image" />
+        <h2 class="slide-title">No queues</h2>
+        <h3>
+         Why take risk of staying in a queue </h3>
+      </ion-slide>
+  
+      <ion-slide class="slide_3">
+        <img src="assets/img/tutorial/scooter-delivery.png" class="slide-image" />
+        <h2 class="slide-title">When we deliver items at your Door Step</h2><br/>
+        <ion-button class="mont-medium" fill="solid" size="large" (click)="startApp()">
+          Get started
+          <ion-icon slot="end" name="arrow-forward"></ion-icon>
+        </ion-button>
+      </ion-slide>
+    </ion-slides>
+  </ion-content>

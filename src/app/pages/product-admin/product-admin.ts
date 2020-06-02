@@ -45,7 +45,6 @@ export class ProductAdminPage {
     };
     // passed in array of track names that should be excluded (unchecked)
     const productDetails = this.navParams.get('productDetails');
-    console.log('productDetails ', productDetails);
     this.product = productDetails;
     // will check in local storage
     this.productData.getFiltersData().then((filters: any) => {
@@ -91,7 +90,6 @@ export class ProductAdminPage {
 
     const { data } = await modal.onWillDismiss();
     if (data) {
-      console.log(data);
       for (let i = 0; i < data.length; i++) {
         this.product.img.push(data[i].img_url);
       }

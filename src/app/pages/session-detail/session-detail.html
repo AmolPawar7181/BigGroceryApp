@@ -17,19 +17,6 @@
     </ion-refresher-content>
   </ion-refresher>
 
-  <!-- <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Products</ion-title>
-    </ion-toolbar>
-    <ion-toolbar>
-      <ion-searchbar
-        [(ngModel)]="queryText"
-        (ionChange)="searchProduct($event.target.value)"
-        placeholder="Search"
-      ></ion-searchbar>
-    </ion-toolbar>
-  </ion-header> -->
-
   <ion-list #scheduleList [hidden]="products === 0">
     <ion-item-sliding *ngFor="let product of products" [hidden]="product.hide" >
     <!-- <ion-item-group > -->
@@ -48,19 +35,12 @@
                 </ion-buttons>
               </ion-toolbar>
             </fiv-gallery-toolbar>
-            
-              <!-- <ion-row> -->
-                <!-- <ion-col > -->
                   <ion-slide *ngFor="let image of product.img">
                     <fiv-gallery-image
                       [src]="image ? image : '../assets/img/no_image.jpg'"
                     ></fiv-gallery-image>
-                  </ion-slide>
-                <!-- </ion-col> -->
-              <!-- </ion-row> -->
-            
+                  </ion-slide>            
           </ion-slides>
-          <!-- <img class="place_holder" [src]="product.img ? product.img : '../assets/img/no_image.jpg'"> -->
         </fiv-gallery>
         </ion-thumbnail>
       

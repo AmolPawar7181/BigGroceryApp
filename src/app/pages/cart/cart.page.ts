@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { IonRouterOutlet, ModalController } from '@ionic/angular';
+
 import { UserData } from '../../providers/user-data';
 import { CartService } from '../../providers/cart-service';
 import { ModelService } from '../../providers/models/model-service';
 import { ProductData } from '../../providers/product-data';
 import { AdminData } from '../../providers/admin-data';
+import { SpeakerListPage } from '../speaker-list/speaker-list';
 
 declare var RazorpayCheckout: any;
 
@@ -21,10 +24,12 @@ export class CartPage implements OnInit {
   saved = 0;
   userData: any;
   razorData: any = { currency: '', key: '', name: '', description: ''};
+  upiData: any;
 
   constructor(public user: UserData, public cartService: CartService,
               public modelService: ModelService, public router: Router,
-              public productData: ProductData, public adminData: AdminData
+              public productData: ProductData, public adminData: AdminData,
+              public modalCtrl: ModalController, public routerOutlet: IonRouterOutlet,
     ) { }
 
   ngOnInit() {
@@ -54,7 +59,6 @@ export class CartPage implements OnInit {
     };
 
     const successCallback = (paymentId: any) =>  {
-      // alert('payment_id: ' + paymentId);
       console.log('success ', paymentId);
       this.checkOut(paymentId);
     };
@@ -64,11 +68,15 @@ export class CartPage implements OnInit {
       console.log('error cancelCallBack', error);
     };
 
-    RazorpayCheckout.open(options, successCallback, cancelCallback);
+    this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
+        .then(res => {
+          if (res === 'ok') {
+          RazorpayCheckout.open(options, successCallback, cancelCallback);
+          }
+        });
   }
 
   addToCart(productId: any) {
-    console.log('addToCart called');
     if (this.userId) {
     this.modelService.presentLoading('Please wait...');
     this.productData.addToCart(this.userId, productId).subscribe((cart: any) => {
@@ -93,7 +101,6 @@ export class CartPage implements OnInit {
   }
 
   removeFromCart(productId: any, count: any) {
-    console.log('removeFromCart called');
     this.modelService.presentLoading('Please wait...');
     this.cartService.removeFromCart(this.userId, productId, count)
     .subscribe((cartDetails: any) => {
@@ -103,7 +110,6 @@ export class CartPage implements OnInit {
        this.cartItems = cartDetails.data;
        this.calculateCart(cartDetails.data);
        this.cartService.addCartItemCount(this.cartItemCount);
-       // this.modelService.presentToast(cartDetails.msg, 1500, 'success');
       } else {
        this.cartItems = [];
        this.total = 0;
@@ -163,9 +169,23 @@ export class CartPage implements OnInit {
     });
   }
 
+  async presentAddressPage() {
+
+    const modal = await this.modalCtrl.create({
+      component: SpeakerListPage,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { userData: this.userData },
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+
+    // Close any open sliding items when the schedule updates
+  }
+
   calculateCart(cartDetails: any) {
     this.total = 0;
-    // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < cartDetails.length; i++) {
         this.total = this.total + (cartDetails[i].details.price * cartDetails[i].count);
     }

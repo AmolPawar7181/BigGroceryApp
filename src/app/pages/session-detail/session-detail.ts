@@ -200,9 +200,7 @@ export class SessionDetailPage implements OnInit {
   }
 
   setAvaibility(product: any) {
-    console.log(product);
     const avaibility = product.available ? false : true;
-    console.log(avaibility);
     // Close any open sliding items when the schedule updates
     this.closeSlidingItems();
 
@@ -220,7 +218,6 @@ export class SessionDetailPage implements OnInit {
   }
 
   searchProduct(value: any) {
-    console.log(value);
     this.modelService.presentLoading('Please wait...');
     this.product.getproductBySearch(value).subscribe((response: any) => {
       this.modelService.dismissLoading();
@@ -242,7 +239,6 @@ export class SessionDetailPage implements OnInit {
   }
 
   onImageOpen() {
-    console.log('onImageOpen ');
     this.backBtnSub = this.platform.backButton.subscribeWithPriority(1, () => {
       this.closeImagePopup();
     });
@@ -350,8 +346,6 @@ export class SessionDetailPage implements OnInit {
       componentProps: { productDetails: product },
     });
     await modal.present();
-
-    // const { data } = await modal.onWillDismiss();
     // Close any open sliding items when the schedule updates
     this.closeSlidingItems();
   }

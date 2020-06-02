@@ -26,11 +26,4 @@ export class AboutPage {
     this.callNumber.callNumber(this.storeData.contactNo, true)
     .then(res => console.log('Launched dialer!', res));
   }
-  // async presentPopover(event: Event) {
-  //   const popover = await this.popoverCtrl.create({
-  //     component: PopoverPage,
-  //     event
-  //   });
-  //   await popover.present();
-  // }
 }

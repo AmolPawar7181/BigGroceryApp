@@ -52,6 +52,7 @@ export class AdminPage implements OnInit {
     initialSlide: 0,
     slidesPerView: 1
   };
+  title = 'Orders';
 
   categories: any;
   brands: any;
@@ -66,13 +67,12 @@ export class AdminPage implements OnInit {
               private router: Router) { }
 
   ngOnInit() {
-    //  console.log('this.userData.isAdmin ', this.userData.isAdmin);
-    //  if (this.userData.isAdmin) {
+    if (this.userData.isAdmin) {
       this.getOrdersByStatus('active');
       this.getHomePageData();
-    //  } else {
-    //   this.router.navigateByUrl('/app/tabs/schedule', { replaceUrl: true });
-    //  }
+     } else {
+      this.router.navigateByUrl('/app/tabs/schedule', { replaceUrl: true });
+     }
   }
 
   toggleStatus(event: any) {
@@ -89,8 +89,6 @@ export class AdminPage implements OnInit {
         this.homePageData.showCategorys.category.push(id);
       }
     }
-    // console.log('this.newCategories ', this.newCategories);
-    // console.log('this.homeData ', this.homePageData.showCategorys);
   }
 
   ionCheckBrandsChange(name: any, pos: any, event: any, id: any) {
@@ -103,22 +101,25 @@ export class AdminPage implements OnInit {
         this.homePageData.showBrands.brands.push(id);
       }
     }
-    // console.log('this.homePageData.showBrands ', this.homePageData.showBrands);
   }
 
   deleteImage(module: any, content: any, pos: any) {
-    // console.log(content, content);
-    this.modelService.presentLoading('Deleting please wait...');
-    this.adminData.deleteFromHome(module, content)
-        .subscribe((res: any) => {
-          this.modelService.dismissLoading();
-          if (res.success) {
-            this.homePageData.firstCarousel.img.splice(pos, 1);
-            this.modelService.presentToast(res.msg, 2000, 'success');
-          } else {
-            this.modelService.presentToast(res.msg, 2000, 'danger');
-          }
-        });
+    this.modelService.presentConfirm('Are you sure', 'You want to delete', 'No', 'Yes')
+        .then(resp => {
+          if (resp === 'ok') {
+            this.modelService.presentLoading('Deleting please wait...');
+            this.adminData.deleteFromHome(module, content)
+                .subscribe((res: any) => {
+                  this.modelService.dismissLoading();
+                  if (res.success) {
+                    this.homePageData.firstCarousel.img.splice(pos, 1);
+                    this.modelService.presentToast(res.msg, 2000, 'success');
+                  } else {
+                    this.modelService.presentToast(res.msg, 2000, 'danger');
+                  }
+                });
+      }
+    });
   }
 
   getOrdersByDate(form: NgForm) {
@@ -129,7 +130,6 @@ export class AdminPage implements OnInit {
     this.modelService.presentLoading('Please wait...');
     this.adminData.getOrdersByDate(fromdate, todate, this.status)
         .subscribe((orders: any) => {
-          // console.log('filtered orders ', orders);
           this.modelService.dismissLoading();
           if (orders.success) {
             this.filteredOrders = orders.data;
@@ -157,7 +157,6 @@ export class AdminPage implements OnInit {
   getHomePageData() {
     this.adminData.getHomePageData()
       .subscribe((homePage: any) => {
-        // console.log('homePage ', homePage);
         if (homePage.success) {
           this.homePageData.firstCarousel = homePage.homePage[0].content;
           this.homePageData.secondCarousel = homePage.homePage[1].content;
@@ -186,8 +185,6 @@ export class AdminPage implements OnInit {
                    });
               }
             });
-
-         // console.log('this.homePageData ', this.homePageData);
         } else {
           this.modelService.presentToast(homePage.msg, 2000, 'danger');
         }
@@ -206,7 +203,6 @@ export class AdminPage implements OnInit {
         });
       });
     } else if (field === 'brand') {
-     //  console.log(content, alreadyExists, field);
       content.forEach((brand: any, index: any) => {
         const isChecked = alreadyExists.brands.includes(brand.id);
         this.newBrands.push({
@@ -216,7 +212,6 @@ export class AdminPage implements OnInit {
         });
       });
     }
-    // console.log('this.newBrands ', this.newBrands);
   }
 
 
@@ -283,11 +278,6 @@ export class AdminPage implements OnInit {
     await modal.present();
 
     const { data } = await modal.onWillDismiss();
-    // if (data) {
-    //   for(let i=0; i< data.length; i++) {
-    //     this.images.push(data[i].img_url);
-    //   }
-    // }
   }
 
 
@@ -306,7 +296,6 @@ export class AdminPage implements OnInit {
     const { data } = await modal.onWillDismiss();
     if (data) {
       for (let i = 0; i < data.length; i++) {
-        // this.images.push(data[i].img_url);
         this.homePageData[module].img.push(data[i].img_url);
       }
     }

@@ -26,10 +26,6 @@ export class LoginPage {
     public modelService: ModelService
   ) { }
 
-  // async ngOnInit() {
-  //   this.checkLoginStatus();
-  // }
-
   checkLoginStatus() {
     return this.userData.isLoggedIn().then(loggedIn => {
       this.router.navigateByUrl('/app/tabs/schedule');

@@ -1,11 +1,11 @@
 <ion-header translucent>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/app/tabs/schedule"></ion-back-button>
+      <!-- <ion-back-button defaultHref="/app/tabs/schedule"></ion-back-button> -->
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      {{addingProduct? 'Add product' : 'Orders'}}
+      {{title}}
     </ion-title>
   </ion-toolbar>
   <ion-toolbar [hidden]="showClose">
@@ -584,7 +584,7 @@
             >
           </div>
           <div>
-            <ion-button (click)="addHomePageData('firstCarousel','img')">
+            <ion-button size="full" (click)="addHomePageData('firstCarousel','img')">
                 Update First banner
             </ion-button>
           </div>
@@ -626,7 +626,7 @@
             >
           </div>
           <div>
-            <ion-button (click)="addHomePageData('secondCarousel','img')">
+            <ion-button size="full" (click)="addHomePageData('secondCarousel','img')">
                 Update Second banner
             </ion-button>
           </div>
@@ -639,18 +639,16 @@
     <ion-card>
       <ion-card-header>
         <ion-card-title>Categories to show on home page </ion-card-title>
-        <ion-card-subtitle>Maximum 4 categories are allowed</ion-card-subtitle>
       </ion-card-header>
       
       <ion-card-content>
         <ion-list>
             <ion-item *ngFor="let cat of newCategories; index as pos" [attr.category]="cat.name | lowercase">
-              <!-- <ion-icon *ngIf="ios" slot="start" [name]="track.icon" color="medium"></ion-icon> -->
-              <ion-label>{{cat.name}}</ion-label>
+              <ion-label class="ion-text-wrap">{{cat.name}}</ion-label>
               <ion-checkbox slot="end" [(ngModel)]="cat.isChecked" (ionChange)="ionCheckboxChange(cat.name,pos,$event,cat.id)"></ion-checkbox>
             </ion-item>
           
-            <ion-button (click)="addHomePageData('showCategorys','category')">
+            <ion-button size="full" class="ion-margin-top" (click)="addHomePageData('showCategorys','category')">
               Update categories
           </ion-button>          
           </ion-list>
@@ -662,18 +660,16 @@
     <ion-card>
       <ion-card-header>
         <ion-card-title>Brands to show on home page </ion-card-title>
-        <ion-card-subtitle>Maximum 4 brands are allowed</ion-card-subtitle>
       </ion-card-header>
       
       <ion-card-content>
         <ion-list>
             <ion-item *ngFor="let brand of newBrands; index as pos" [attr.brand]="brand.name | lowercase">
-              <!-- <ion-icon *ngIf="ios" slot="start" [name]="track.icon" color="medium"></ion-icon> -->
-              <ion-label>{{brand.name}}</ion-label>
+              <ion-label class="ion-text-wrap">{{brand.name}}</ion-label>
               <ion-checkbox slot="end" [(ngModel)]="brand.isChecked" (ionChange)="ionCheckBrandsChange(brand.name,pos,$event,brand.id)"></ion-checkbox>
             </ion-item>
           
-            <ion-button (click)="addHomePageData('showBrands','brands')">
+            <ion-button size="full" class="ion-margin-top" (click)="addHomePageData('showBrands','brands')">
               Update brands
           </ion-button>          
           </ion-list>
@@ -689,27 +685,27 @@
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="top">
-      <div class="custom-fab" (click)="showAdding('product')">
+      <div class="custom-fab" (click)="showAdding('product'); title='New product'">
         <ion-button>Product</ion-button>
         <ion-fab-button size="small" color="light">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </div>
-      <div class="custom-fab" (click)="showAdding('category')">
+      <div class="custom-fab" (click)="showAdding('category'); title='New category'">
         <ion-button color="danger">Category</ion-button>
         <ion-fab-button size="small" color="danger">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </div>
-      <div class="custom-fab" (click)="showAdding('brand')">
+      <div class="custom-fab" (click)="showAdding('brand'); title='New brand'">
         <ion-button>Brand</ion-button>
         <ion-fab-button size="small" color="light">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </div>
-      <div class="custom-fab" (click)="showAdding('homePage')">
+      <div class="custom-fab" (click)="showAdding('homePage'); title='Update Home page'">
         <ion-button>Home page</ion-button>
-        <ion-fab-button size="small" color="light">
+        <ion-fab-button size="small" color="danger">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </div>
@@ -717,7 +713,7 @@
 
     <ion-fab-button
       color="danger"
-      (click)="closeAllAdding()"
+      (click)="closeAllAdding(); title='Orders'"
       [hidden]="!showClose"
     >
       <ion-icon name="close"></ion-icon>

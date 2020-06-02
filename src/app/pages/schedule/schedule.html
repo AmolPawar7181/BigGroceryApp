@@ -3,32 +3,13 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
     <ion-title>Home </ion-title>
-    <!-- <ion-searchbar
-      *ngIf="showSearchbar"
-      showCancelButton="always"
-      [(ngModel)]="queryText"
-      (ionChange)="searchProduct($event.target.value)"
-      (ionCancel)="cancelSearch()"
-      placeholder="Search" 
-      debounce="1000"
-    ></ion-searchbar> -->
-    <!-- <ion-buttons slot="end">
-      <ion-button *ngIf="!showSearchbar" (click)="showSearchbar = true">
-        <ion-icon slot="icon-only" name="search"></ion-icon>
-      </ion-button>
-      <ion-button *ngIf="!showSearchbar" (click)="presentFilter()">
-        <span>
-          <ion-icon slot="icon-only" name="options"></ion-icon>
-        </span>
-      </ion-button>
-    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
  
 <ion-content fullscreen="true">
-   <ion-grid *ngIf="homePageData.firstCarousel.img" class="ion-no-padding ion-no-margin ion-margin-top">
+  
+   <ion-grid *ngIf="homePageData.firstCarousel.img" class="ion-no-padding ion-no-margin firstCarousel">
       <ion-row>
         <ion-col size="12">    
           <ion-slides pager="true" [options]="slideOptsOne" #slideWithNav>
@@ -40,14 +21,21 @@
       </ion-row>
     </ion-grid>
 
-    <ion-text class="ion-margin-top">Shop by Category</ion-text>
+    
     <ion-grid *ngIf="homePageData.showCategorys" class="ion-no-padding ion-no-margin ion-margin-top">
+      <ion-row>
+        <ion-col >
+          <ion-item  lines="none" color="secondary" class="ion-text-center">
+            <ion-label class="mont-medium">Shop by Category</ion-label>
+          </ion-item>
+        </ion-col>
+      </ion-row>
       <ion-row>
         <ion-col size="6" *ngFor="let category of homePageData.showCategorys; index as pos">    
           <ion-card routerLink="/app/tabs/schedule/session/category/{{category.category}}">
             <img [src]="category.img ? category.img : '../assets/img/no_image.jpg'">
             <ion-card-header>
-              <ion-card-title>{{category.category}}</ion-card-title>
+              <ion-card-subtitle color="dark" class="mont-medium">{{category.category}}</ion-card-subtitle>
             </ion-card-header>
           </ion-card>
         </ion-col>    
@@ -66,109 +54,36 @@
       </ion-row>
     </ion-grid>
 
-    <ion-text class="ion-margin-top">Shop by Brands</ion-text>
+    
     <ion-grid *ngIf="homePageData.showBrands" class="ion-no-padding ion-no-margin ion-margin-top">
+      <ion-row>
+        <ion-col >
+          <ion-item  lines="none" color="danger" class="ion-text-center">
+            <ion-label class="mont-medium">Shop by Brands</ion-label>
+          </ion-item>
+          
+        </ion-col>
+      </ion-row>
       <ion-row>
         <ion-col size="6" *ngFor="let brand of homePageData.showBrands; index as pos">    
           <ion-card routerLink="/app/tabs/schedule/session/brand/{{brand.brand}}">
             <img [src]="brand.img ? brand.img : '../assets/img/no_image.jpg'">
             <ion-card-header>
-              <ion-card-title>{{brand.brand}}</ion-card-title>
+              <ion-card-subtitle color="dark" class="mont-medium">{{brand.brand}}</ion-card-subtitle>
             </ion-card-header>
           </ion-card>
         </ion-col>    
       </ion-row>
     </ion-grid>
-    <ion-grid class="ion-margin-bottom" style="margin-bottom:60px">
+    
+    <ion-grid class="ion-margin-bottom" style="margin-bottom:60px" *ngIf="homePageData.showBrands">
       <ion-row>
         <ion-col>
           <div>
-          <ion-button size="small" routerLink="/app/tabs/allproducts" >VIEW ALL</ion-button>
+          <ion-button size="full" routerLink="/app/tabs/allproducts" >VIEW ALL</ion-button>
         </div>
         </ion-col>
       </ion-row>
     </ion-grid>
     
-
-  <!-- <ion-refresher slot="fixed" (ionRefresh)="updateSchedule($event)">
-    <ion-refresher-content
-      pullingIcon="arrow-dropdown"
-      pullingText="Pull to refresh"
-      refreshingSpinner="circles"
-      refreshingText="Refreshing...">
-    </ion-refresher-content>
-  </ion-refresher> -->
-
-  <!-- <ion-list #scheduleList [hidden]="products === 0">
-    <ion-item-sliding *ngFor="let product of products" [hidden]="product.hide" >
-    
-      <ion-item >
-        
-        <ion-thumbnail slot="start">
-        <fiv-gallery #gallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
-          <ion-slides [options]="slideOpts">
-            
-            <fiv-gallery-toolbar position="top">
-              <ion-toolbar color="transparent">
-                <ion-buttons slot="start">
-                  <ion-button (click)="gallery.close()">
-                    <ion-icon slot="icon-only" name="close"></ion-icon>
-                  </ion-button>
-                </ion-buttons>
-              </ion-toolbar>
-            </fiv-gallery-toolbar>
-            
-          
-                  <ion-slide *ngFor="let image of product.img">
-                    <fiv-gallery-image
-                      [src]="image ? image : '../assets/img/no_image.jpg'"
-                    ></fiv-gallery-image>
-                  </ion-slide>
-          
-            
-          </ion-slides>
-          
-        </fiv-gallery>
-        </ion-thumbnail>
-      
-      
-        <ion-label class="ion-text-wrap">
-          <ion-note *ngIf="product.createdAt">{{product.createdAt._seconds * 1000 | date:'medium'  }}</ion-note><br/>
-          <ion-note>{{product.brand}}</ion-note>
-          <h3>{{product.name}}</h3>
-          <h3 class="quantity">{{product.pricePerQuantity}}</h3>
-          <h3 class="price mont-semibold">Rs {{product.price}}</h3>
-        </ion-label>
-        <ion-button class="addButton" *ngIf="product.available"
-          size="small"
-          slot="end"
-          (click)="addToCart(product.productId)"
-          >ADD</ion-button>
-          
-          <ion-chip color="danger" class="notAvailable" [hidden]="product.available">
-            <ion-icon name="alert-outline" ></ion-icon>
-            <ion-label>Not available</ion-label>
-          </ion-chip>
-
-      </ion-item>
-      <ion-item-options side="end" *ngIf="isAdmin">
-        <ion-item-option color="success" (click)="setAvaibility(product)" >Set {{product.available? 'Unavailable' : 'Available'}}</ion-item-option>
-        <ion-item-option color="primary" (click)="presentProductAdmin(product)" >Edit</ion-item-option>
-        <ion-item-option color="danger" (click)="deleteProduct(product)">Delete</ion-item-option>
-      </ion-item-options>
-
-    </ion-item-sliding>
-    
-  </ion-list>
-
-  <ion-list-header [hidden]="products.length !== 0">
-    No products found
-  </ion-list-header>
-
-  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
-    <ion-infinite-scroll-content
-      loadingSpinner="bubbles"
-      loadingText="Loading more data...">
-    </ion-infinite-scroll-content>
-  </ion-infinite-scroll> -->
 </ion-content>

@@ -31,13 +31,6 @@ export class ScheduleFilterPage {
 
     // passed in array of track names that should be excluded (unchecked)
     const excludeProducts = this.navParams.get('excludeProducts');
-    console.log('products ', excludeProducts);
-    // this.productData.getFiltersData().then((value) => {
-    //   console.log('value ', value);
-    //   if (value) {
-    //     this.setFilterData(value, excludeProducts);
-    //   } else {
-    console.log('value not present');
     this.modelService.presentLoading('Loading...');
     this.productData.getAllFilters().subscribe((data: any) => {
           this.modelService.dismissLoading();
@@ -46,18 +39,6 @@ export class ScheduleFilterPage {
             this.setFilterData(data.filterData, excludeProducts);
           }
         });
-      // }
-    // });
-
-    // this.confData.getTracks().subscribe((tracks: any[]) => {
-    //   tracks.forEach(track => {
-    //     this.tracks.push({
-    //       name: track.name,
-    //       icon: track.icon,
-    //       isChecked: (excludedTrackNames.indexOf(track.name) === -1)
-    //     });
-    //   });
-    // });
   }
 
 setFilterData(data: any, excludeProducts: any) {
@@ -99,8 +80,6 @@ applyFilters() {
       .filter((c) => c.isChecked)
       .map((c) => c.name);
     const excludedFilterNames = { filterCategorys, filterbrands };
-
-    console.log('excludedFilterNames ', excludedFilterNames);
     this.dismiss(excludedFilterNames);
   }
 

@@ -14,7 +14,7 @@
  * that can be changed to theme an app. Additional colors can be
  * added as well (see below). For more information, please see
  * https://www.ionicframework.com/docs/theming/colors
- *
+ * 
  * To easily create custom color palettes for your app’s UI,
  * check out our color generator:
  * https://www.ionicframework.com/docs/theming/color-generator
@@ -429,6 +429,13 @@
   --ion-color-cart-checkout-contrast-rgb: 255,255,255;
   --ion-color-cart-checkout-shade: #143754;
   --ion-color-cart-checkout-tint: #2e526f;
+
+  --ion-color-white: #ffffff;
+  --ion-color-white-rgb: 255,255,255;
+  --ion-color-white-contrast: #000000;
+  --ion-color-white-contrast-rgb: 0,0,0;
+  --ion-color-white-shade: #e0e0e0;
+  --ion-color-white-tint: #ffffff;
 }
 
 .ion-color-cart-checkout {
@@ -439,4 +446,14 @@
   --ion-color-shade: var(--ion-color-cart-checkout-shade);
   --ion-color-tint: var(--ion-color-cart-checkout-tint);
 }
+
+.ion-color-white {
+  --ion-color-base: var(--ion-color-white);
+  --ion-color-base-rgb: var(--ion-color-white-rgb);
+  --ion-color-contrast: var(--ion-color-white-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-white-contrast-rgb);
+  --ion-color-shade: var(--ion-color-white-shade);
+  --ion-color-tint: var(--ion-color-white-tint);
+}
+
 

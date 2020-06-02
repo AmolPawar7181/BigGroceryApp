@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, from } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import {backEnd} from './env';
+import { HTTP } from '@ionic-native/http/ngx';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +21,7 @@ export class UserData {
   public userId = new BehaviorSubject(null);
   public isAdmin = new BehaviorSubject(false);
 
-  constructor(public storage: Storage, public http: HttpClient) {}
+  constructor(public storage: Storage, public http: HttpClient, private corsHttp: HTTP) {}
 
   hasFavorite(sessionName: string): boolean {
     return this.favorites.indexOf(sessionName) > -1;
@@ -37,18 +38,59 @@ export class UserData {
     }
   }
 
-  sendOTP(phone: number): Promise<any> {
+  sendOTP(phone: number, hash: any) {
+    // alert('hash ' + hash);
     const otp = Math.floor(1000 + Math.random() * 9000);
-    return this.storage.set('otp', otp);
-    // const apiKey = 'YEEIqHvOpDk-aKTD4KGyqhuZImjTnPLxah98P6OMdd';
-    // const message = `Please use ${otp} to verify phone number`;
+    this.storage.set('otp', otp);
+    const authKey = '330924AOYrvKtEDD5ed4de52P1';
 
-    // const url = `https://api.textlocal.in/send/?apikey=${apiKey}&numbers=91${phone}&message=${message}&sender=TXTLCL`;
-    // this.http.get(url)
-    //     .subscribe(res => {
-    //       console.log(JSON.stringify(res));
-    //     });
-    // return;
+    const message = `<#> ${otp} is your 4 digit OTP for Grocery app. ${hash}`;
+    const encodesMsg = encodeURIComponent(message);
+
+    const url = `https://cors-anywhere.herokuapp.com/http://vtermination.com/api/sendhttp.php?authkey=${authKey}&mobiles=${phone}&message=${encodesMsg}&sender=GROAPP&route=4&response=json`;
+
+    return this.http.get(url).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err.error.error||
+          'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  async sendOtpNative(phone: number, hash: any) {
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    this.storage.set('otp', otp);
+    const authKey = '330924AOYrvKtEDD5ed4de52P1';
+
+    const message = `<#> ${otp} is your 4 digit OTP for Grocery app. ${hash}`;
+    const encodesMsg = encodeURIComponent(message);
+
+    const url = `http://vtermination.com/api/sendhttp.php?authkey=${authKey}&mobiles=${phone}&message=${encodesMsg}&sender=GROAPP&route=4&response=json`;
+    const params = {};
+    const headers = {};
+    this.corsHttp.setHeader('http://vtermination.com', 'Header', 'value');
+    const nativeCall = this.corsHttp.get(url, params, headers);
+
+    await from(nativeCall).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err.error.error ||
+          'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
   }
 
   getOTP(): Promise<number> {
@@ -77,7 +119,8 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error,
+          msg: err.error.error||
+          'Something went wrong, Please check internet connection',
         };
         return of(res);
       })
@@ -95,6 +138,22 @@ export class UserData {
           success: false,
           msg: err.error.error||
           'Something went wrong, Please check internet connection'
+        };
+        return of(res);
+      })
+    );
+  }
+
+  checkNumber(phone: any) {
+    return this.http.get(`${backEnd}/checkNumber?phone=${phone}`).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err.error.error ||
+          'Something went wrong, Please check internet connection',
         };
         return of(res);
       })
@@ -119,12 +178,6 @@ export class UserData {
           return of(res);
         })
       );
-    // return resData;
-    // this.http.post(this.url,)
-    // return this.storage.set(this.HAS_LOGGED_IN, true).then(() => {
-    //   this.setUsername(username);
-    //   return window.dispatchEvent(new CustomEvent('user:signup'));
-    // });
   }
 
   logout(): Promise<any> {
@@ -193,5 +246,33 @@ export class UserData {
     return this.storage.get(this.HAS_SEEN_TUTORIAL).then((value) => {
       return value;
     });
+  }
+
+
+  getZipCodes() {
+    return this.http.get(`${backEnd}/getZipCodes`).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg:
+            err.error.error ||
+            'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  setZipCodes(data: any) {
+    this.storage.set('zipcodes', data);
+  }
+
+  getAllowedZipCodes() {
+      return this.storage.get('zipcodes').then((value) => {
+        return value;
+      });
   }
 }

@@ -1,5 +1,14 @@
 import { Component } from '@angular/core';
 import { ConferenceData } from '../../providers/conference-data';
+import {
+  ActionSheetController,
+  ToastController,
+  Platform,
+  LoadingController,
+  Config,
+  ModalController,
+  NavParams,
+} from '@ionic/angular';
 
 @Component({
   selector: 'page-speaker-list',
@@ -8,12 +17,15 @@ import { ConferenceData } from '../../providers/conference-data';
 })
 export class SpeakerListPage {
   speakers: any[] = [];
+  userData: any;
 
-  constructor(public confData: ConferenceData) {}
+  constructor(public navParams: NavParams) {}
 
-  ionViewDidEnter() {
-    this.confData.getSpeakers().subscribe((speakers: any[]) => {
-      this.speakers = speakers;
-    });
+  ionViewWillEnter() {
+    const userData = this.navParams.get('userData');
+    console.log('userData ', userData);
+    if (userData) {
+      this.userData = userData;
+    }
   }
 }

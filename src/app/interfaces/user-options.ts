@@ -5,4 +5,5 @@ export interface UserOptions {
   phone?: number;
   address?: string;
   email?: string;
+  zip?: [];
 }

@@ -87,16 +87,9 @@ export class AccountPage implements AfterViewInit {
     });
   }
 
-  // changePassword() {
-  //   console.log('Clicked to change password');
-  // }
-
   logout() {
     this.userData.logout();
     this.router.navigateByUrl('/login');
   }
 
-  // support() {
-  //   this.router.navigateByUrl('/support');
-  // }
 }

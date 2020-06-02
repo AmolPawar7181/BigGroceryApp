@@ -18,3 +18,8 @@ ion-header {
     --ion-font-family: 'Montserrat-ExtraLight'!important;
     font-family: 'Montserrat-ExtraLight'!important;
 }
+
+ion-toolbar {
+    --background: var(--ion-color-primary); 
+    --color: #ffffff;
+}

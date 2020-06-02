@@ -11,3 +11,13 @@
 .list {
   margin-bottom: 0;
 }
+
+.loginPage{
+  background: #ffffff !important;
+  ion-list {
+    background: var(--primary-tint,#4c8dff) !important;
+    ion-item.profileName {
+      --background: var(--primary-tint,#4c8dff) !important;
+    }
+  }
+}
