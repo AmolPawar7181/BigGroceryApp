@@ -67,10 +67,11 @@ $categories: (
  }
 
 
-//  ion-card img{
-//   min-height: 160px;
-//   max-height: 160px;
-//  }
+ ion-card img{
+  min-height: 120px;
+  max-height: 120px;
+  width: 100%;
+ }
  .firstCarousel {
   margin-top: 10px;
  }
