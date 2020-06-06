@@ -13,6 +13,7 @@ import { UserData } from './providers/user-data';
 import { ProductData } from './providers/product-data';
 import { CartService } from './providers/cart-service';
 import { ModelService } from './providers/models/model-service';
+import { AdminData } from './providers/admin-data';
 
 // const { App } = Plugins;
 
@@ -60,25 +61,27 @@ export class AppComponent implements OnInit {
     private cartService: CartService,
     private modelService: ModelService,
     private location: PlatformLocation,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private adminData: AdminData
   ) {
     this.initializeApp();
     this.location.onPopState(async () => {
-      console.log('on pop');
+      // console.log('on pop');
       const modal = await this.modalCtrl.getTop();
       if (modal) {
         modal.dismiss();
-        console.log('on pop');
+        // console.log('on pop');
       }
     });
   }
 
   async ngOnInit() {
-    console.log(this.checkLoginStatus());
+    // console.log(this.checkLoginStatus());
     this.checkLoginStatus();
     this.listenForLoginEvents();
     this.setFilterData();
     this.setAllowedZipCodes();
+    this.setRezData();
 
     this.swUpdate.available.subscribe(async res => {
       const toast = await this.toastCtrl.create({
@@ -107,9 +110,9 @@ export class AppComponent implements OnInit {
       // this.statusBar.styleLightContent();
       this.statusBar.backgroundColorByHexString('#3880ff');
       this.splashScreen.hide();
-      console.log(this.userData.isLoggedIn());
+      // console.log(this.userData.isLoggedIn());
       if (this.userData.isLoggedIn()) {
-        console.log('isloggedIn from app');
+        // console.log('isloggedIn from app');
         this.userData.setIsAdmin();
         this.setProfileData();
       }
@@ -147,7 +150,7 @@ export class AppComponent implements OnInit {
 
   listenForLoginEvents() {
     window.addEventListener('user:login', () => {
-      console.log('user:login');
+     // console.log('user:login');
       this.updateLoggedInStatus(true);
       setTimeout(() => {
         this.setProfileData();
@@ -159,7 +162,7 @@ export class AppComponent implements OnInit {
     });
 
     window.addEventListener('user:logout', () => {
-      console.log('event listener on app user logout');
+      // console.log('event listener on app user logout');
       this.productData.removeCart();
       this.cartService.addCartItemCount(0);
       this.userData.setUserId(null);
@@ -182,7 +185,7 @@ export class AppComponent implements OnInit {
 
   setIsAdmin() {
     this.userData.getIsAdmin().subscribe((isAdmin: boolean) => {
-      console.log('isAdmin', isAdmin);
+      // console.log('isAdmin', isAdmin);
       this.isAdmin = isAdmin;
     });
   }
@@ -209,5 +212,12 @@ export class AppComponent implements OnInit {
         .subscribe((codes: any) => {
           this.userData.setZipCodes(codes);
       });
+  }
+
+  setRezData() {
+    this.adminData.getRazorData()
+        .subscribe((data: any) => {
+          this.adminData.setRezData(data);
+        });
   }
 }

@@ -1,0 +1,20 @@
+To generate a release build for Android, run the following cli command:
+$ ionic cordova build android --prod --release
+
+Signing an APK
+
+$ keytool -genkey -v -keystore ambeshwar.keystore -alias ambeshwar -keyalg RSA -keysize 2048 -validity 10000
+Keytool password = amol143@
+
+WARNING: Save this file and keep it somewhere safe. If it is lost the Google Play Store will not accept updates for this app!
+
+
+$ jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ambeshwar.keystore app-release-unsigned.apk ambeshwar
+
+$ zipalign -v 4 HelloWorld-release-unsigned.apk HelloWorld.apk
+
+
+
+
+
+

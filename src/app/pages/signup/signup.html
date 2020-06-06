@@ -20,8 +20,8 @@
         <ion-input [(ngModel)]="phoneNumber" name="phone" type="number"  #phone="ngModel" required>
         </ion-input>
       </ion-item>
-      <div class="ion-padding ion-margin-top">
-        <ion-note color="primary">Please note: OTP will be sent on this number</ion-note>
+      <div class="ion-padding ion-margin-top" >
+        <ion-note color="primary">Please note: OTP will be send on this number</ion-note>
       </div>
       
       <ion-text color="danger">
@@ -32,6 +32,7 @@
       </ion-list>
       <div class="ion-padding">
         <ion-button (click)="sendOTP(verifyPhoneForm)" type="submit" expand="block">Send OTP</ion-button>
+
       </div>
   </form>
 
@@ -66,9 +67,20 @@
         </ion-item>
       </ion-list>
   </form>
-
-  <form #signupForm="ngForm" novalidate [hidden]="optVerified == false">
+  
+  <form #signupForm="ngForm" [hidden]="optVerified == false" novalidate>
     <ion-list >
+      <ion-item>
+        <ion-label position="stacked" color="primary">PIN code</ion-label>
+        <ion-input (ionBlur)="checkPinCode($event)" [(ngModel)]="signup.zip" name="zip" type="number" #zip="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="zip.valid || signupSubmitted == false" class="ion-padding-start">
+          PIN code is required
+        </p>
+      </ion-text>
+      
       <ion-item>
         <ion-label position="stacked" color="primary">Username</ion-label>
         <ion-input [(ngModel)]="signup.username" name="username" type="text" #username="ngModel" required>
@@ -112,22 +124,13 @@
           Address is required
         </p>
       </ion-text>
-
-      <ion-item>
-        <ion-label position="stacked" color="primary">ZIP code</ion-label>
-        <ion-input [(ngModel)]="signup.zip" name="zip" type="number" #zip="ngModel" required>
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger">
-        <p [hidden]="zip.valid || signupSubmitted == false" class="ion-padding-start">
-          ZIP code is required
-        </p>
-      </ion-text>
-
       
     </ion-list>
-    <div class="ion-padding">
-      <ion-button (click)="onSignup(signupForm)" type="submit" expand="block">Create account</ion-button>
+    <div class="ion-padding" >
+      <ion-note class="policy-terms">By clicking Create account, you agree to our <a (click)="presentPolicyPage('terms')"> Terms </a> and that you have read our <a (click)="presentPolicyPage('privacy')"> Privacy Policy</a>
+        and <a (click)="presentPolicyPage('refund')">Refund policy</a>.
+      </ion-note>
+      <ion-button class="ion-margin-top singup" (click)="onSignup(signupForm)" type="submit" expand="block">Create account</ion-button>
     </div>
   </form>
 </ion-content>

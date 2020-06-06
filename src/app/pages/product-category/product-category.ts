@@ -154,7 +154,7 @@ export class ProductCategoryPage implements OnInit {
       if (event) {
         event.target.complete();
       }
-
+      if (data.success) {
       if (data.products.length > 0) {
         this.products.push.apply(this.products, data.products);
         if (data.last.productNo > 1) {
@@ -164,10 +164,13 @@ export class ProductCategoryPage implements OnInit {
           event.target.disabled = true;
         }
       } else {
-        if (!data.success) {
-          this.modelService.presentToast(data.msg, 3000, 'danger');
-        }
+        this.modelService.presentToast('No products found', 3000, 'danger');
       }
+    } else {
+        // will disable the infinite scroll
+        event.target.disabled = true;
+        this.modelService.presentToast(data.msg, 3000, 'danger');
+    }
     });
   }
 

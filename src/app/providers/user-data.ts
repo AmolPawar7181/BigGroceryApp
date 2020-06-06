@@ -161,7 +161,7 @@ export class UserData {
   }
 
   signup(userData: any) {
-    console.log('signup ', userData);
+    // console.log('signup ', userData);
     return this.http
       .post(`${backEnd}/addUser`, userData, this.httpHeader)
       .pipe(
@@ -195,7 +195,7 @@ export class UserData {
 
   setIsAdmin() {
     this.getUserData().then((value: any) => {
-      console.log('value ', value);
+      // console.log('value ', value);
       if (value) {
         if (value.role === 1) {
           this.isAdmin.next(true);

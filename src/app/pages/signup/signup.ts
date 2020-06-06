@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MenuController } from '@ionic/angular';
+import { MenuController, ModalController,IonRouterOutlet } from '@ionic/angular';
 
 import { UserData } from '../../providers/user-data';
 
@@ -9,6 +9,7 @@ import { UserOptions } from '../../interfaces/user-options';
 import { ModelService } from '../../providers/models/model-service';
 import { BehaviorSubject } from 'rxjs';
 import { SmsRetriever } from '@ionic-native/sms-retriever/ngx';
+import { PolicyPage } from '../policy/policy';
 
 @Component({
   selector: 'page-signup',
@@ -19,7 +20,7 @@ export class SignupPage {
   @ViewChild('ngOtpInput', { static: true }) ngOtpInputRef: any;
   phoneNumber = null;
   zipCodes: any = [];
-  signup: UserOptions = { username: '', password: '', phone : this.phoneNumber, address : '', email : '', zip: this.zipCodes };
+  signup: UserOptions = { username: '', password: '', phone : this.phoneNumber, address : '', email : '', zip: null };
   otp = null;
   optVerified = false;
   optSent = false;
@@ -40,7 +41,9 @@ export class SignupPage {
     public userData: UserData,
     private menu: MenuController,
     public modelService: ModelService,
-    private smsRetriever: SmsRetriever
+    private smsRetriever: SmsRetriever,
+    public modalCtrl: ModalController,
+    public routerOutlet: IonRouterOutlet,
   ) {
   }
 
@@ -66,8 +69,31 @@ export class SignupPage {
     }
   }
 
+  async presentPolicyPage(showPolicy) {
+
+    const modal = await this.modalCtrl.create({
+      component: PolicyPage,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { showPolicy },
+    });
+    await modal.present();
+  }
+
   onOtpChange(event: any) {
     this.otp = event;
+  }
+
+  checkPinCode(event: any) {
+    if (event.target.value.length < 6) {
+        this.modelService.presentToast('Please enter valid PIN code', 2000, 'danger');
+        return;
+    }
+    // tslint:disable-next-line: radix
+    const zip = parseInt(event.target.value);
+    if (!this.areaAvailable(zip)) {
+      this.modelService.presentToast('Oh ho, Currently we are not delivering in your area. Sorry for inconvenience', 3000, 'danger');
+    }
   }
 
   onSignup(form: NgForm) {

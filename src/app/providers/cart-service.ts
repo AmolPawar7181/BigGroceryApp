@@ -102,7 +102,7 @@ export class CartService {
   }
 
   addCartItemCount(count?: any) {
-    console.log('cart-service count ', count);
+    // console.log('cart-service count ', count);
     const increaseCount = count;
     this.cartItemCount.next(increaseCount);
   }

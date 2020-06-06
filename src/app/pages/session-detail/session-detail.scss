@@ -1,86 +1,56 @@
-.session-track-ionic {
-  color: var(--ion-color-primary);
+ion-fab-button {
+  --background: var(--ion-color-step-150, #fff);
+  --background-hover: var(--ion-color-step-200, #f2f2f2);
+  --background-focused: var(--ion-color-step-250, #d9d9d9);
+
+  --color: var(--ion-color-primary, #3880ff);
 }
 
-.session-track-angular {
-  color: var(--ion-color-angular);
-}
-
-.session-track-communication {
-  color: var(--ion-color-communication);
-}
-
-.session-track-tooling {
-  color: var(--ion-color-tooling);
-}
-
-.session-track-services {
-  color: var(--ion-color-services);
-}
-
-.session-track-design {
-  color: var(--ion-color-design);
-}
-
-.session-track-workshop {
-  color: var(--ion-color-workshop);
-}
-
-.session-track-food {
-  color: var(--ion-color-food);
-}
-
-.session-track-documentation {
-  color: var(--ion-color-documentation);
-}
-
-.session-track-navigation {
-  color: var(--ion-color-navigation);
-}
-
-/* Favorite Icon
- * --------------------------------------------------------
+/* 
+ * Material Design uses the ripple for activated
+ * so only style the iOS activated background
  */
-
-.show-favorite {
-  position: relative;
+.ios ion-fab-button {
+  --background-activated: var(--ion-color-step-250, #d9d9d9);
 }
 
-.icon-heart-empty,
-.icon-heart {
-  --border-radius: 50%;
-  --padding-start: 0;
-  --padding-end: 0;
+$categories: (
+  ionic: var(--ion-color-primary),
+  angular: #ac282b,
+  communication: #8e8d93,
+  tooling: #fe4c52,
+  services: #fd8b2d,
+  design: #fed035,
+  workshop: #69bb7b,
+  food: #3bc7c4,
+  documentation: #b16be3,
+  navigation: #6600cc
+);
 
+@each $track, $value in map-remove($categories) {
+  ion-item-sliding[track='#{$track}'] ion-label {
+    border-left: 2px solid $value;
+    padding-left: 10px;
+  }
+}
+
+.place_holder{
+  background: url('../../../assets/img/no_image.jpg');
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+}
+
+.addButton,
+.notAvailable{
   position: absolute;
-
-  top: 5px;
-  right: 5px;
-
-  width: 48px;
-  height: 48px;
-
-  font-size: 16px;
-
-  transition: transform 300ms ease;
+  right: 10%;
+  bottom: 7%;
 }
 
-.icon-heart-empty {
-  transform: scale(1);
+.quantity {
+ padding-top: 5px;
 }
 
-.icon-heart {
-  transform: scale(0);
-}
-
-.show-favorite .icon-heart {
-  transform: scale(1);
-}
-
-.show-favorite .icon-heart-empty {
-  transform: scale(0);
-}
-
-h1 {
-  margin: 0;
-}
+.price {
+  padding-top: 10px;
+ }

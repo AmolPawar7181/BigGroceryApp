@@ -59,13 +59,13 @@ export class CartPage implements OnInit {
     };
 
     const successCallback = (paymentId: any) =>  {
-      console.log('success ', paymentId);
+      // console.log('success ', paymentId);
       this.checkOut(paymentId);
     };
 
     const cancelCallback = (error: any) => {
       this.modelService.presentToast(`${error.description} (Error ${error.code})`, 3000, 'danger');
-      console.log('error cancelCallBack', error);
+      // console.log('error cancelCallBack', error);
     };
 
     this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
@@ -128,7 +128,7 @@ export class CartPage implements OnInit {
       this.cartService.getCartDetails(this.userId)
       .subscribe((cartDetails: any) => {
          this.modelService.dismissLoading();
-         console.log('cartDetails.data ', cartDetails);
+         // console.log('cartDetails.data ', cartDetails);
          if (cartDetails.data && cartDetails.data.length > 0) {
           this.cartItemCount = cartDetails.data.length;
           this.cartItems = cartDetails.data;
@@ -149,7 +149,7 @@ export class CartPage implements OnInit {
       products: this.cartItems,
       paymentId
     };
-    console.log('order ', order);
+    // console.log('order ', order);
     this.modelService.presentLoading('Confirming order, Please wait...');
     this.cartService.placeOrder(order)
     .subscribe((orderDetails: any) => {
@@ -195,22 +195,32 @@ export class CartPage implements OnInit {
     this.user.getUserData()
         .then((user: any) => {
           this.userData = user;
-          console.log(this.userData);
+          // console.log(this.userData);
         });
   }
 
   setRazorData() {
-    this.adminData.getRazorData()
-        .subscribe((razor: any) => {
-          this.razorData = razor;
-          console.log(this.razorData);
+    this.adminData.getRezData()
+        .then((razor: any) => {
+          if (razor.success) {
+            this.razorData = razor.rezData;
+            // console.log('if ', this.razorData);
+          } else {
+            this.modelService.presentLoading('Please wait...');
+            this.adminData.getRazorData()
+                .subscribe((res: any) => {
+                  this.modelService.dismissLoading();
+                  this.razorData = res.rezData;
+                  // console.log('else ', this.razorData);
+                });
+          }
         });
   }
 
   setUserId() {
     this.user.getUserId()
       .subscribe((userId) => {
-        console.log('subscribe to userid ', userId);
+        // console.log('subscribe to userid ', userId);
         if (userId) {
          this.userId = userId;
         } else {
@@ -254,7 +264,7 @@ export class CartPage implements OnInit {
     });
 
     window.addEventListener('user:cartUpdated', () => {
-      console.log('cartUpdated');
+      // console.log('cartUpdated');
       this.productData.getCart().then((cart: any) => {
         this.cartItemCount = cart.length;
         this.cartItems = cart;

@@ -150,7 +150,7 @@ export class SessionDetailPage implements OnInit {
     // Close any open sliding items when the schedule updates
     this.closeSlidingItems();
   }
-
+ 
   loadData(event: any) {
 
     // this.modelService.presentLoading('Please wait...');
@@ -169,9 +169,11 @@ export class SessionDetailPage implements OnInit {
           event.target.disabled = true;
         }
       } else {
-        if (!data.success) {
-          this.modelService.presentToast(data.msg, 3000, 'danger');
+        // this will disable infinite scroll
+        if (data.msg === 'No products found') {
+          event.target.disabled = true;
         }
+        this.modelService.presentToast(data.msg, 3000, 'danger');
       }
     });
   }

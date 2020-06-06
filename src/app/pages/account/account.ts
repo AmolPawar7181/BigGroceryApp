@@ -30,10 +30,6 @@ export class AccountPage implements AfterViewInit {
     this.getUsername();
   }
 
-  updatePicture() {
-    console.log('Clicked to update picture');
-  }
-
   // Present an alert with the current username populated
   // clicking OK will update the username and display it
   // clicking Cancel will close the alert and do nothing
@@ -66,7 +62,7 @@ export class AccountPage implements AfterViewInit {
     this.userData.getUserData().then((value: any) => {
       if (value) {
         this.userProfileData = value;
-        console.log(this.userProfileData);
+        // console.log(this.userProfileData);
         this.getUserHistory(value.userId);
       }
     });
@@ -80,7 +76,7 @@ export class AccountPage implements AfterViewInit {
 
       if (data.success) {
         this.historyData = data.data;
-        console.log(this.historyData);
+        // console.log(this.historyData);
       } else {
           this.modelService.presentToast(data.msg, 3000, 'danger');
       }

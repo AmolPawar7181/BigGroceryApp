@@ -11,6 +11,8 @@ import { ProductData } from '../../providers/product-data';
 import { UserData } from '../../providers/user-data';
 import { SupportPage } from '../support/support';
 
+import { CallNumber } from '@ionic-native/call-number/ngx';
+
 const STORAGE_KEY = 'my_images';
 
 @Component({
@@ -64,7 +66,7 @@ export class AdminPage implements OnInit {
   constructor(private adminData: AdminData, private modelService: ModelService,
               private modalCtrl: ModalController, private routerOutlet: IonRouterOutlet,
               private productData: ProductData, private userData: UserData,
-              private router: Router) { }
+              private router: Router, private callNumber: CallNumber) { }
 
   ngOnInit() {
     if (this.userData.isAdmin) {
@@ -101,6 +103,11 @@ export class AdminPage implements OnInit {
         this.homePageData.showBrands.brands.push(id);
       }
     }
+  }
+
+  makeACall(phoneNo: any) {
+    this.callNumber.callNumber(phoneNo, true)
+    .then(res => console.log('Launched dialer!', res));
   }
 
   deleteImage(module: any, content: any, pos: any) {

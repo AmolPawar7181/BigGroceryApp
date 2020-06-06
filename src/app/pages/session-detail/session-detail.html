@@ -46,7 +46,6 @@
       
       
         <ion-label class="ion-text-wrap">
-          <ion-note *ngIf="product.createdAt">{{product.createdAt._seconds * 1000 | date:'medium'  }}</ion-note><br/>
           <ion-note>{{product.brand}}</ion-note>
           <h3>{{product.name}}</h3>
           <h3 class="quantity">{{product.pricePerQuantity}}</h3>
@@ -81,7 +80,7 @@
   <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
     <ion-infinite-scroll-content
       loadingSpinner="bubbles"
-      loadingText="Loading more data...">
+      loadingText="Hang on, Loading content...">
     </ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>

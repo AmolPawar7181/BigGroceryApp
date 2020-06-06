@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.amolpawar.biggrocery" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.ambeshwar.biggrocery" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>BigGrocery</name>
     <description>Buy grocry's.</description>
     <author email="sandippatil.vfx@gmail.com" href="http://indiafasttech.com/"> India Fast Technology Team</author>

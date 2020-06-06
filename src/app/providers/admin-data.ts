@@ -103,11 +103,28 @@ export class AdminData {
   }
 
   getRazorData(): any {
-    return this.http
-      .get('assets/data/razorpay.json')
+    // return this.http
+    //   .get('assets/data/razorpay.json')
+    //   .pipe(
+    //     map((res) => {
+    //       return res;
+    //     })
+    //   );
+
+      return this.http
+      .get(`${backEnd}/getrezData`)
       .pipe(
         map((res) => {
           return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
         })
       );
 }
@@ -212,6 +229,16 @@ export class AdminData {
   setCart(cart: any): Promise<any> {
     return this.storage.set('cart', cart).then(() => {
       return window.dispatchEvent(new CustomEvent('user:cartUpdated'));
+    });
+  }
+
+  setRezData(rezdata: any) {
+    return this.storage.set('rezData', rezdata);
+  }
+
+  getRezData() {
+    return this.storage.get('rezData').then((value) => {
+      return value;
     });
   }
 
