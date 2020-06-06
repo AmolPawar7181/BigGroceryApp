@@ -18,3 +18,4 @@ $ zipalign -v 4 HelloWorld-release-unsigned.apk HelloWorld.apk
 
 
 
+
