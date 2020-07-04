@@ -35,9 +35,11 @@
     <ion-card-header>
       <ion-card-title>My orders</ion-card-title>
     </ion-card-header>
-    <ion-card-content>
+    <ion-card-content class="card-content ion-no-padding">
 
-      <ion-card class="" *ngFor="let order of historyData; index as pos" class="ion-no-padding ion-no-margin ion-margin-bottom">
+     <ion-virtual-scroll [items]="historyData">
+      <!-- <ion-card class="" *ngFor="let order of historyData; index as pos" class="ion-no-padding ion-no-margin ion-margin-bottom"> -->
+        <ion-card *virtualItem="let order">
           <ion-card-header>
             <ion-item lines="full" class="ion-no-padding ion-no-margin">
               <ion-label>
@@ -57,28 +59,19 @@
             <ion-list>
               <ion-item *ngFor="let product of order.products">
                 <ion-thumbnail slot="start">
+                  <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
                   <ion-slides>
-                    <fiv-gallery-toolbar position="top">
-                      <ion-toolbar color="transparent">
-                        <ion-buttons slot="end">
-                          <ion-button (click)="gallery.close()">
-                            <ion-icon slot="icon-only" name="close"></ion-icon>
-                          </ion-button>
-                        </ion-buttons>
-                      </ion-toolbar>
-                    </fiv-gallery-toolbar>
-                    <fiv-gallery #gallery>
-                      <ion-row>
-                        <ion-col *ngFor="let image of product.details.img">
-                          <ion-slide>
+                      <!-- <ion-row> -->
+                        <!-- <ion-col *ngFor="let image of product.details.img"> -->
+                          <ion-slide *ngFor="let image of product.details.img">
                             <fiv-gallery-image
                               [src]="image ? image : '../assets/img/no_image.jpg'"
                             ></fiv-gallery-image>
                           </ion-slide>
-                        </ion-col>
-                      </ion-row>
-                    </fiv-gallery>
+                        <!-- </ion-col> -->
+                      <!-- </ion-row> -->
                   </ion-slides>
+                </fiv-gallery>
                 </ion-thumbnail>
                 <ion-label>
                   <h3>Product: {{product.details.name}}</h3>
@@ -88,7 +81,44 @@
                 </ion-label>
               </ion-item>
               <ion-list-header>
-                <ion-label class="mont-semibold">Order total: {{order.total}}</ion-label>
+                <ion-grid>
+                  <ion-row>
+                    <!-- <ion-list class="ion-no-padding ion-no-margin">
+                      <ion-list-header lines="full">
+                        <ion-label><ion-note>PRICE DETAILS</ion-note></ion-label>
+                      </ion-list-header>
+                        <ion-item lines="none" class="price-details">
+                          <ion-label>Price ({{order.products.length}} item{{order.products.length > 1 ? "s": ""}})</ion-label>
+                           <ion-text slot="end">Rs {{order.productAmount | number}}</ion-text>
+                        </ion-item>
+                        <ion-item lines="full" class="price-details">
+                          <ion-label>Delivery Fee<br/>
+                          </ion-label>
+                           <ion-text slot="end"> 
+                             <ion-text [hidden]="order.deChrg == 0">Rs {{order.deChrg}}</ion-text> 
+                             <ion-text [hidden]="order.deChrg !== 0" class="success">FREE</ion-text> 
+                            </ion-text>
+                        </ion-item>
+                        <ion-item lines="full" class="mont-semibold total">
+                          <ion-label>Total Amount</ion-label>
+                           <ion-text slot="end">Rs {{order.total }}</ion-text>
+                        </ion-item>
+                    </ion-list> -->
+
+                    <ion-label class="mont-semibold">Price ({{order.products.length}} item{{order.products.length > 1 ? "s": ""}}): {{order.productAmount}}</ion-label><br/>
+                  </ion-row>
+                  <ion-row>
+                    <ion-label class="mont-semibold">Delivery Fee: <ion-text [hidden]="order.deChrg == 0">Rs {{order.deChrg}}</ion-text> 
+                      <ion-text [hidden]="order.deChrg !== 0" color="success">FREE</ion-text></ion-label><br/>
+                  </ion-row>
+                  <ion-row>
+                    <ion-label class="mont-semibold">Order total: {{order.total}}</ion-label><br/>
+                  </ion-row>
+                <ion-row >                
+                  <ion-text *ngIf="order.status === 'active'" class="mont-semibold"> Payment status: <ion-text [color]="order.paymentMethod === 'COD' ? 'danger': 'success'">{{order.paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid'}}</ion-text></ion-text>                
+                  <ion-text *ngIf="order.status === 'delivered'" class="mont-semibold"> Payment status: <ion-text color="success">{{order.paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid'}}</ion-text></ion-text>                
+                 </ion-row>
+                </ion-grid>
               </ion-list-header>              
             </ion-list>
           </ion-card-content>
@@ -103,8 +133,10 @@
             </ion-list>
           </ion-card-header>
         </ion-card>
-        <ion-item lines="full" >
-          <ion-label *ngIf="historyData?.length === 0">
+      </ion-virtual-scroll>
+
+        <ion-item lines="full" *ngIf="historyData?.length === 0">
+          <ion-label>
             <h3>Nothing in orders history</h3>
           </ion-label>
         </ion-item>

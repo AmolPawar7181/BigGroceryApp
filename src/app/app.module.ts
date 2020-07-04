@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -22,9 +22,11 @@ import { FormsModule } from '@angular/forms';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
 import { NgOtpInputModule } from 'ng-otp-input';
-// import { WebIntent } from '@ionic-native/web-intent/ngx';
+import { WebIntent } from '@ionic-native/web-intent/ngx';
 import { SmsRetriever } from '@ionic-native/sms-retriever/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
+import { TokenInterceptor } from '../app/providers/token.interceptor';
+
 
 @NgModule({
   imports: [
@@ -44,7 +46,9 @@ import { HTTP } from '@ionic-native/http/ngx';
   providers: [InAppBrowser, SplashScreen, StatusBar,
               Camera, File, WebView, FilePath, CallNumber,
               Geolocation, NativeGeocoder, SmsRetriever,
-              HTTP
+              HTTP, { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true},
+              WebIntent
+
             ],
   bootstrap: [AppComponent]
 })

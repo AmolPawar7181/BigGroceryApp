@@ -23,3 +23,20 @@ ion-toolbar {
     --background: var(--ion-color-primary); 
     --color: #ffffff;
 }
+
+.cart-action-sheet {
+    --background: #e5e5e5;
+    --button-background: #ffffff;
+    button {
+        margin:10px;
+        width: 95% !important;
+    }
+
+    button:nth-child(2) ion-icon {
+        color: #5f950d !important;
+    }
+
+    button:nth-child(3) ion-icon {
+        color: #eb445a !important;
+    }
+  }

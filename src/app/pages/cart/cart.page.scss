@@ -17,3 +17,87 @@
  .price {
    padding-top: 10px;
   }
+
+  ion-thumbnail {
+    width: 25%;
+   }
+
+   .MRPStrike {
+    font-size:12px;
+    span {
+      text-decoration: line-through;
+    }
+  }
+  
+  .addMoreButtons {
+    display: grid;
+  }
+
+  ion-content {
+    --background: #f0f0f0;
+    background: #f0f0f0;
+}
+.price-details {
+  font-size: 13px;
+  --min-height: 30px; 
+  --border-style: dashed;
+  ion-note {
+    font-size: 10px;
+  }
+}
+
+.total {
+  font-size: 14px;  
+  --min-height: 30px; 
+}
+
+.minAmount,
+.success {
+  color: var(--ion-color-success-shade,#28ba62);
+}
+
+.saved-for-later {
+    // ion-slides,
+    // ion-slide {
+    //   max-height: 200px;
+    // }
+    ion-item {
+      padding-inline-start: 0px !important;
+    }
+
+    ion-slide {
+      margin: 5px;
+      ion-card {
+        min-width: 140px;
+        margin: 0px;
+        img {
+          max-height: 80px;
+        }
+        ion-card-header {
+          padding:10px;
+          ion-card-title {
+            font-size: 13px;
+          }
+        }
+        ion-card-content {
+          .MRPStrike {
+            span {
+              text-decoration: line-through;
+            }
+          }
+          font-size: 13px;
+          padding: 10px 0px;
+          .notAvailable {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+
+    ion-slide:nth-child(1) {
+      min-width: 150px;
+      ion-card {
+        margin-left:10px;
+      }
+    }
+}

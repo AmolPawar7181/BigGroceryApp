@@ -6,6 +6,8 @@ export interface ProductOptions {
     price: number;
     pricePerQuantity: string;
     img: any;
+    description: any;
+    mrp: number;
 }
 
 export interface CategoryOptions {

@@ -1,22 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-import { NgOtpInputModule } from 'ng-otp-input';
 
-import { LoginPage } from './login';
-import { LoginPageRoutingModule } from './login-routing.module';
+import { IonicModule } from '@ionic/angular';
+
+import { CheckoutPageRoutingModule } from './checkout-routing.module';
+
+import { CheckoutPage } from './checkout.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    LoginPageRoutingModule,
-    NgOtpInputModule
+    CheckoutPageRoutingModule
   ],
-  declarations: [
-    LoginPage,
-  ]
+  declarations: [CheckoutPage]
 })
-export class LoginModule { }
+export class CheckoutPageModule {}

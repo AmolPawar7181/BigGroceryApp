@@ -1,5 +1,5 @@
 To generate a release build for Android, run the following cli command:
-$ ionic cordova build android --prod --release
+$ ionic cordova build android --prod --aot --minifyjs --minifycss --optimizejs --release
 
 Signing an APK
 

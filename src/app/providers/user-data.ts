@@ -129,14 +129,14 @@ export class UserData {
 
 
   login(userData: any) {
-    return this.http.post(`${backEnd}/login`, userData, this.httpHeader).pipe(
+    return this.http.post(`${backEnd}/login`, userData).pipe(
       map((res) => {
         return res;
       }),
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error||
+          msg: err ||
           'Something went wrong, Please check internet connection'
         };
         return of(res);
@@ -154,6 +154,38 @@ export class UserData {
           success: false,
           msg: err.error.error ||
           'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  checkNumberForgotPass(phone: any) {
+    return this.http.get(`${backEnd}/checkNumberForgotPass?phone=${phone}`).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err.error.error ||
+          'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  changePassword(userData: any) {
+    return this.http.post(`${backEnd}/changePassword`, userData).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err ||
+          'Something went wrong, Please check internet connection'
         };
         return of(res);
       })
@@ -180,13 +212,30 @@ export class UserData {
       );
   }
 
-  logout(): Promise<any> {
+  logout(userId: any) {
+    return this.http.get(`${backEnd}/logout?userId=${userId}`).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err.error.error ||
+          'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
+  removeStorage(): Promise<any> {
     return this.storage
       .remove(this.HAS_LOGGED_IN)
       .then(() => {
         this.setUserId(null);
         this.isAdmin.next(false);
-        return this.storage.remove('userdata');
+        this.storage.remove('userdata');
+        this.storage.remove('__u_t');
       })
       .then(() => {
         window.dispatchEvent(new CustomEvent('user:logout'));
@@ -220,13 +269,24 @@ export class UserData {
     return this.userId;
   }
 
-  setUserData(userdata: any): Promise<any> {
+  setUserData(userdata: any, token: any): Promise<any> {
     return this.storage.set(this.HAS_LOGGED_IN, true).then(() => {
       this.storage.set('userdata', userdata).then(() => {
         this.setUserId(userdata.userId);
         this.setIsAdmin();
+        this.setToken(token);
       });
       return window.dispatchEvent(new CustomEvent('user:login'));
+    });
+  }
+
+  setToken(token: any) {
+    this.storage.set('__u_t', token);
+  }
+
+  getToken() {
+    return this.storage.get('__u_t').then((value) => {
+      return value;
     });
   }
 
@@ -274,5 +334,22 @@ export class UserData {
       return this.storage.get('zipcodes').then((value) => {
         return value;
       });
+  }
+
+  getSavedForLater(userId: any) {
+    return this.http.get(`${backEnd}/getSavedForLater?userId=${userId}`).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg:
+            err.error.error ||
+            'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
   }
 }

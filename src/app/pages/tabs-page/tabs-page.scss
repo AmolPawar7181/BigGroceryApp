@@ -5,3 +5,9 @@
 .tab-button {
   max-width: 200px;
 }
+
+fiv-icon {
+  --fiv-padding-end: 0;
+  --fiv-padding-start: 0;
+  --fiv-icon-color: var(--ion-color-dark);
+}

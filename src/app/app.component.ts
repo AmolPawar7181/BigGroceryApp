@@ -13,7 +13,7 @@ import { UserData } from './providers/user-data';
 import { ProductData } from './providers/product-data';
 import { CartService } from './providers/cart-service';
 import { ModelService } from './providers/models/model-service';
-import { AdminData } from './providers/admin-data';
+// import { AdminData } from './providers/admin-data';
 
 // const { App } = Plugins;
 
@@ -46,6 +46,7 @@ export class AppComponent implements OnInit {
   dark = false;
   isAdmin: boolean;
   profileData: any;
+  backButtonPressedOnceToExit: boolean;
 
   constructor(
     private menu: MenuController,
@@ -62,7 +63,7 @@ export class AppComponent implements OnInit {
     private modelService: ModelService,
     private location: PlatformLocation,
     private modalCtrl: ModalController,
-    private adminData: AdminData
+    // private adminData: AdminData
   ) {
     this.initializeApp();
     this.location.onPopState(async () => {
@@ -79,9 +80,10 @@ export class AppComponent implements OnInit {
     // console.log(this.checkLoginStatus());
     this.checkLoginStatus();
     this.listenForLoginEvents();
-    this.setFilterData();
-    this.setAllowedZipCodes();
-    this.setRezData();
+    // this.setFilterData();
+    // this.setAllowedZipCodes();
+    // this.setPayData();
+    this.setIsAdmin();
 
     this.swUpdate.available.subscribe(async res => {
       const toast = await this.toastCtrl.create({
@@ -102,7 +104,6 @@ export class AppComponent implements OnInit {
         .then(() => this.swUpdate.activateUpdate())
         .then(() => window.location.reload());
     });
-    this.setIsAdmin();
   }
 
   initializeApp() {
@@ -121,12 +122,11 @@ export class AppComponent implements OnInit {
         if (this.routerOutlet && this.routerOutlet.canGoBack()) {
              this.routerOutlet.pop();
         } else if (this.router.url === '/app/tabs/schedule') {
-          this.modelService.presentConfirm('Close App', 'Are you sure, You want to exit?', 'No', 'Yes')
-              .then((res: any) => {
-                if (res === 'ok') {
-                  navigator['app'].exitApp();
-                }
-              });
+          if (this.backButtonPressedOnceToExit) {
+              navigator['app'].exitApp();
+            } else {
+              return this.showExitToast();
+            }
         } else if (this.router.url === '/login') {
           navigator['app'].exitApp();
         } else {
@@ -135,6 +135,14 @@ export class AppComponent implements OnInit {
       });
     });
   }
+
+  showExitToast() {
+    this.modelService.presentToast('Press back again to exit', 1500, '');
+    this.backButtonPressedOnceToExit = true;
+    setTimeout(() => {
+      this.backButtonPressedOnceToExit = false;
+    }, 2000);
+}
 
   checkLoginStatus() {
     return this.userData.isLoggedIn().then(loggedIn => {
@@ -172,9 +180,20 @@ export class AppComponent implements OnInit {
   }
 
   logout() {
-    this.userData.logout().then(() => {
-      return this.router.navigateByUrl('/app/tabs/schedule', {});
-    });
+    this.modelService.presentLoading('Please wait...');
+    this.userData.logout(this.profileData.userId)
+        .subscribe((res: any) => {
+          this.modelService.dismissLoading();
+          if (res.success) {
+            this.userData.removeStorage()
+              .then(() => {
+                this.modelService.presentToast(res.msg, 2000, 'success');
+                return this.router.navigateByUrl('/app/tabs/schedule', {});
+              });
+          } else {
+            this.modelService.presentToast(res.msg, 2000, 'danger');
+          }
+        });
   }
 
   openTutorial() {
@@ -199,7 +218,7 @@ export class AppComponent implements OnInit {
       }
     });
   }
-
+  /*
   setFilterData() {
     this.productData.getAllFilters()
         .subscribe((filters: any) => {
@@ -214,10 +233,11 @@ export class AppComponent implements OnInit {
       });
   }
 
-  setRezData() {
-    this.adminData.getRazorData()
+  setPayData() {
+    this.adminData.getPayMethodData()
         .subscribe((data: any) => {
-          this.adminData.setRezData(data);
+          this.adminData.setPayData(data);
         });
   }
+  */
 }

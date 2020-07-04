@@ -2,9 +2,12 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
+      <ion-back-button [hidden]="!isForgotPass" (click)="isForgotPass = false"></ion-back-button>
     </ion-buttons>
 
-    <ion-title>Login</ion-title>
+    <ion-title [hidden]="isForgotPass">Login</ion-title>
+    <ion-title [hidden]="!isForgotPass">Change Password</ion-title>
+
   </ion-toolbar>
 </ion-header>
 
@@ -13,7 +16,7 @@
     <img src="assets/img/appicon.svg" alt="Ionic logo">
   </div>
 
-  <form #loginForm="ngForm" novalidate>
+  <form #loginForm="ngForm" novalidate [hidden]="isForgotPass">
     <ion-list>
       <ion-item>
         <ion-label position="stacked" color="primary">Username</ion-label>
@@ -49,6 +52,112 @@
         <ion-button (click)="onSignup()" color="light" expand="block">Signup</ion-button>
       </ion-col>
     </ion-row>
+
+    <ion-row class="ion-padding-horizontal">
+      <ion-col>
+        <ion-text color="primary" class="forgot-password" (click)="isForgotPass = true">Forgot password?</ion-text>
+      </ion-col>
+    </ion-row>
   </form>
+  
+  <!-- Forgot password setup  -->
+  <form #verifyPhoneForm="ngForm" novalidate  [hidden]="optSent || isForgotPass === false">
+    <ion-list>
+      <ion-item>
+        <ion-label class="ion-text-wrap" position="stacked" color="primary">Enter Phone number associated with your account</ion-label>
+        <ion-input class="ion-margin-top" [(ngModel)]="phoneNumber" name="phone" type="number"  #phone="ngModel" required>
+        </ion-input>
+      </ion-item>
+      <div class="ion-padding ion-margin-top" >
+        <ion-note color="primary">Please note: OTP will be send on this number</ion-note>
+      </div>
+      
+      <ion-text color="danger">
+        <p [hidden]="phone.valid || sendOTPSubmitted == false" class="ion-padding-start">
+          Valid Number Required
+        </p>
+      </ion-text>
+      </ion-list>
+      <div class="ion-padding">
+        <ion-button (click)="sendOTP(verifyPhoneForm)" type="submit" expand="block">Send OTP</ion-button>
+
+      </div>
+  </form>
+
+
+  <form #verifyOTPForm="ngForm" novalidate [hidden]="optSent === false || optVerified || isForgotPass === false">
+    <ion-list lines="none" >
+      <ion-item>
+        <ion-label class="ion-text-wrap ion-text-center">Please enter Verification code sent on {{phoneNumber}} </ion-label>
+      </ion-item>
+      <ion-item class="otp" class="ion-text-center">
+        <ion-label>
+        <ng-otp-input #ngOtpInput class="otp" (onInputChange)="onOtpChange($event)" [config]="{length:4,allowNumbersOnly:true}"></ng-otp-input>
+      </ion-label>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="verifyOTPSubmitted == false" class="ion-padding-start">
+          Valid OTP Required
+        </p>
+      </ion-text>
+      </ion-list>
+      
+      <div class="ion-padding">
+        <ion-button (click)="verifyOTP(verifyOTPForm)" type="submit" expand="block">Verify OTP</ion-button>
+      </div>
+
+      <ion-list lines="none" >
+        <ion-item>
+          <ion-note class="note" slot="start">Did not received OTP?  </ion-note>
+          <ion-label class="mont-semibold" color="dark">{{ time | async}}</ion-label>
+        </ion-item>
+        <ion-item [disabled]="!reSendOTP">
+          <ion-chip slot="end" color="primary" (click)="resendOTP()">
+            <ion-label>Re send OTP</ion-label>
+          </ion-chip>
+        </ion-item>
+      </ion-list>
+  </form>
+
+  <form #forgotPass="ngForm" [hidden]="optVerified == false || isPassChanged || isForgotPass === false" novalidate>
+    <ion-list>
+      <ion-item>
+        <ion-label position="stacked" color="primary">New password</ion-label>
+        <ion-input [(ngModel)]="forgotPassword.newPass" name="newPass" type="text" #newPass="ngModel" spellcheck="false" autocapitalize="off"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-text color="danger">
+        <p [hidden]="newPass.valid || forgotPassSubmitted == false" class="ion-padding-start">
+          New password is required
+        </p>
+      </ion-text>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Confirm Password</ion-label>
+        <ion-input [(ngModel)]="forgotPassword.confirmPass" name="confirmPass" type="password" #confirmPass="ngModel" required>
+        </ion-input>
+      </ion-item>
+
+      <ion-text color="danger">
+        <p [hidden]="confirmPass.valid || forgotPassSubmitted == false" class="ion-padding-start">
+          Confirm Password is required
+        </p>
+      </ion-text>
+    </ion-list>
+
+    <ion-row>
+      <ion-col>
+        <ion-button (click)="changePassword(forgotPass)" type="submit" expand="block">Change password</ion-button>
+      </ion-col>
+    </ion-row>
+  </form>
+
+  <ion-row class="ion-padding-horizontal" [hidden]="!isForgotPass">
+    <ion-col>
+      <ion-text color="primary" class="login" (click)="isForgotPass = false">Login</ion-text>
+    </ion-col>
+  </ion-row>
 
 </ion-content>

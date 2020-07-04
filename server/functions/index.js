@@ -12,7 +12,7 @@ const fs = require("fs");
 const os = require("os");
 const https = require('https');
 //const bcrypt = require("bcrypt");
-//const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 //const crypto = require('crypto');
 // const moment = require('moment');
 //const SALT_I = 10;
@@ -45,8 +45,8 @@ const bucket = admin.storage().bucket();
 ///// Middlewares
 ///////////////////////
 
-const { auth } = require("./middleware/auth");
-const { admin_ } = require("./middleware/admin");
+// const { auth } = require("./middleware/auth");
+// const { admin_ } = require("./middleware/admin");
 
 ////////////////////////
 ///// Models
@@ -54,6 +54,113 @@ const { admin_ } = require("./middleware/admin");
 //const { User } = require("./models/user");
 const SECRET = "SUPERSECRETPASSWORD123";
 let lastObject = "";
+
+
+let auth = (req, res, next) => {
+  let token = req.header('__u_t');
+  jwt.verify(token, SECRET, (err, decode)=> {
+    if(err) {
+      res.json({ success: false, msg: "Authentication failed, Please login" });
+        return;
+    }
+    
+    db.collection("userTable")
+    .where("username", "==", decode)
+    .where("token", "==", token)
+    .get()
+    .then((snapshot) => {
+      // if username not found
+      if (snapshot.empty) {
+        res.json({ success: false, msg: "Authentication failed, Please login" });
+        return;
+      }
+      let user = {}
+      snapshot.forEach(doc => {
+          user = doc.data()
+          user.userId = doc.id
+      });
+
+      req.token = token;
+      req.user = user;
+      next();
+    })
+  })
+}
+
+let admin_check = (req, res, next) => {
+  let token = req.header('__u_t');
+  jwt.verify(token, SECRET, (err, decode)=> {
+    if(err) {
+      res.json({ success: false, msg: "You're not allowed to perform this action" });
+        return;
+    }
+    
+    db.collection("userTable")
+    .where("username", "==", decode)
+    .where("token", "==", token)
+    .where("role", "==", 1)
+    .get()
+    .then((snapshot) => {
+      // if username not found
+      if (snapshot.empty) {
+        res.json({ success: false, msg: "You're not allowed to perform this action" });
+        return;
+      }
+      let user = {}
+      snapshot.forEach(doc => {
+          user = doc.data()
+          user.userId = doc.id
+      });
+
+      req.token = token;
+      req.user = user;
+      next();
+    })
+  })
+}
+
+////////////////////////
+///// UPI DATA
+///////////////////////
+
+
+app.get("/getPayMethodData", (req, res) => {
+
+  const rezData = {
+    "currency": "INR",
+    "key": "rzp_test_qSDMaDCnqrsw9T",
+    "name": "Shree Ambeshwar Enterprises",
+    "description": "Pay for grocery items"
+  }
+
+  const upiData = { 
+      "payeeVPA": "amol-pawar@icici", 
+      "payeeName": "Amol%20Pawar",
+      "amount": 0,
+      "tranId": "",
+      "currency": "INR",
+      "tranNote": "Payment%20for%20Groceries",
+      "trRef": ""
+    }
+  
+  res.json({success: true, upiData, cod: true, deChrg: 40, minTotal: 500});
+})
+
+app.post("/addUpiData", (req, res) => {
+  const upiData = req.body;
+  db.collection("upiTable")
+    .add({upiData,
+      createdAt: admin.firestore.Timestamp.fromDate(new Date())
+    })
+    .then(() => {
+      res.json({success: true, msg: `Data added successfully`});
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
+});
 
 ////////////////////////
 ///// HOME PAGE
@@ -162,7 +269,7 @@ app.get("/getHomePage", (req, res) => {
     });
 });
 
-app.post("/addHomeData", (req, res) => {
+app.post("/addHomeData", admin_check, (req, res) => {
   const module = req.body.module;
   const content = req.body.content;
   db.collection("homeTable")
@@ -178,7 +285,7 @@ app.post("/addHomeData", (req, res) => {
     });
 });
 
-app.put("/deleteFromHome", (req, res) => {
+app.put("/deleteFromHome", admin_check, (req, res) => {
   const module = req.query.module;
   const content = req.query.content;
   let deleteFrom = ''
@@ -222,12 +329,15 @@ app.put("/deleteFromHome", (req, res) => {
 ///// ORDER
 ///////////////////////
 
-app.post("/addOrder", (req, res) => {
+app.post("/addOrder",auth, (req, res) => {
   const newOrder = {
     userId: req.body.userId,
     total: req.body.total,
     products: req.body.products,
     paymentId: req.body.paymentId,
+    paymentMethod: req.body.paymentMethod,
+    productAmount: req.body.productAmount,
+    deChrg: req.body.deChrg,
     status: "active",
     createdAt: admin.firestore.Timestamp.fromDate(new Date()),
   };
@@ -237,6 +347,7 @@ app.post("/addOrder", (req, res) => {
       const orderId = doc.id;
       res.json({
         success: true,
+        orderId,
         msg: `Order placed successfully. Check notifications under My Account for order update`,
       });
       return orderId;
@@ -280,7 +391,7 @@ app.post("/addOrder", (req, res) => {
     });
 });
 
-app.get("/getActiveOrders", (req, res) => {
+app.get("/getActiveOrders", admin_check, (req, res) => {
   db.collection("orderTable")
     .where("status", "==", "active")
     .get()
@@ -324,7 +435,7 @@ app.get("/getActiveOrders", (req, res) => {
     });
 });
 
-app.get("/getOrdersByStatus", (req, res) => {
+app.get("/getOrdersByStatus",admin_check, (req, res) => {
   const status = req.query.status;
   db.collection("orderTable")
     .where("status", "==", status)
@@ -369,7 +480,7 @@ app.get("/getOrdersByStatus", (req, res) => {
     });
 });
 
-app.put("/setOrderStatus", (req, res) => {
+app.put("/setOrderStatus",admin_check, (req, res) => {
   const status = req.query.status;
   const orderId = req.query.orderId;
 
@@ -389,7 +500,7 @@ app.put("/setOrderStatus", (req, res) => {
     });
 });
 
-app.put("/setOrderMsg", (req, res) => {
+app.put("/setOrderMsg", admin_check, (req, res) => {
   const message = req.body.msg;
   const orderId = req.body.orderId;
 
@@ -409,7 +520,7 @@ app.put("/setOrderMsg", (req, res) => {
     });
 });
 
-app.get("/getOrders", (req, res) => {
+app.get("/getOrders",admin_check, (req, res) => {
   db.collection("orderTable")
     .get()
     .then((data) => {
@@ -439,7 +550,7 @@ app.get("/getOrderById", (req, res) => {
     });
 });
 
-app.get("/getOrdersByDate", (req, res) => {
+app.get("/getOrdersByDate", admin_check,(req, res) => {
   const status = req.query.status;
   const fromDate = new Date(req.query.fromDate);
   const toDate = new Date(req.query.toDate);
@@ -512,6 +623,79 @@ app.get("/getOrdersByDate", (req, res) => {
 ///// USER
 ///////////////////////
 
+app.get("/removeSaveForLater", auth, (req, res) => {
+  let saveId = req.query.saveId;
+  let userId = req.query.userId;
+
+  db.collection(`userTable/${userId}/saved`)
+    .doc(saveId)
+    .delete()
+    .then((snapshot) => {
+      res.json({ success: true, msg: "Removed from saved list" });    
+  })
+  .catch((err) => {
+    res
+      .status(500)
+      .json({ success: false, error: "Something went wrong", err: err });
+  });
+});
+
+app.get("/addSaveForLater", auth, (req, res) => {
+  let productId = req.query.productId;
+  let userId = req.query.userId;
+  const product = {
+    product: productId,
+    createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+  }
+
+  db.collection(`userTable/${userId}/saved`)
+    .where("product", "==", productId)
+    .get()
+    .then((snapshot) => {
+      if (snapshot.empty) {
+        db.doc(`/userTable/${userId}`)
+          .collection("saved")
+          .add(product)
+          .then(() => {
+            res.json({status: true, msg: 'Saved for later'})
+          });
+          return
+      }
+
+      res.json({ success: false, msg: "Already in saved list" });
+    
+  })
+  .catch((err) => {
+    res
+      .status(500)
+      .json({ success: false, error: "Something went wrong", err: err });
+  });
+})
+
+app.get("/getSaveForLater", auth, (req, res) => {
+
+  let userId = req.query.userId;
+
+  db.doc(`/userTable/${userId}`)
+    .collection("saved")
+    .get()
+    .then((querySnapshot) => {
+      const products = [];
+      querySnapshot.forEach((doc) => {
+        products.push({ productId: doc.id, data: doc.data() });
+      });
+
+      res.json({status: true, products});
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+    });
+})
+
+
+
 app.get("/getProductImageById", (req, res) => {
   let productId = req.query.id;
   bucket
@@ -549,7 +733,7 @@ app.get("/removeProductImage", (req, res) => {
     });
 });
 
-app.post("/addProductImage", (req, res) => {
+app.post("/addProductImage",auth, (req, res) => {
   const busboy = new Busboy({ headers: req.headers });
   const uploads = {};
   const fileWrites = [];
@@ -608,7 +792,7 @@ app.get("/getProductImage", (req, res) => {
     });
 });
 
-app.post("/successBuy", (req, res) => {
+app.post("/successBuy",auth, (req, res) => {
   let history = [];
   let transactionData = {};
   const userId = req.body.user._id;
@@ -650,7 +834,7 @@ app.post("/successBuy", (req, res) => {
     });
 });
 
-app.get("/getPurchaseHistory", (req, res) => {
+app.get("/getPurchaseHistory",auth, (req, res) => {
   const userId = req.query.userId;
   db.doc(`/userTable/${userId}`)
     .collection("history")
@@ -696,7 +880,7 @@ app.get("/getPurchaseHistory", (req, res) => {
     });
 });
 
-app.post("/removefromCart", (req, res) => {
+app.post("/removefromCart",auth, (req, res) => {
   const userId = req.query.userId;
   const productID = req.query.productId;
   const pCount = req.query.count;
@@ -838,7 +1022,59 @@ app.post("/removefromCart", (req, res) => {
   }
 });
 
-app.post("/getCartDetails", (req, res) => {
+app.get("/getSavedForLater", auth, (req, res)=> {
+  const userId = req.query.userId;
+  db.doc(`/userTable/${userId}`)
+    .collection("saved")
+    .get()
+    .then((querySnapshot) => {
+       if(querySnapshot.empty) {
+        return res.json({success: false, data: [] })
+       }
+
+      const products = [];
+      querySnapshot.forEach((doc) => {
+        products.push({saveId: doc.id, productId: doc.data().product });
+      });
+      return products;
+    })
+    .then((products) => {
+       var productDetails = [];
+       for (let i = 0; i < products.length; i++) {
+        productDetails.push(
+          db
+            .doc(`/productTable/${products[i].productId}`)
+            .get()
+            .then((data) => {
+              let product = {
+                saveId: products[i].saveId,
+                productId: products[i].productId,
+                details: data.data()
+              };
+              return product;
+            })
+        );
+      }
+      return Promise.all(productDetails);
+    })
+    .then((data) => {
+      if (data.length > 0) {
+        // res.send(data);
+        res.json({
+          success: true,
+          data: data,
+        });
+      } else {
+        res.json({ success: false, data: [] });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.json({ catchError: err });
+    });
+})
+
+app.post("/getCartDetails", auth, (req, res) => {
   const userId = req.query.userId;
   let cartDetails = [];
   db.doc(`/userTable/${userId}`)
@@ -889,7 +1125,7 @@ app.post("/getCartDetails", (req, res) => {
     });
 });
 
-app.post("/addToCart", (req, res) => {
+app.post("/addToCart", auth, (req, res) => {
   const userId = req.query.userId;
   const productID = req.query.productId;
   let duplicate = false;
@@ -980,6 +1216,45 @@ app.get("/checkNumber", (req, res) => {
       });
 
 
+});
+
+app.get("/checkNumberForgotPass", (req, res) => {
+  const phone = parseInt(req.query.phone);
+  console.log('phone ', phone);
+  db.collection("userTable")
+    .where("phone", "==", phone)
+    .get()
+    .then((snapshot) => {
+      if (snapshot.empty) {
+          res.json({success: false, msg: 'Phone number not registered with us'});
+          return;
+        }  
+        let userId = [];
+        snapshot.forEach((doc) => {
+          userId.push({ userId: doc.id });
+        });
+        res.json({success: true, userId: userId, msg: 'OTP sent'});
+      })
+      .catch((err) => {
+        res.status(500).json({ error: "Something went wrong", err: err });
+      });
+});
+
+app.post("/changePassword", (req, res) => {
+  const userId = req.body.userId;
+  const password = req.body.password;
+  db.collection("userTable")
+    .doc(userId)
+    .update({
+      password
+    })
+    .then(() => {
+      return res.json({success:true, msg: "Password updated successfully!!!"});
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.json({success:false, msg: "somethig went wrong" });
+    });
 });
 
 app.get("/getZipCodes", (req,res)=> {
@@ -1082,7 +1357,8 @@ app.post("/login", (req, res) => {
             if (
               data !== "resetToken" &&
               data !== "resetTokenExp" &&
-              data !== "password"
+              data !== "password" &&
+              data !== "token"
             ) {
               userData[data] = doc.data()[data];
             }
@@ -1099,21 +1375,19 @@ app.post("/login", (req, res) => {
         });
       } else {
         //generate token
-        //const user = userData[0];
-        //console.log("user ", user);
-        //let token = jwt.sign(user_id.toHexString(), SECRET);
-        // const token = jwt.sign(user_id,SECRET);
-        //  user.token = token;
-        //  console.log("token ", token);
-        // update token for user
-        // db.collection("userTable")
-        // .doc(user_id)
-        // .update({token:user.token})
-        // .then()
+        const user_id = userData.userId;
+        const username = userData.username;
+        const token = jwt.sign(username,SECRET);
 
+        // update token for user
+         db.collection("userTable")
+         .doc(user_id)
+         .update({token})
+        
         res.status(200).json({
           success: true,
           userData: userData,
+          __u_t: token
         });
       }
     })
@@ -1123,6 +1397,19 @@ app.post("/login", (req, res) => {
         .json({ error: "Something went wrong", err: JSON.stringify(err) });
     });
 });
+
+app.get("/logout", (req, res)=> {
+  let userId = req.query.userId;
+  db.doc(`/userTable/${userId}`)
+    .update({token:""})
+    .then((data) => {
+      return res.json({success:true, msg: "Logout successfully"});
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.json({success:false, error: "somethig went wrong" });
+    });
+})
 
 app.get("/getUserById", (req, res) => {
   let userId = req.query.id;
@@ -1426,7 +1713,7 @@ app.post("/getProductsByTimestamp", (req, res) => {
     .catch((err) => console.error(err));
 });
 
-app.put("/updateProduct", (req, res) => {
+app.put("/updateProduct", admin_check, (req, res) => {
   const product = req.body;
   const productId = req.body.productId;
   const updateProduct = {
@@ -1437,6 +1724,8 @@ app.put("/updateProduct", (req, res) => {
     pricePerQuantity: req.body.pricePerQuantity,
     img: req.body.img,
     updatedAt: admin.firestore.Timestamp.fromDate(new Date()),
+    description: req.body.description,
+    mrp: req.body.mrp,
   };
 
   db.collection("productTable")
@@ -1459,7 +1748,7 @@ app.put("/updateProduct", (req, res) => {
     });
 });
 
-app.put("/setAvaibility", (req, res) => {
+app.put("/setAvaibility", admin_check, (req, res) => {
   const available = req.body.available;
   const productId = req.body.productId;
   db.collection("productTable")
@@ -1478,7 +1767,7 @@ app.put("/setAvaibility", (req, res) => {
     });
 });
 
-app.post("/deleteProductById", (req, res) => {
+app.post("/deleteProductById", admin_check, (req, res) => {
   const productId = req.body.productId;
   const images = req.body.img;
 
@@ -1506,7 +1795,7 @@ app.post("/deleteProductById", (req, res) => {
     });
 });
 
-app.post("/addBrand", (req, res) => {
+app.post("/addBrand",admin_check, (req, res) => {
   // add brand to the brand table
   // only unique brands will be allowed
   db.collection("brandTable")
@@ -1555,7 +1844,7 @@ app.post("/addBrand", (req, res) => {
     });
 });
 
-app.post("/addCategory", (req, res) => {
+app.post("/addCategory", admin_check, (req, res) => {
   // add category to the category table
   // only unique categories will be allowed
   // we can use this for filtering in app
@@ -1606,7 +1895,7 @@ app.post("/addCategory", (req, res) => {
     });
 });
 
-app.post("/addProducts", (req, res) => {
+app.post("/addProducts", admin_check, (req, res) => {
   let counter = 0;
   db.collection("productTable")
     .get()
@@ -1623,6 +1912,8 @@ app.post("/addProducts", (req, res) => {
         available: true,
         createdAt: admin.firestore.Timestamp.fromDate(new Date()),
         productNo: counter,
+        description: req.body.description,
+        mrp: req.body.mrp,
       };
       db.collection("productTable")
         .add(newProduct)
@@ -1638,5 +1929,9 @@ app.post("/addProducts", (req, res) => {
         });
     });
 });
+
+app.get('/chcekAuth', auth, (req, res) => {
+  res.status(200).json({success: true, user: req.user});
+})
 
 exports.api = functions.region("asia-northeast1").https.onRequest(app);

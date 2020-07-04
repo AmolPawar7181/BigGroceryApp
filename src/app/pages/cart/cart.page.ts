@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList  } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonRouterOutlet, ModalController } from '@ionic/angular';
+import { IonRouterOutlet, ModalController, Platform, ActionSheetController } from '@ionic/angular';
+import { FivGallery } from '@fivethree/core';
 
 import { UserData } from '../../providers/user-data';
 import { CartService } from '../../providers/cart-service';
@@ -8,6 +9,8 @@ import { ModelService } from '../../providers/models/model-service';
 import { ProductData } from '../../providers/product-data';
 import { AdminData } from '../../providers/admin-data';
 import { SpeakerListPage } from '../speaker-list/speaker-list';
+import { WebIntent } from '@ionic-native/web-intent/ngx';
+import { CheckoutPage } from '../checkout/checkout.page';
 
 declare var RazorpayCheckout: any;
 
@@ -17,6 +20,9 @@ declare var RazorpayCheckout: any;
   styleUrls: ['./cart.page.scss'],
 })
 export class CartPage implements OnInit {
+  // @ViewChild('gallery', { static: false }) gallery: FivGallery;
+  // @ViewChildren('fivGallery', { read: ElementRef }) fivGals: QueryList<ElementRef>;
+  @ViewChildren(FivGallery) fivGals: QueryList<FivGallery>;
   userId: any;
   cartItemCount: any;
   cartItems: any = [];
@@ -24,19 +30,158 @@ export class CartPage implements OnInit {
   saved = 0;
   userData: any;
   razorData: any = { currency: '', key: '', name: '', description: ''};
-  upiData: any;
+  traId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+  trRef = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+  upiData = { payeeVPA: '', payeeName: '', amount: 0, tranId: '', currency: 'INR', tranNote: 'Payment%20for%20Groceries', trRef: ''};
+  upiResponse: any;
+  payementMethod: any;
+  cartproducts = [];
+  backBtnSub: any;
+  codAvailable: boolean;
+  deChrg = 0;
+  productAmount = 0;
+  minTotal = 0; // getting from server to get free delivery
+  minAmount = 0; // to get free delivery
+  isFreeDelivery: boolean;
+  savedProducts: any = [];
+  slideOpts = {
+    slidesPerView: 2,
+  };
 
   constructor(public user: UserData, public cartService: CartService,
               public modelService: ModelService, public router: Router,
               public productData: ProductData, public adminData: AdminData,
               public modalCtrl: ModalController, public routerOutlet: IonRouterOutlet,
+              public webIntent: WebIntent, public platform: Platform,
+              private actionCtrl: ActionSheetController
     ) { }
 
   ngOnInit() {
     this.listenForEvents();
     this.setUserId();
     this.getUserData();
-    this.setRazorData();
+    this.setPayData();
+    // this.cartService.getCartItemsByProductId()
+    //     .subscribe((res: any) => {
+    //       console.log('res ', res);
+    //     });
+  }
+
+  // this will check payment method
+  // and will trigger the function accordingly
+
+  payWith() {
+    this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
+        .then(res => {
+          if (res === 'ok') {
+            if (this.payementMethod === 'upi') {
+              // console.log('this.codAvailable ', this.codAvailable);
+              // if cash on delivery available
+              if (this.codAvailable) {
+                this.selectCODorUPI('UPI - Google pay, PhonePe...', 'upi');
+              } else {
+                this.payWithUpi();
+              }
+            } else if (this.payementMethod === 'rez') {
+              // if cash on delivery available
+              if (this.codAvailable) {
+                this.selectCODorUPI('Net banking, Debit Card...', 'rez');
+              } else {
+                this.payWithRazorpay();
+              }
+            }
+          }
+        });
+  }
+
+  async selectCODorUPI(otherMethod: any, method: any) {
+    const actionSheet = await this.actionCtrl.create({
+      header: 'Select payment method',
+      cssClass: 'cart-action-sheet',
+      buttons: [{
+        text: 'COD - Cash on delivery',
+        icon: 'cash-outline',
+        handler: () => {
+          this.payWithCOD();
+        }
+      }, {
+        text: otherMethod,
+        icon: 'phone-portrait-outline',
+        handler: () => {
+          if (method === 'upi') {
+            this.payWithUpi();
+          } else if (method === 'rez') {
+            this.payWithRazorpay();
+          }
+        }
+      }]
+    });
+    await actionSheet.present();
+  }
+
+  payWithCOD() {
+    // this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
+    //     .then(res => {
+    //       if (res === 'ok') {
+            this.checkOut('COD', 'COD');
+        //   }
+        // }); 
+
+  }
+
+  payWithUpi() {
+    // this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
+    //     .then(res => {
+    //       if (res === 'ok') {
+
+          this.upiData.amount = this.total;
+          this.upiData.tranId =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+          this.upiData.trRef =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+
+          const options = {
+            action: this.webIntent.ACTION_VIEW,
+            url: `upi://pay?pa=${this.upiData.payeeVPA}&pn=${this.upiData.payeeName}&tid=${this.upiData.tranId}&am=${this.upiData.amount}&cu=${this.upiData.currency}&tn=${this.upiData.tranNote}&tr=${this.upiData.trRef}`
+          };
+
+          this.webIntent.startActivityForResult(options)
+              .then((success: any) => {
+                this.upiResponse = success;
+                if (success.extras.Status === 'SUCCESS' || success.extras.Status === 'Success') {
+                  this.modelService.presentToast(`Success ${success})`, 3000, 'success');
+                  this.addUpiSuccess(success);
+                  this.checkOut(success.extras.txnRef, this.payementMethod);
+                } else if (success.extras.Status === 'SUBMITTED') {
+                  this.addUpiSuccess(success);
+                  this.checkOut(success.extras.txnRef, this.payementMethod);
+                  this.modelService.presentToast(`Success ${success})`, 3000, 'success');
+                } else if (success.extras.Status === 'Failed' || success.extras.Status === 'FAILURE') {
+                  this.addUpiSuccess(success);
+                  this.modelService.presentToast(`(Error ${success.extras.Status})`, 3000, 'danger');
+                } else {
+                  this.addUpiSuccess(success);
+                  this.modelService.presentToast(`(Error ${success.extras.Status})`, 3000, 'danger');
+                }
+              }, (rejected: any) => {
+                this.upiResponse = rejected;
+                this.addUpiSuccess(rejected);
+                this.modelService.presentToast(`(Rejected ${rejected})`, 3000, 'danger');
+              })
+              .catch((error: any) => {
+                alert('Error in webintent');
+              });
+    //   }
+    // });
+  }
+
+  addUpiSuccess(res: any) {
+    this.productData.addUpiData(res)
+        .subscribe((resp: any) => {
+          if (resp.success) {
+            this.modelService.presentToast(resp.msg, 2000, 'success');
+           } else {
+            this.modelService.presentToast(resp.msg, 2000, 'danger');
+           }
+        });
   }
 
   payWithRazorpay() {
@@ -60,7 +205,7 @@ export class CartPage implements OnInit {
 
     const successCallback = (paymentId: any) =>  {
       // console.log('success ', paymentId);
-      this.checkOut(paymentId);
+      this.checkOut(paymentId, this.payementMethod);
     };
 
     const cancelCallback = (error: any) => {
@@ -68,29 +213,64 @@ export class CartPage implements OnInit {
       // console.log('error cancelCallBack', error);
     };
 
-    this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
-        .then(res => {
-          if (res === 'ok') {
-          RazorpayCheckout.open(options, successCallback, cancelCallback);
-          }
-        });
+    // this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
+    //     .then(res => {
+    //       if (res === 'ok') {
+    RazorpayCheckout.open(options, successCallback, cancelCallback);
+        //   }
+        // });
   }
 
-  addToCart(productId: any) {
+  addToCart(product: any, pos: any) {
+    // console.log('this.cartItems ', this.cartItems);
     if (this.userId) {
     this.modelService.presentLoading('Please wait...');
-    this.productData.addToCart(this.userId, productId).subscribe((cart: any) => {
+    this.productData.addToCart(this.userId, product.productId).subscribe((cart: any) => {
       this.modelService.dismissLoading();
       if (cart.length > 0) {
          this.cartItems.forEach((item: any, index: any) => {
              item.count = cart[index].data.count;
          });
+
          this.calculateCart(this.cartItems);
+         this.setProductsById(cart);
+         this.productData.updateCart(product);
+         // console.log('after update ', this.cartItems);
       } else {
         if (!cart.success) {
           this.modelService.presentToast(cart.msg, 3000, 'danger');
         }
       }
+    });
+   } else {
+     this.modelService.presentToast('Please login to add item to cart', 2000, 'danger');
+     setTimeout(() => {
+      this.router.navigate(['login']);
+     }, 2000);
+   }
+  }
+
+  addToCartFromSaved(product: any, pos: any) {
+    if (this.userId) {
+    this.modelService.presentLoading('Please wait...');
+    this.productData.addToCart(this.userId, product.productId).subscribe((cart: any) => {
+      this.modelService.dismissLoading();
+      // console.log('before ', this.cartItems);
+      // console.log('product ', product);
+      if (cart.length > 0) {
+        this.cartService.removeSaveForLater(this.userId, product.saveId)
+            .subscribe();
+        product.count = 1;
+        this.cartItems.push(product);
+        // console.log('after ', this.cartItems);
+        this.cartService.addCartItemCount(this.cartItemCount);
+        this.calculateCart(this.cartItems);
+        this.savedProducts.splice(pos, 1);
+        this.cartItemCount = cart.length;
+        this.productData.updateCart(product);
+       } else {
+        this.modelService.presentToast(cart.msg, 3000, 'danger');
+       }
     });
    } else {
      this.modelService.presentToast('Please login to add item to cart', 2000, 'danger');
@@ -110,10 +290,18 @@ export class CartPage implements OnInit {
        this.cartItems = cartDetails.data;
        this.calculateCart(cartDetails.data);
        this.cartService.addCartItemCount(this.cartItemCount);
+       this.setProductsById(cartDetails.data);
+       this.checkRemovedItems(productId, cartDetails.data);
+       this.productData.setCart(cartDetails);
       } else {
+       console.log('removefromcart else ', cartDetails);
+       this.checkRemovedItems(productId, 'empty');
        this.cartItems = [];
        this.total = 0;
+       this.saved = 0;
+       this.productAmount = 0;
        this.cartService.addCartItemCount(0);
+       this.productData.setCart(cartDetails);
        this.modelService.presentToast(cartDetails.msg, 1500, 'danger');
       }
    });
@@ -129,12 +317,18 @@ export class CartPage implements OnInit {
       .subscribe((cartDetails: any) => {
          this.modelService.dismissLoading();
          // console.log('cartDetails.data ', cartDetails);
+         this.getSavedForLater();
          if (cartDetails.data && cartDetails.data.length > 0) {
           this.cartItemCount = cartDetails.data.length;
           this.cartItems = cartDetails.data;
           this.cartService.addCartItemCount(this.cartItemCount);
           this.calculateCart(cartDetails.data);
+          // console.log('getcart ', this.cartItems);
+          this.productData.setCart(cartDetails);
+          // console.log('after ', this.cartItems);
          } else {
+          this.cartItems = [];
+          this.productData.setCart(cartDetails);
           this.modelService.presentToast(cartDetails.msg, 3000, 'danger');
          }
       });
@@ -142,12 +336,15 @@ export class CartPage implements OnInit {
     });
   }
 
-  checkOut(paymentId: any) {
+  checkOut(paymentId: any, paymentMethod: any) {
     const order = {
       userId: this.userId,
       total: this.total,
       products: this.cartItems,
-      paymentId
+      paymentId,
+      paymentMethod,
+      productAmount: this.productAmount,
+      deChrg: this.isFreeDelivery ? 0 : this.deChrg,
     };
     // console.log('order ', order);
     this.modelService.presentLoading('Confirming order, Please wait...');
@@ -158,15 +355,36 @@ export class CartPage implements OnInit {
        this.cartItemCount = 0;
        this.cartItems = [];
        this.total = 0;
+       this.saved = 0;
+       this.productAmount = 0;
        this.cartService.addCartItemCount(0);
        this.modelService.presentToast(orderDetails.msg, 1500, 'success');
+       this.openCheckOutPage(orderDetails.orderId, order);
+       this.productData.setCart({success: false, msg: 'Cart is empty'});
       } else {
        this.cartItems = [];
        this.total = 0;
+       this.saved = 0;
+       this.productAmount = 0;
        this.cartService.addCartItemCount(0);
        this.modelService.presentToast(orderDetails.msg, 1500, 'danger');
+       this.productData.setCart({success: false, msg: 'Cart is empty'});
       }
     });
+  }
+
+  async openCheckOutPage(orderId: any, orderDetails: any) {
+
+    const modal = await this.modalCtrl.create({
+      component: CheckoutPage,
+      swipeToClose: true,
+      componentProps: { orderId, userData: this.userData, orderDetails },
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+
+    // Close any open sliding items when the schedule updates
   }
 
   async presentAddressPage() {
@@ -186,8 +404,22 @@ export class CartPage implements OnInit {
 
   calculateCart(cartDetails: any) {
     this.total = 0;
+    this.saved = 0;
+    this.productAmount = 0;
     for (let i = 0; i < cartDetails.length; i++) {
-        this.total = this.total + (cartDetails[i].details.price * cartDetails[i].count);
+        // this.total = this.total + (cartDetails[i].details.price * cartDetails[i].count);
+        this.productAmount = this.productAmount + (cartDetails[i].details.price * cartDetails[i].count);
+        // tslint:disable-next-line: max-line-length
+        this.saved = this.saved + ((cartDetails[i].details.mrp * cartDetails[i].count) - (cartDetails[i].details.price * cartDetails[i].count));
+    }
+
+    if (this.productAmount >= this.minTotal) {
+      this.isFreeDelivery = true;
+      this.total = this.productAmount;
+    } else {
+      this.isFreeDelivery = false;
+      this.minAmount = this.minTotal - this.productAmount;
+      this.total = this.productAmount + this.deChrg;
     }
   }
 
@@ -199,22 +431,147 @@ export class CartPage implements OnInit {
         });
   }
 
-  setRazorData() {
-    this.adminData.getRezData()
-        .then((razor: any) => {
-          if (razor.success) {
-            this.razorData = razor.rezData;
-            // console.log('if ', this.razorData);
+  setPayData() {
+    this.adminData.getPayData()
+        .then((payData: any) => {
+          if (payData.success) {
+            this.setPaymentMethod(payData);
           } else {
             this.modelService.presentLoading('Please wait...');
-            this.adminData.getRazorData()
+            this.adminData.getPayMethodData()
                 .subscribe((res: any) => {
                   this.modelService.dismissLoading();
-                  this.razorData = res.rezData;
-                  // console.log('else ', this.razorData);
+                  if (res.success) {
+                    this.setPaymentMethod(res);
+                  } else {
+                    this.modelService.presentToast(res.msg, 2000, 'danger');
+                  }
                 });
           }
         });
+  }
+
+  getSavedForLater() {
+    this.user.getUserData()
+    .then((user: any) => {
+      if (user) {
+        this.user.getSavedForLater(user.userId)
+            .subscribe((savedProducts: any) => {
+              if (savedProducts.success) {
+                this.savedProducts = savedProducts.data;
+                for (let i = 0; i < this.savedProducts.length; i++) {
+                  const productAvailable = this.cartItems.find((ob: any) => ob.productId === this.savedProducts[i].productId);
+                  if (productAvailable !== undefined) {
+                      this.savedProducts[i].isAddedTocart = true;
+                    } else {
+                      this.savedProducts[i].isAddedTocart = false;
+                    }
+                }
+              }
+            });
+          }
+      });
+  }
+
+  async presentDetails(productDetails: any) {
+    const userId = this.userId;
+    const newProductDetails = {
+      productId: productDetails.productId,
+      saveId: productDetails.saveId,
+      ...productDetails.details
+    };
+    const modal = await this.modalCtrl.create({
+      component: SpeakerListPage,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { productDetails: newProductDetails, userId },
+    });
+    await modal.present();
+  }
+
+  setPaymentMethod(payData: any) {
+    // console.log('setPaymentMethod ', payData);
+    if (payData.upiData) {
+      this.upiData = payData.upiData;
+      this.payementMethod = 'upi';
+      this.codAvailable = payData.cod;
+      this.deChrg = payData.deChrg;
+      this.minTotal = payData.minTotal;
+    } else if (payData.rezData) {
+      this.razorData = payData.rezData;
+      this.payementMethod = 'rez';
+      this.codAvailable = payData.cod;
+      this.deChrg = payData.deChrg;
+      this.minTotal = payData.minTotal;
+    }
+  }
+
+ setProductsById(cartDetails: any) {
+    // console.log('setProductsById ', cartDetails);
+    if (cartDetails[0].data) {
+      // console.log('cartDetails.data ', cartDetails.data);
+      for (let i = 0; i < cartDetails.length; i++) {
+          const product = {
+            id: cartDetails[i].id,
+            count: cartDetails[i].data.count
+          };
+          if (i === 0) {
+            this.cartService.addCartItemsByProduct(product, 0);
+          } else {
+            this.cartService.addCartItemsByProduct(product);
+          }
+        }
+    } else {
+      // console.log('else this.cartproducts ', this.cartproducts);
+      for (let i = 0; i < cartDetails.length; i++) {
+        const product = {
+          id: cartDetails[i].productId,
+          count: cartDetails[i].count
+        };
+        if (i === 0) {
+          this.cartService.addCartItemsByProduct(product, 0);
+        } else {
+          this.cartService.addCartItemsByProduct(product);
+        }
+      }
+     }
+  }
+
+  checkRemovedItems(productId: any, newArr: any) {
+    // let proId: any;
+    // newArr will have empty value when cart is empty
+    if (newArr !== 'empty') {
+      // will check if product is deleted from cart
+      if (!newArr.some((obj: any) => obj.productId === productId)) {
+        // console.log(productId, 'not found');
+        this.triggerDeleteEvent(productId);
+      }
+    } else {
+      this.triggerDeleteEvent(productId);
+    }
+  }
+
+  onImageOpen() {
+    this.backBtnSub = this.platform.backButton.subscribeWithPriority(10000, () => {
+      this.closeImagePopup();
+    });
+  }
+
+  onImageClose() {
+    this.backBtnSub.unsubscribe();
+  }
+
+  closeImagePopup() {
+    const gallery = this.fivGals.toArray();
+    for (let i = 0; i < gallery.length; i++) {
+      if (gallery[i].initialImage) {
+        gallery[i].close();
+        break;
+      }
+    }
+  }
+
+  triggerDeleteEvent(productId: any) {
+    this.cartService.addDeletedProId(productId);
   }
 
   setUserId() {
@@ -266,8 +623,11 @@ export class CartPage implements OnInit {
     window.addEventListener('user:cartUpdated', () => {
       // console.log('cartUpdated');
       this.productData.getCart().then((cart: any) => {
-        this.cartItemCount = cart.length;
-        this.cartItems = cart;
+        if (cart.success) {
+          // console.log('cartUpdated ', cart);
+          this.cartItemCount = cart.length;
+          this.cartItems = cart.data;
+        }
       });
     });
   }

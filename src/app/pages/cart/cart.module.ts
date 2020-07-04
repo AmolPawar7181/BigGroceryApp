@@ -7,6 +7,7 @@ import { FivGalleryModule } from '@fivethree/core';
 import { CartPageRoutingModule } from './cart-routing.module';
 import { CartPage } from './cart.page';
 import { SpeakerListModule } from '../speaker-list/speaker-list.module';
+import { CheckoutPageModule } from '../checkout/checkout.module';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { SpeakerListModule } from '../speaker-list/speaker-list.module';
     IonicModule,
     CartPageRoutingModule,
     FivGalleryModule,
-    SpeakerListModule
+    SpeakerListModule,
+    CheckoutPageModule
   ],
   declarations: [CartPage]
 })

@@ -54,3 +54,33 @@ $categories: (
 .price {
   padding-top: 10px;
  }
+
+
+ ion-thumbnail {
+  width: 25%;
+  height:80px;
+ }
+
+ .MRPStrike {
+  font-size:12px;
+  span {
+    text-decoration: line-through;
+  }
+}
+
+.addMoreButtons {
+  display: grid;
+}
+
+.discount {
+  position: absolute;
+  z-index: 111111;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding-top: 10px;
+  font-size: 10px;
+  white-space: normal;
+  top: 15px;
+  line-height: 12px;
+}

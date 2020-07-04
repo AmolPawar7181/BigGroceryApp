@@ -23,3 +23,16 @@ img {
     }
   }
 }
+
+.card-content {
+  background: #f7f7f7;
+}
+
+.price-details {
+  font-size: 13px;
+  --min-height: 30px; 
+  --border-style: dashed;
+  ion-note {
+    font-size: 10px;
+  }
+}

@@ -1,7 +1,9 @@
-import { Component, OnInit, } from '@angular/core';
-import { ModalController, IonRouterOutlet } from '@ionic/angular';
+import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { ModalController, IonRouterOutlet, Platform } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import { FivGallery } from '@fivethree/core';
+
 import { AdminData } from '../../providers/admin-data';
 import { ModelService } from '../../providers/models/model-service';
 import { UploadImagePage } from '../upload-image/upload-image';
@@ -21,10 +23,12 @@ const STORAGE_KEY = 'my_images';
   styleUrls: ['./admin.page.scss'],
 })
 export class AdminPage implements OnInit {
+  // @ViewChild('gallery', { static: false }) gallery: FivGallery;
+  @ViewChildren(FivGallery) fivGals: QueryList<FivGallery>;
   images = [];
   imgData: any;
   product: ProductOptions = {
-    name: '', brand: '', category: '', img: this.images, price: null, pricePerQuantity: ''
+    name: '', brand: '', category: '', img: this.images, price: null, pricePerQuantity: '', description: '', mrp: null
   };
   catimages = [];
   categoryData: CategoryOptions = {category: '', img: this.catimages, showOnHome: false};
@@ -62,11 +66,13 @@ export class AdminPage implements OnInit {
   newCategories: { id: string; name: string; isChecked: boolean }[] = [];
   newBrands: { id: string; name: string; isChecked: boolean }[] = [];
   homePageData: HomePageData = { firstCarousel : '', secondCarousel : '', showCategorys : this.newCategories, showBrands: this.newBrands };
+  backBtnSub: any;
 
   constructor(private adminData: AdminData, private modelService: ModelService,
               private modalCtrl: ModalController, private routerOutlet: IonRouterOutlet,
               private productData: ProductData, private userData: UserData,
-              private router: Router, private callNumber: CallNumber) { }
+              private router: Router, private callNumber: CallNumber,
+              public platform: Platform, ) { }
 
   ngOnInit() {
     if (this.userData.isAdmin) {
@@ -230,6 +236,7 @@ export class AdminPage implements OnInit {
           this.modelService.dismissLoading();
           if (res.success) {
             this.activeOrders.splice(pos, 1);
+            this.activeOrdersCount--;
             this.modelService.presentToast(res.msg, 1000, 'success');
           } else {
             this.modelService.presentToast(res.msg, 1000, 'danger');
@@ -346,7 +353,8 @@ export class AdminPage implements OnInit {
                 this.images = [];
                 form.resetForm();
                 this.submitted = false;
-                this.product = {name: '', brand: '', category: '', img: this.images, price: null, pricePerQuantity: '' };
+                this.product = {name: '', brand: '', category: '', img: this.images, price: null, pricePerQuantity: '',
+                                description: '', mrp: null };
                 this.modelService.presentToast(product.msg, 2000, 'success');
               } else {
                 this.modelService.presentToast(product.msg, 2000, 'danger');
@@ -440,6 +448,26 @@ export class AdminPage implements OnInit {
     }
   }
 
+
+  onImageOpen() {
+    this.backBtnSub = this.platform.backButton.subscribeWithPriority(10000, () => {
+      this.closeImagePopup();
+    });
+  }
+
+  onImageClose() {
+    this.backBtnSub.unsubscribe();
+  }
+
+  closeImagePopup() {
+    const gallery = this.fivGals.toArray();
+    for (let i = 0; i < gallery.length; i++) {
+      if (gallery[i].initialImage) {
+        gallery[i].close();
+        break;
+      }
+    }
+  }
 
 
 }

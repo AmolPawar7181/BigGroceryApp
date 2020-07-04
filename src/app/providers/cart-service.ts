@@ -23,8 +23,61 @@ export class CartService {
   data: Product[] = [];
   private cart = [];
   private cartItemCount = new BehaviorSubject(0);
+  private cartItems = new BehaviorSubject([]);
+  private deletedProductId = new BehaviorSubject('');
 
   constructor(public http: HttpClient) {
+  }
+
+  addSaveForLater(userId: any, productId: any) {
+    return this.http.get(`${backEnd}/addSaveForLater?userId=${userId}&productId=${productId}`).pipe(
+        map((res: any) => {
+            return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
+  removeSaveForLater(userId: any, saveId: any) {
+    return this.http.get(`${backEnd}/removeSaveForLater?userId=${userId}&saveId=${saveId}`).pipe(
+        map((res: any) => {
+            return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
+  getSaveForLater(userId: any) {
+    return this.http.get(`${backEnd}/getSaveForLater?userId=${userId}`).pipe(
+        map((res: any) => {
+            return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
   }
 
   getCartDetails(userId: any) {
@@ -82,9 +135,9 @@ export class CartService {
       );
   }
 
-  placeOrder(oreder: any) {
+  placeOrder(order: any) {
     return this.http
-      .post(`${backEnd}/addOrder`, oreder)
+      .post(`${backEnd}/addOrder`, order)
       .pipe(
         map((res) => {
           return res;
@@ -110,4 +163,28 @@ export class CartService {
   getCartItemCount() {
     return this.cartItemCount;
   }
+
+  addCartItemsByProductId(product: any) {
+    this.cartItems.next([...this.cartItems.value, product]);
+  }
+
+  addCartItemsByProduct(product: any, index?: any) {
+    if (index === 0) {
+      this.cartItems.next([]);
+    }
+    this.cartItems.next([...this.cartItems.value, product]);
+  }
+
+  getCartItemsByProductId() {
+    return this.cartItems;
+  }
+
+  addDeletedProId(productId: any) {
+    this.deletedProductId.next(productId);
+  }
+
+  getDeletedProId() {
+    return this.deletedProductId;
+  }
+
 }

@@ -67,6 +67,18 @@
       </ion-text>
 
       <ion-item>
+        <ion-label position="stacked" color="primary">MRP</ion-label>
+        <ion-input [(ngModel)]="product.mrp" name="mrp" type="text" #mrp="ngModel" required>
+        </ion-input>
+        <ion-note>This is not selling price. Should be greater than price</ion-note>
+      </ion-item>
+      <ion-text color="danger">
+        <p [hidden]="mrp.valid || submitted == false" class="ion-padding-start">
+          MRP is required
+        </p>
+      </ion-text>
+
+      <ion-item>
         <ion-label position="stacked" color="primary">Quantity</ion-label>
         <ion-input [(ngModel)]="product.pricePerQuantity" name="pricePerQuantity" type="text" #pricePerQuantity="ngModel" required>
         </ion-input>
@@ -107,6 +119,32 @@
           </p>
         </ion-text>
       </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked" color="primary">Description</ion-label>
+        <ion-textarea rows="6" cols="20" placeholder="Enter products description here..."
+              [(ngModel)]="product.description"  name="description " #description="ngModel" required
+        ></ion-textarea>
+        <!-- <ion-input
+          [(ngModel)]="product.category"
+          name="category"
+          type="text"
+          #category="ngModel"
+          spellcheck="false"
+          autocapitalize="off"
+          required
+        >
+        </ion-input> -->
+      </ion-item>
+      <ion-text color="danger">
+        <p
+          [hidden]="description.valid || submitted == false"
+          class="ion-padding-start"
+        >
+        Description is required
+        </p>
+      </ion-text>
+
     </ion-list>
 
     <ion-row>

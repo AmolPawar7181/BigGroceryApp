@@ -20,7 +20,7 @@ import { ProductData } from '../../providers/product-data';
 import { ModelService } from '../../providers/models/model-service';
 import { CartService } from '../../providers/cart-service';
 import { ProductAdminPage } from '../product-admin/product-admin';
-
+import { SpeakerListPage } from '../speaker-list/speaker-list';
 
 
 @Component({
@@ -55,6 +55,7 @@ export class SessionDetailPage implements OnInit {
   productNo = 0;
   filterBy: any;
   field: any;
+  cartproducts = [];
 
   constructor(
     public alertCtrl: AlertController,
@@ -82,6 +83,8 @@ export class SessionDetailPage implements OnInit {
     this.field = this.route.snapshot.paramMap.get('field');
 
     this.loadInitialData();
+    this.getCartData();
+    this.listenRemoveFromCart();
   }
 
   ionViewWillEnter() {
@@ -94,14 +97,67 @@ export class SessionDetailPage implements OnInit {
     });
   }
 
-  addToCart(productId: any) {
+  getCartData() {
+    this.cartService.getCartItemsByProductId().subscribe((products) => {
+      // console.log('subscribe to cart products ', products);
+      if (products.length > 0) {
+        this.cartproducts = products;
+        this.mapCartDataToProducts();
+      }
+    });
+  }
+
+  listenRemoveFromCart() {
+    this.cartService.getDeletedProId().subscribe((productId) => {
+      // console.log('subscribe to remove ', productId);
+      if (productId) {
+        const productAvailable = this.products.find((ob: any) => ob.productId === productId);
+        if (productAvailable !== undefined) {
+          productAvailable.addedTocart = false;
+          productAvailable.count = 0;
+        }
+      }
+    });
+  }
+
+  // addToCart(productId: any) {
+  //   if (this.userId) {
+  //   this.modelService.presentLoading('Please wait...');
+  //   this.product.addToCart(this.userId, productId).subscribe((cart: any) => {
+  //     this.modelService.dismissLoading();
+  //     if (cart.length > 0) {
+  //       this.product.setCartEvent();
+  //       this.cartService.addCartItemCount(cart.length);
+  //     } else {
+  //       if (!cart.success) {
+  //         this.modelService.presentToast(cart.msg, 3000, 'danger');
+  //       }
+  //     }
+  //   });
+  //  } else {
+  //    this.modelService.presentToast('Please login to add item to cart', 2000, 'danger');
+  //    setTimeout(() => {
+  //     this.router.navigate(['login']);
+  //    }, 2000);
+  //  }
+  // }
+
+  addToCart(product: any, pos: any) {
     if (this.userId) {
     this.modelService.presentLoading('Please wait...');
-    this.product.addToCart(this.userId, productId).subscribe((cart: any) => {
+    this.product.addToCart(this.userId, product.productId).subscribe((cart: any) => {
       this.modelService.dismissLoading();
       if (cart.length > 0) {
+        this.products[pos].addedTocart = true;
+        if (this.products[pos].count) {
+          this.products[pos].count++;
+        } else {
+          this.products[pos].count = 1;
+        }
         this.product.setCartEvent();
         this.cartService.addCartItemCount(cart.length);
+        this.setProductsById(cart);
+        this.product.updateCart(product);
       } else {
         if (!cart.success) {
           this.modelService.presentToast(cart.msg, 3000, 'danger');
@@ -114,6 +170,142 @@ export class SessionDetailPage implements OnInit {
       this.router.navigate(['login']);
      }, 2000);
    }
+  }
+
+  removeFromCart(productId: any, count: any, pos: any) {
+    this.modelService.presentLoading('Please wait...');
+    this.cartService.removeFromCart(this.userId, productId, count)
+    .subscribe((cartDetails: any) => {
+      this.modelService.dismissLoading();
+      if (cartDetails.success) {
+        this.cartService.addCartItemCount(cartDetails.data.length);
+        this.setProductsById(cartDetails.data);
+        this.checkRemovedItems(productId, cartDetails.data);
+        this.product.setCart(cartDetails);
+      } else {
+      //  this.cartItems = [];
+      //  this.total = 0;
+       this.checkRemovedItems(productId, 'empty');
+       this.cartService.addCartItemCount(0);
+       this.product.setCart(cartDetails);
+       if (cartDetails.msg !== 'Cart is empty') {
+        this.modelService.presentToast(cartDetails.msg, 1500, 'danger');
+       }
+      }
+   });
+  }
+
+  setProductsById(cartDetails: any) {
+    // console.log('setProductsById ', cartDetails);
+    if (cartDetails[0].data) {
+      // console.log('cartDetails.data ', cartDetails.data);
+      for (let i = 0; i < cartDetails.length; i++) {
+         if (this.cartproducts.length > 0) {
+          if (this.cartproducts.indexOf(cartDetails[i].id) !== -1) {
+            // console.log('if ', cartDetails);
+            const product = {
+              id: cartDetails[i].id,
+              count: cartDetails[i].data.count
+            };
+            this.cartService.addCartItemsByProductId(product);
+          } else {
+            // console.log('else ', cartDetails);
+            const productAvailable = this.products.find((ob: any) => ob.productId === cartDetails[i].id);
+            if (productAvailable !== undefined) {
+              productAvailable.count = cartDetails[i].data.count;
+            }
+
+          }
+        } else {
+          const product = {
+            id: cartDetails[i].id,
+            count: cartDetails[i].data.count
+          };
+          this.cartService.addCartItemsByProductId(product);
+        }
+      }
+    } else {
+      // console.log('else this.cartproducts ', this.cartproducts);
+      for (let i = 0; i < cartDetails.length; i++) {
+       if (this.cartproducts.length > 0) {
+        const isNotPresent = this.cartproducts.find(ob => ob.id === cartDetails[i].productId);
+        // console.log('isNotPresent ', isNotPresent);
+
+        if (isNotPresent === undefined) {
+          const product = {
+            id: cartDetails[i].productId,
+            count: cartDetails[i].count
+          };
+          this.cartService.addCartItemsByProductId(product);
+       } else {
+         // console.log('else products ', this.products);
+         const productAvailable = this.products.find((ob: any) => ob.productId === cartDetails[i].productId);
+         // console.log('productAvailable ', productAvailable);
+         if (productAvailable !== undefined) {
+            productAvailable.count = cartDetails[i].count;
+            productAvailable.addedTocart = true;
+            // console.log('productAvailable ', productAvailable);
+         }
+         isNotPresent.count = cartDetails[i].count;
+         isNotPresent.addedTocart = true;
+         // console.log('else else ', isNotPresent.count, cartDetails[i].count, this.cartproducts);
+       }
+      } else {
+        const product = {
+          id: cartDetails[i].productId,
+          count: cartDetails[i].count
+        };
+        this.cartService.addCartItemsByProductId(product);
+      }
+     }
+    }
+  }
+
+  mapCartDataToProducts() {
+    // console.log('mapdata ', this.cartproducts);
+    this.cartproducts.forEach((product: any) => {
+      const productAvailable = this.products.find((ob: any) => ob.productId === product.id);
+      if (productAvailable !== undefined) {
+        productAvailable.addedTocart = true;
+        productAvailable.count = product.count;
+      }
+    });
+  }
+
+  checkRemovedItems(productId: any, newArr: any) {
+    // newArr will have empty value when cart is empty
+    if (newArr !== 'empty') {
+      newArr.forEach((element: any) => {
+        const product = {
+          id: element.productId,
+          count: element.count
+        };
+
+        const cartAvailable = this.cartproducts.find((ob: any) => ob.id === element.productId);
+        const productAvailable = this.products.find((ob: any) => ob.productId === element.productId);
+        // console.log(cartAvailable, productAvailable);
+        if (cartAvailable !== undefined) {
+          if (productAvailable !== undefined) {
+            productAvailable.count = element.count;
+          }
+          cartAvailable.count = element.count;
+        } else {
+          this.cartService.addCartItemsByProduct(product);
+        }
+      });
+      // will check if product is deleted from cart
+      if (!newArr.some((obj: any) => obj.productId === productId)) {
+        // console.log(productId, 'not found');
+        this.triggerDeleteEvent(productId);
+      }
+    } else {
+      this.cartproducts = [];
+      this.triggerDeleteEvent(productId);
+    }
+  }
+
+  triggerDeleteEvent(productId: any) {
+    this.cartService.addDeletedProId(productId);
   }
 
   deleteProduct(product: any) {
@@ -150,7 +342,7 @@ export class SessionDetailPage implements OnInit {
     // Close any open sliding items when the schedule updates
     this.closeSlidingItems();
   }
- 
+
   loadData(event: any) {
 
     // this.modelService.presentLoading('Please wait...');
@@ -195,6 +387,7 @@ export class SessionDetailPage implements OnInit {
             this.products = data.products;
             this.lastProduct = data.last;
             this.productNo++;
+            this.mapCartDataToProducts();
           } else {
             this.modelService.presentToast(data.msg, 3000, 'danger');
           }
@@ -261,18 +454,50 @@ export class SessionDetailPage implements OnInit {
     }
   }
 
+  // getUserData() {
+  //   this.user.getUserData().then((user: any) => {
+  //     if (user) {
+  //       this.userId = user.userId;
+  //       this.cartService
+  //         .getCartDetails(user.userId)
+  //         .subscribe((cartDetails: any) => {
+  //           if (cartDetails.data && cartDetails.data.length > 0) {
+  //             this.product.setCart(cartDetails.data);
+  //             this.cartService.addCartItemCount(cartDetails.data.length);
+  //             this.setProductsById(cartDetails.data);
+  //           }
+  //         });
+  //     }
+  //   });
+  // }
+
   getUserData() {
     this.user.getUserData().then((user: any) => {
       if (user) {
         this.userId = user.userId;
-        this.cartService
-          .getCartDetails(user.userId)
-          .subscribe((cartDetails: any) => {
-            if (cartDetails.data && cartDetails.data.length > 0) {
-              this.product.setCart(cartDetails.data);
-              this.cartService.addCartItemCount(cartDetails.data.length);
-            }
-          });
+        /* check in localStorage */
+        this.product.getCart()
+            .then((cart: any) => {
+              /* if exists localStorage */
+              if (cart.data && cart.data.length > 0) {
+                  this.cartService.addCartItemCount(cart.data.length);
+                  this.setProductsById(cart.data);
+                } else {
+                  /* else */
+                  if (!cart.success) {
+                    this.cartService
+                      .getCartDetails(user.userId)
+                      .subscribe((cartDetails: any) => {
+                        // console.log('cartDetails ', cartDetails);
+                        if (cartDetails.data && cartDetails.data.length > 0) {
+                          this.product.setCart(cartDetails.data);
+                          this.cartService.addCartItemCount(cartDetails.data.length);
+                          this.setProductsById(cartDetails.data);
+                        }
+                      });
+                  }
+                }
+            });
       }
     });
   }
@@ -286,6 +511,22 @@ export class SessionDetailPage implements OnInit {
           this.userId = null;
         }
     });
+  }
+
+  async presentDetails(productDetails: any) {
+    const userId = this.userId;
+    const modal = await this.modalCtrl.create({
+      component: SpeakerListPage,
+      swipeToClose: true,
+      presentingElement: this.routerOutlet.nativeEl,
+      componentProps: { productDetails, userId },
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+
+    }
   }
 
   async presentFilter() {

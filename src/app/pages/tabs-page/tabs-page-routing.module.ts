@@ -74,7 +74,11 @@ const routes: Routes = [
           {
             path: '',
             loadChildren: () => import('../product-category/product-category.module').then(m => m.ProductModule),
-            canActivate: [AuthGuard]
+            // canActivate: [AuthGuard]
+          },
+          {
+            path: 'productDetail',
+            loadChildren: () => import('../speaker-list/speaker-list.module').then(m => m.SpeakerListModule)
           }
         ]
       },
@@ -93,3 +97,4 @@ const routes: Routes = [
 })
 export class TabsPageRoutingModule { }
 
+ 

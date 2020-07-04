@@ -1,1 +1,1 @@
-export const backEnd = 'https://asia-east2-grocery-app-54e9a.cloudfunctions.net/api';
+export const backEnd = 'https://asia-northeast1-grocery-app-c43f5.cloudfunctions.net/api';

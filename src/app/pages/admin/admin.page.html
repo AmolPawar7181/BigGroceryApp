@@ -20,15 +20,17 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content padding class="card-content">
   <!-- Ongoing Orders -->
+  
   <ion-card [hidden]="showClose" class="ion-no-padding ion-no-margin" *ngIf="segment === 'pending'">
     <ion-card-header>
       <ion-card-title>Ongoing Orders: {{activeOrdersCount}}</ion-card-title>
     </ion-card-header>
-    <ion-card-content class="ion-no-padding ion-no-margin">
-
-      <ion-card class="" *ngFor="let order of activeOrders; index as pos">
+    <ion-card-content class="ion-no-padding ion-no-margin card-content">
+      <ion-virtual-scroll [items]="activeOrders">
+        <ion-card class="" *virtualItem="let order; index as pos">
+      <!-- <ion-card class="" *ngFor="let order of activeOrders; index as pos"> -->
           <ion-card-header>
             <ion-item lines="full" class="ion-no-padding ion-no-margin">
               <ion-label>
@@ -43,28 +45,19 @@
             <ion-list>
               <ion-item *ngFor="let product of order.orders.order.products">
                 <ion-thumbnail slot="start">
+                  <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
                   <ion-slides>
-                    <fiv-gallery-toolbar position="top">
-                      <ion-toolbar color="transparent">
-                        <ion-buttons slot="end">
-                          <ion-button (click)="gallery.close()">
-                            <ion-icon slot="icon-only" name="close"></ion-icon>
-                          </ion-button>
-                        </ion-buttons>
-                      </ion-toolbar>
-                    </fiv-gallery-toolbar>
-                    <fiv-gallery #gallery>
-                      <ion-row>
-                        <ion-col *ngFor="let image of product.details.img">
-                          <ion-slide>
+                      <!-- <ion-row> -->
+                        <!-- <ion-col *ngFor="let image of product.details.img"> -->
+                          <ion-slide *ngFor="let image of product.details.img">
                             <fiv-gallery-image
                               [src]="image ? image : '../assets/img/no_image.jpg'"
                             ></fiv-gallery-image>
                           </ion-slide>
-                        </ion-col>
-                      </ion-row>
-                    </fiv-gallery>
+                        <!-- </ion-col> -->
+                      <!-- </ion-row> -->
                   </ion-slides>
+                </fiv-gallery>
                 </ion-thumbnail>
                 <ion-label>
                   <h3>Product: {{product.details.name}}</h3>
@@ -79,6 +72,9 @@
                   <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>{{order.userData.address}}</h3>
                   <h3 (click)="makeACall(order.userData.phone)"><span class="mont-semibold">Mob no:  </span> {{order.userData.phone}}</h3>
                 </ion-label>
+              </ion-item>
+              <ion-item>
+                <h3 class="mont-semibold"> Payment status: <ion-text [color]="order.orders.order.paymentMethod === 'COD' ? 'danger': 'success'">{{order.orders.order.paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid'}}</ion-text></h3>                
               </ion-item>
               <!-- <ion-item> -->
                 <ion-grid class="ion-no-padding ion-no-margin ion-padding-top">
@@ -111,8 +107,9 @@
             </ion-card-header>
           </ion-card-content>
         </ion-card>
-        <ion-item lines="full" >
-          <ion-label *ngIf="activeOrders?.length === 0">
+        </ion-virtual-scroll>
+        <ion-item lines="full" *ngIf="activeOrders?.length === 0">
+          <ion-label >
             <h3>No ongoing orders</h3>
           </ion-label>
         </ion-item>
@@ -173,9 +170,11 @@
         <ion-card-header>
           <ion-card-title>Filtered Orders</ion-card-title>
         </ion-card-header>
-        <ion-card-content >
-    
-          <ion-card class="" *ngFor="let order of filteredOrders; index as pos" class="ion-no-padding ion-no-margin ion-margin-bottom">
+        <ion-card-content class="card-content ion-no-padding">
+          
+          <ion-virtual-scroll [items]="filteredOrders">
+            <ion-card *virtualItem="let order; index as pos">
+          <!-- <ion-card class="" *ngFor="let order of filteredOrders; index as pos" class="ion-no-padding ion-no-margin ion-margin-bottom"> -->
               <ion-card-header >
                 <ion-item lines="full" class="ion-no-padding ion-no-margin">
                   <ion-label>
@@ -192,28 +191,19 @@
                 <ion-list>
                   <ion-item *ngFor="let product of order.orders.order.products">
                     <ion-thumbnail slot="start">
+                      <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
                       <ion-slides>
-                        <fiv-gallery-toolbar position="top">
-                          <ion-toolbar color="transparent">
-                            <ion-buttons slot="end">
-                              <ion-button (click)="gallery.close()">
-                                <ion-icon slot="icon-only" name="close"></ion-icon>
-                              </ion-button>
-                            </ion-buttons>
-                          </ion-toolbar>
-                        </fiv-gallery-toolbar>
-                        <fiv-gallery #gallery>
-                          <ion-row>
-                            <ion-col *ngFor="let image of product.details.img">
-                              <ion-slide>
+                         <!-- <ion-row>
+                            <ion-col *ngFor="let image of product.details.img"> -->
+                              <ion-slide *ngFor="let image of product.details.img">
                                 <fiv-gallery-image
                                   [src]="image ? image : '../assets/img/no_image.jpg'"
                                 ></fiv-gallery-image>
                               </ion-slide>
-                            </ion-col>
-                          </ion-row>
-                        </fiv-gallery>
+                            <!-- </ion-col>
+                          </ion-row> -->
                       </ion-slides>
+                    </fiv-gallery>
                     </ion-thumbnail>
                     <ion-label>
                       <h3>Product: {{product.details.name}}</h3>
@@ -232,8 +222,9 @@
                 </ion-card-header>
               </ion-card-content>
             </ion-card>
-            <ion-item lines="full" >
-              <ion-label *ngIf="filteredOrders?.length === 0">
+            </ion-virtual-scroll>
+            <ion-item lines="full" *ngIf="filteredOrders?.length === 0">
+              <ion-label >
                 <h3>No orders</h3>
               </ion-label>
             </ion-item>
@@ -245,7 +236,7 @@
 
   
  <!-- Add product -->
-  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingProduct">
+  <ion-card class="ion-no-padding ion-no-margin card-content" *ngIf="addingProduct">
     <ion-card>
       <ion-text *ngIf="images.length == 0" class="ion-text-center">
         <h5 text-center>Please Select Image!</h5>
@@ -321,6 +312,18 @@
         </ion-text>
 
         <ion-item>
+          <ion-label position="stacked" color="primary">MRP</ion-label>
+          <ion-input [(ngModel)]="product.mrp" name="mrp" type="text" #mrp="ngModel" required>
+          </ion-input>
+          <ion-note>This is not selling price. Should be greater than price</ion-note>
+        </ion-item>
+        <ion-text color="danger">
+          <p [hidden]="mrp.valid || submitted == false" class="ion-padding-start">
+            MRP is required
+          </p>
+        </ion-text>
+
+        <ion-item>
           <ion-label position="stacked" color="primary">Quantity</ion-label>
           <ion-input
             [(ngModel)]="product.pricePerQuantity"
@@ -387,6 +390,22 @@
             Brand is required
           </p>
         </ion-text>
+
+
+        <ion-item>
+          <ion-label position="stacked" color="primary">Description</ion-label>
+          <ion-textarea rows="6" cols="20" placeholder="Enter products description here..."
+                [(ngModel)]="product.description"  name="description " #description="ngModel" required
+          ></ion-textarea>
+        </ion-item>
+        <ion-text color="danger">
+          <p
+            [hidden]="category.valid || submitted == false"
+            class="ion-padding-start"
+          >
+          Description is required
+          </p>
+        </ion-text>
       </ion-list>
 
       <ion-row>
@@ -405,7 +424,7 @@
 
 
   <!-- Add Category -->
-  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingCategory">
+  <ion-card class="ion-no-padding ion-no-margin card-content" *ngIf="addingCategory">
     <ion-card>
       <ion-text *ngIf="catimages.length == 0" class="ion-text-center">
         <h5 text-center>Please Select Image!</h5>
@@ -477,7 +496,7 @@
   <!-- Add Category END -->
 
   <!-- Add Brand -->
-  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingBrand">
+  <ion-card class="ion-no-padding ion-no-margin card-content" *ngIf="addingBrand">
     <ion-card>
       <ion-text *ngIf="brandimages.length == 0" class="ion-text-center">
         <h5 text-center>Please Select Image!</h5>
@@ -551,7 +570,7 @@
 
 
   <!-- Add Homepage images -->
-  <ion-card class="ion-no-padding ion-no-margin" *ngIf="addingHome">
+  <ion-card class="ion-no-padding ion-no-margin card-content" *ngIf="addingHome">
     <ion-card>
       <ion-card-header>
         <ion-card-title>First banner images</ion-card-title>
@@ -682,7 +701,7 @@
   </ion-card>
   <!-- Add HomePage END -->
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" [hidden]="segment === 'completed'">
     <ion-fab-button [hidden]="showClose">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

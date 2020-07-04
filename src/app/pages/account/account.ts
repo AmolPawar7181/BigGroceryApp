@@ -1,7 +1,9 @@
-import { AfterViewInit, Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { AfterViewInit, Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { Router, } from '@angular/router';
 
-import { AlertController } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
+import { FivGallery } from '@fivethree/core';
+
 import { ModelService } from '../../providers/models/model-service';
 import { UserData } from '../../providers/user-data';
 
@@ -12,18 +14,23 @@ import { UserData } from '../../providers/user-data';
   styleUrls: ['./account.scss'],
 })
 export class AccountPage implements AfterViewInit {
+  // @ViewChild('gallery', { static: false }) gallery: FivGallery;
+  @ViewChildren(FivGallery) fivGals: QueryList<FivGallery>;
   userProfileData: any = {address: '', phone: '', username: ''};
   historyData: any = [];
+  userId: any;
   slideOpts = {
     initialSlide: 1,
     speed: 400
   };
+  backBtnSub: any;
 
   constructor(
     public alertCtrl: AlertController,
     public router: Router,
     public userData: UserData,
-    public modelService: ModelService
+    public modelService: ModelService,
+    public platform: Platform
   ) { }
 
   ngAfterViewInit() {
@@ -41,7 +48,7 @@ export class AccountPage implements AfterViewInit {
         {
           text: 'Ok',
           handler: (data: any) => {
-            this.userData.setUserData(data.username);
+            // this.userData.setUserData(data.username);
             this.getUsername();
           }
         }
@@ -62,6 +69,7 @@ export class AccountPage implements AfterViewInit {
     this.userData.getUserData().then((value: any) => {
       if (value) {
         this.userProfileData = value;
+        this.userId = value.userId;
         // console.log(this.userProfileData);
         this.getUserHistory(value.userId);
       }
@@ -83,8 +91,28 @@ export class AccountPage implements AfterViewInit {
     });
   }
 
+  onImageOpen() {
+    this.backBtnSub = this.platform.backButton.subscribeWithPriority(10000, () => {
+      this.closeImagePopup();
+    });
+  }
+
+  onImageClose() {
+    this.backBtnSub.unsubscribe();
+  }
+
+  closeImagePopup() {
+    const gallery = this.fivGals.toArray();
+    for (let i = 0; i < gallery.length; i++) {
+      if (gallery[i].initialImage) {
+        gallery[i].close();
+        break;
+      }
+    }
+  }
+
   logout() {
-    this.userData.logout();
+    this.userData.logout(this.userId);
     this.router.navigateByUrl('/login');
   }
 

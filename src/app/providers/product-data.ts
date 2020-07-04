@@ -51,6 +51,21 @@ export class ProductData {
                 );
   }
 
+  addUpiData(upiData: any) {
+    return this.http.post(`${backEnd}/addUpiData`, upiData)
+                .pipe(map(res => {
+                 return res;
+                }),
+                catchError(err => {
+                  const res = {
+                    success: false,
+                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                  };
+                  return of(res);
+                })
+                );
+  }
+
   addCategory(categoryData: any) {
     return this.http.post(`${backEnd}/addCategory`, categoryData, this.httpHeader)
                 .pipe(map(res => {
@@ -300,4 +315,48 @@ export class ProductData {
   removeCart(): Promise<any> {
     return this.storage.remove('cart');
   }
+
+  updateCart(product: any) {
+      // console.log('updateCart ', product);
+      const newProduct = product.details ? product : this.generateProductForCart(product);
+      // newProduct = this.generateProductForCart(product);
+      this.getCart().then((cartDetails: any) => {
+          if (cartDetails && cartDetails.success) {
+              let productAvailable = cartDetails.data.find((ob: any) => ob.productId === newProduct.productId);
+              if (productAvailable === undefined) {
+                cartDetails.data.push(newProduct);
+              } else {
+                productAvailable.count = newProduct.count;
+              }
+
+              this.setCart(cartDetails);
+          } else {
+            // console.log('else');
+            cartDetails.success = true;
+            cartDetails.data = newProduct;
+            this.setCart(cartDetails);
+          }
+      });
+  }
+
+
+  generateProductForCart(product: any) {
+    return {
+      count: product.count,
+      productId: product.productId,
+      details: {
+        createdAt: product.createdAt,
+        productNo: product.productNo,
+        price: product.price,
+        name: product.name,
+        description: product.description,
+        available: product.available,
+        brand: product.brand,
+        mrp: product.mrp,
+        pricePerQuantity: product.pricePerQuantity,
+        img: product.img,
+        category: product.category
+      }
+    };
+}
 }

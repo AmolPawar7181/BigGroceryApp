@@ -129,6 +129,25 @@ export class AdminData {
       );
 }
 
+getPayMethodData(): any {
+  return this.http
+    .get(`${backEnd}/getPayMethodData`)
+    .pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg:
+            err.error.error ||
+            'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+}
+
   getOrdersByDate(fromDate: any, toDate: any, status: any) {
     return this.http
       .get(`${backEnd}/getOrdersByDate?fromDate=${fromDate}&toDate=${toDate}&status=${status}`)
@@ -238,6 +257,16 @@ export class AdminData {
 
   getRezData() {
     return this.storage.get('rezData').then((value) => {
+      return value;
+    });
+  }
+
+  setPayData(rezdata: any) {
+    return this.storage.set('payData', rezdata);
+  }
+
+  getPayData() {
+    return this.storage.get('payData').then((value) => {
       return value;
     });
   }

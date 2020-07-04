@@ -8,49 +8,53 @@
 </ion-header>
 <ion-content>
   <ion-list #scheduleList [hidden]="cartItems.length === 0" lines="full">
-    <ion-item-sliding *ngFor="let item of cartItems" [hidden]="item.hide">
+    <ion-item-sliding *ngFor="let cartItem of cartItems; index as pos" [hidden]="cartItem.hide">
       <!-- <ion-item-group > -->
       <ion-item>
         <ion-thumbnail slot="start">
+          <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
           <ion-slides>
-            <fiv-gallery #gallery>
-              <ion-slide *ngFor="let image of item.details.img">
+              <ion-slide *ngFor="let image of cartItem.details?.img">
                 <fiv-gallery-image
                   [src]="image ? image : '../assets/img/no_image.jpg'"
                 ></fiv-gallery-image>
               </ion-slide>
-            </fiv-gallery>
           </ion-slides>
+        </fiv-gallery>
         </ion-thumbnail>
         <ion-label class="ion-text-wrap">
-          <ion-note>{{item.details.brand}}</ion-note>
-          <h3>{{item.details.name}}</h3>
-          <h3 class="quantity">{{item.details.pricePerQuantity}}</h3>
+          <ion-note>{{cartItem.details.brand}}</ion-note>
+          <h3>{{cartItem.details.name}}</h3>
+          <h3 class="quantity">{{cartItem.details.pricePerQuantity}}</h3>
+
 
           <ion-grid slot="end" class="ion-no-padding">
             <ion-row class="ion-no-padding">
-              <ion-col size="5"> <h3 class="price mont-semibold">Rs {{item.details.price}}</h3> </ion-col>
-              <ion-col>
+              <ion-col size="5" class="price"> 
+                <ion-note class="MRPStrike mont-medium">MRP: <span>Rs {{cartItem.details.mrp}}</span></ion-note>
+                <h3 class="mont-semibold">Rs {{cartItem.details.price}}</h3> 
+              </ion-col>
+              <ion-col class="ion-align-items-end addMoreButtons">
                 <ion-row class="ion-no-padding" class="ion-align-items-center">
                   <ion-col>
                     <ion-button
                       size="small"
                       color="danger"
-                      (click)="removeFromCart(item.productId,item.count)"
+                      (click)="removeFromCart(cartItem.productId,cartItem.count)"
                     >
                       <ion-icon name="remove-circle-outline"></ion-icon
                     ></ion-button>
                   </ion-col>
                   <ion-col>
                     <ion-text color="danger">
-                      <div class="ion-text-center">{{item.count}}</div>
+                      <div class="ion-text-center">{{cartItem.count}}</div>
                     </ion-text>
                   </ion-col>
                   <ion-col>
                     <ion-button
                       size="small"
                       color="danger"
-                      (click)="addToCart(item.productId)"
+                      (click)="addToCart(cartItem, pos)"
                     >
                       <ion-icon name="add-circle-outline"></ion-icon
                     ></ion-button>
@@ -65,7 +69,7 @@
       <ion-item-options side="end">
         <ion-item-option
           color="danger"
-          (click)="removeFromCart(item.productId,1)"
+          (click)="removeFromCart(cartItem.productId,1)"
           >Remove item</ion-item-option
         >
       </ion-item-options>
@@ -75,7 +79,80 @@
   <div [hidden]="cartItems.length > 0">
     <img src="../assets/img/empty-cart.png" />
   </div>
-  <ion-text *ngIf="upiData">upiData {{upiData}}</ion-text>
+
+  <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom saved-for-later" [hidden]="savedProducts.length === 0">
+    <ion-row class="ion-no-padding">
+      <ion-col class="ion-no-padding">
+        <ion-list class="ion-no-padding ion-no-margin">
+          <ion-list-header lines="full" >
+            <ion-label><ion-note>Saved For later</ion-note></ion-label>
+          </ion-list-header>
+            <ion-item lines="none" class="ion-no-padding ion-margin-top">
+                <ion-slides [options]="slideOpts">
+                  <ion-slide *ngFor="let product of savedProducts; index as pos" [hidden]="product.isAddedTocart" class="card-margin">
+                      <ion-card class="ion-margin-start ion-margin-end">
+                        <img (click)="presentDetails(product)" [src]="product.details.img[0] ? product.details.img[0] : '../assets/img/no_image.jpg'" />
+                        
+                        <ion-card-header class="ion-no-padding ion-no-margin">
+                          <ion-card-title>{{product.details.name}}</ion-card-title>
+                        </ion-card-header>
+                        <ion-card-content>
+                        <ion-text>{{product.details.pricePerQuantity}}</ion-text><br/>
+                        <ion-text class="MRPStrike">MRP: <span>{{product.details.mrp}}</span></ion-text><br/>
+                        <ion-text class="quantity">MRP: {{product.details.price}}</ion-text><br/>
+                        <ion-button class="addButton" *ngIf="product.details.available" 
+                                size="small"
+                                slot="end"
+                                color="danger"
+                                (click)="addToCartFromSaved(product, pos)"
+                                >ADD</ion-button>
+                        <ion-chip color="danger" class="notAvailable" [hidden]="product.details.available">
+                          <ion-icon name="alert-outline" ></ion-icon>
+                          <ion-label>Not available</ion-label>
+                        </ion-chip>
+
+                      </ion-card-content>
+                      </ion-card>
+                    </ion-slide>
+                  </ion-slides>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+  <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom" [hidden]="cartItems.length === 0">
+    <ion-row class="ion-no-padding">
+      <ion-col class="ion-no-padding">
+        <ion-list class="ion-no-padding ion-no-margin">
+          <ion-list-header lines="full">
+            <ion-label><ion-note>PRICE DETAILS</ion-note></ion-label>
+          </ion-list-header>
+            <ion-item lines="none" class="price-details">
+              <ion-label>Price ({{cartItems.length}} item{{cartItems.length > 1 ? "s": ""}})</ion-label>
+               <ion-text slot="end">Rs {{productAmount | number}}</ion-text>
+            </ion-item>
+            <ion-item lines="full" class="price-details">
+              <ion-label>Delivery Fee<br/>
+                <ion-note [hidden]="isFreeDelivery" class="ion-text-wrap">Shop for <span class="mont-medium success">Rs {{ minAmount | number}}</span> more to get this Delivery for <span class="mont-medium success">FREE!</span></ion-note>
+              </ion-label>
+               <ion-text slot="end"> 
+                 <ion-text [hidden]="isFreeDelivery">Rs {{deChrg}}</ion-text> 
+                 <ion-text [hidden]="!isFreeDelivery && deChrg > 0" class="success">FREE</ion-text> 
+                </ion-text>
+            </ion-item>
+            <ion-item lines="full" class="mont-semibold total">
+              <ion-label>Total Amount</ion-label>
+               <ion-text slot="end">Rs {{total | number}}</ion-text>
+            </ion-item>
+            <ion-item lines="none" class="price-details">
+              <ion-label class="success">You are saving Rs {{saved}} on this order </ion-label>
+            </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  
 </ion-content>
 
 <ion-footer>
@@ -86,8 +163,11 @@
           <ion-title class="ion-no-padding ion-no-margin">
             <ion-grid>
               <ion-row>
-                Total: Rs {{total}}
+                Rs {{total | number}}
               </ion-row>
+              <!-- <ion-row class="saved" >
+                <ion-text color="success">Saved: Rs {{saved | number}}</ion-text>
+              </ion-row> -->
             </ion-grid>
           </ion-title>
         </ion-col>
@@ -95,7 +175,7 @@
           <ion-button
             [disabled]="cartItems.length === 0 ? true : false"
             color="danger"
-            (click)="payWithRazorpay()"
+            (click)="payWith()"
             >Checkout</ion-button
           >
         </ion-col>

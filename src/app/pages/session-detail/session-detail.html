@@ -18,30 +18,13 @@
   </ion-refresher>
 
   <ion-list #scheduleList [hidden]="products === 0">
-    <ion-item-sliding *ngFor="let product of products" [hidden]="product.hide" >
+    <ion-item-sliding *ngFor="let product of products; index as pos" [hidden]="product.hide" >
     <!-- <ion-item-group > -->
       <ion-item >
         
-        <ion-thumbnail slot="start">
-        <fiv-gallery #gallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
-          <ion-slides [options]="slideOpts">
-            
-            <fiv-gallery-toolbar position="top">
-              <ion-toolbar color="transparent">
-                <ion-buttons slot="start">
-                  <ion-button (click)="gallery.close()">
-                    <ion-icon slot="icon-only" name="close"></ion-icon>
-                  </ion-button>
-                </ion-buttons>
-              </ion-toolbar>
-            </fiv-gallery-toolbar>
-                  <ion-slide *ngFor="let image of product.img">
-                    <fiv-gallery-image
-                      [src]="image ? image : '../assets/img/no_image.jpg'"
-                    ></fiv-gallery-image>
-                  </ion-slide>            
-          </ion-slides>
-        </fiv-gallery>
+        <ion-thumbnail slot="start" (click)="presentDetails(product)">
+          <ion-badge class="discount mont-medium" color="danger">Rs  {{product.mrp - product.price | number}} OFF</ion-badge>
+              <img [src]="product.img[0] ? product.img[0] : '../assets/img/no_image.jpg'" />
         </ion-thumbnail>
       
       
@@ -49,14 +32,53 @@
           <ion-note>{{product.brand}}</ion-note>
           <h3>{{product.name}}</h3>
           <h3 class="quantity">{{product.pricePerQuantity}}</h3>
-          <h3 class="price mont-semibold">Rs {{product.price}}</h3>
-        </ion-label>
-        <ion-button class="addButton" *ngIf="product.available"
+          <!-- <h3 class="MRPStrike mont-regular"><ion-note>MRP: <span>Rs {{product.mrp}}</span></ion-note></h3> -->
+          <!-- <h3 class="price mont-semibold">Rs {{product.price}}</h3> -->
+        
+        <ion-button class="addButton" *ngIf="product.available" [hidden]="product.addedTocart"
           size="small"
           slot="end"
-          (click)="addToCart(product.productId)"
+          color="danger"
+          (click)="addToCart(product, pos)"
           >ADD</ion-button>
-          
+
+          <ion-grid slot="end" class="ion-no-padding">
+            <ion-row class="ion-no-padding">
+              <ion-col size="5" class="price"> 
+                <ion-note class="MRPStrike mont-medium">MRP: <span>Rs {{product.mrp}}</span></ion-note>
+                <!-- <h5 class="discount">Rs  {{product.mrp - product.price}} OFF</h5> -->
+                <h3 class="mont-semibold">Rs {{product.price}}</h3> 
+              </ion-col>
+              <ion-col *ngIf="product.addedTocart" class="ion-align-items-end addMoreButtons">
+                <ion-row class="ion-no-padding" class="ion-align-items-center">
+                  <ion-col>
+                    <ion-button
+                      size="small"
+                      color="danger"
+                      (click)="removeFromCart(product.productId,product.count, pos)"
+                    >
+                      <ion-icon name="remove-circle-outline"></ion-icon
+                    ></ion-button>
+                  </ion-col> 
+                  <ion-col>
+                    <ion-text color="danger">
+                      <div class="ion-text-center">{{product.count}}</div>
+                    </ion-text>
+                  </ion-col>
+                  <ion-col>
+                    <ion-button
+                      size="small"
+                      color="danger"
+                      (click)="addToCart(product, pos)"
+                    >
+                      <ion-icon name="add-circle-outline"></ion-icon
+                    ></ion-button>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-label>
           <ion-chip color="danger" class="notAvailable" [hidden]="product.available">
             <ion-icon name="alert-outline" ></ion-icon>
             <ion-label>Not available</ion-label>

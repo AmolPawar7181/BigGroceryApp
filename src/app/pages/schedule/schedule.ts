@@ -10,6 +10,7 @@ import { ProductData } from '../../providers/product-data';
 import { ModelService } from '../../providers/models/model-service';
 import { CartService } from '../../providers/cart-service';
 import { HomePageData } from '../../interfaces/product-options';
+import { AdminData } from '../../providers/admin-data';
 
 
 @Component({
@@ -40,17 +41,23 @@ export class SchedulePage implements OnInit {
     public product: ProductData,
     public modelService: ModelService,
     public cartService: CartService,
-    public platform: Platform
+    public platform: Platform,
+    public adminData: AdminData
   ) {}
 
   ngOnInit() {
+    // console.log('ngOnInit');
     this.getUserData();
     this.setUserId('ngOnInit');
     this.setIsAdmin();
     this.getHomePage();
+    this.setFilterData();
+    this.setAllowedZipCodes();
+    this.setPayData();
   }
 
   ionViewWillEnter() {
+    // console.log('ionViewWillEnter');
     this.setIsAdmin();
   }
 
@@ -81,14 +88,17 @@ export class SchedulePage implements OnInit {
   }
 
   getUserData() {
+    // console.log('getUserData called');
     this.user.getUserData().then((user: any) => {
+      // console.log('getUserData user, ', user);
       if (user) {
         this.userId = user.userId;
         this.cartService
           .getCartDetails(user.userId)
           .subscribe((cartDetails: any) => {
+            // console.log('getUserData subsc, ', cartDetails);
             if (cartDetails.data && cartDetails.data.length > 0) {
-              this.product.setCart(cartDetails.data);
+              this.product.setCart(cartDetails);
               this.cartService.addCartItemCount(cartDetails.data.length);
             }
           });
@@ -105,6 +115,27 @@ export class SchedulePage implements OnInit {
           this.userId = null;
         }
     });
+  }
+
+  setFilterData() {
+    this.product.getAllFilters()
+        .subscribe((filters: any) => {
+          this.product.setFiltersData(filters);
+      });
+  }
+
+  setAllowedZipCodes() {
+    this.user.getZipCodes()
+        .subscribe((codes: any) => {
+          this.user.setZipCodes(codes);
+      });
+  }
+
+  setPayData() {
+    this.adminData.getPayMethodData()
+        .subscribe((data: any) => {
+          this.adminData.setPayData(data);
+        });
   }
 
 }

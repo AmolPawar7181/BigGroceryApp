@@ -22,6 +22,8 @@ export class ProductAdminPage {
     img: [],
     price: null,
     pricePerQuantity: '',
+    description: '',
+    mrp: null
   };
   submitted = false;
   categories: any;
@@ -42,6 +44,8 @@ export class ProductAdminPage {
       img: [],
       price: null,
       pricePerQuantity: '',
+      description: '',
+      mrp: null
     };
     // passed in array of track names that should be excluded (unchecked)
     const productDetails = this.navParams.get('productDetails');
