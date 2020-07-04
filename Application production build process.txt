@@ -11,7 +11,7 @@ WARNING: Save this file and keep it somewhere safe. If it is lost the Google Pla
 
 $ jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore ambeshwar.keystore app-release-unsigned.apk ambeshwar
 
-$ zipalign -v 4 HelloWorld-release-unsigned.apk HelloWorld.apk
+$ zipalign -v 4 app-release-unsigned.apk BigGrocery.apk
 
 
 
