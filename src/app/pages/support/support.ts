@@ -14,9 +14,10 @@ import { AdminData } from '../../providers/admin-data';
 export class SupportPage {
   submitted = false;
 
-  supportMessage: any = { datenTime: '',  msg: ''};
+  supportMessage: any = { datenTime: '',  msg: 'Your order will be delivered on above given time'};
   orderId: any;
   orderMessage: any = [];
+  msgType = true;
 
   constructor(
     public modalCtrl: ModalController,
@@ -27,6 +28,14 @@ export class SupportPage {
 
   ionViewWillEnter() {
     this.orderId = this.navParams.get('orderId');
+  }
+
+  toggleChecked(event: any) {
+    if (event) {
+      this.supportMessage.msg = 'Your order will be delivered on above given time';
+    } else {
+      this.supportMessage.msg = 'Please collect your order on above given time';
+    }
   }
 
   submit(form: NgForm) {

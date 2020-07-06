@@ -16,9 +16,9 @@ export class CheckoutPage implements OnInit {
     this.userData = this.navParams.get('userData');
     this.orderDetails = this.navParams.get('orderDetails');
 
-    // console.log('this.orderDetails ', this.orderDetails);
-    // console.log('this.userData ', this.userData);
-    // console.log('this.orderId ', this.orderId);
+    console.log('this.orderDetails ', this.orderDetails);
+    console.log('this.userData ', this.userData);
+    console.log('this.orderId ', this.orderId);
   }
 
   dismiss() {

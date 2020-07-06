@@ -11,12 +11,17 @@
   <form #submitForm="ngForm" novalidate (ngSubmit)="submit(submitForm)">
     <ion-list>
       <ion-item>
+        <ion-label>Message type: {{msgType? 'Delivery': 'Collect'}}</ion-label>
+        <ion-toggle name="msgType" [(ngModel)]="msgType" (ionChange)="toggleChecked($event.detail.checked)"></ion-toggle>
+      </ion-item>
+      <ion-item>
         <ion-label>Date and Time</ion-label>
         <ion-datetime
+          class="ion-no-padding select-date"
           [(ngModel)]="supportMessage.datenTime"
-          display-format="YYYY-MM-DDTHH:mm"
+          display-format="YYYY-MM-DD hh:mmA"
           value="1990-02-19"
-          placeholder="Select date and time"
+          placeholder="YYYY-MM-DD hh:mm A"
           name="ondate"
           #ondate="ngModel"
           required
@@ -33,7 +38,7 @@
 
       <ion-item>
         <ion-label position="stacked" color="primary"
-          >Enter your support message below</ion-label
+          >Enter your message below</ion-label
         >
         <ion-textarea
           [(ngModel)]="supportMessage.msg"

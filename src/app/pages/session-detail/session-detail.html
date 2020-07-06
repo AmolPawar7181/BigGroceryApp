@@ -29,9 +29,9 @@
       
       
         <ion-label class="ion-text-wrap">
-          <ion-note>{{product.brand}}</ion-note>
-          <h3>{{product.name}}</h3>
-          <h3 class="quantity">{{product.pricePerQuantity}}</h3>
+          <ion-note (click)="presentDetails(product)" >{{product.brand}}</ion-note>
+          <h3 (click)="presentDetails(product)" >{{product.name}}</h3>
+          <h3 (click)="presentDetails(product)" class="quantity">{{product.pricePerQuantity}}</h3>
           <!-- <h3 class="MRPStrike mont-regular"><ion-note>MRP: <span>Rs {{product.mrp}}</span></ion-note></h3> -->
           <!-- <h3 class="price mont-semibold">Rs {{product.price}}</h3> -->
         

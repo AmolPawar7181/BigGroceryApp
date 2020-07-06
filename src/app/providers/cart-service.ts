@@ -29,6 +29,29 @@ export class CartService {
   constructor(public http: HttpClient) {
   }
 
+  sendSms(phone: number, total: any) {
+    const authKey = '330924AOYrvKtEDD5ed4de52P1';
+
+    const message = `Order placed: Your order worth Rs.${total} has beed received.`;
+    const encodesMsg = encodeURIComponent(message);
+
+    const url = `https://cors-anywhere.herokuapp.com/http://vtermination.com/api/sendhttp.php?authkey=${authKey}&mobiles=${phone}&message=${encodesMsg}&sender=GROAPP&route=4&response=json`;
+
+    return this.http.get(url).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError((err) => {
+        const res = {
+          success: false,
+          msg: err.error.error||
+          'Something went wrong, Please check internet connection',
+        };
+        return of(res);
+      })
+    );
+  }
+
   addSaveForLater(userId: any, productId: any) {
     return this.http.get(`${backEnd}/addSaveForLater?userId=${userId}&productId=${productId}`).pipe(
         map((res: any) => {

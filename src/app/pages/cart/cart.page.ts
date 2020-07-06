@@ -175,13 +175,7 @@ export class CartPage implements OnInit {
 
   addUpiSuccess(res: any) {
     this.productData.addUpiData(res)
-        .subscribe((resp: any) => {
-          if (resp.success) {
-            this.modelService.presentToast(resp.msg, 2000, 'success');
-           } else {
-            this.modelService.presentToast(resp.msg, 2000, 'danger');
-           }
-        });
+        .subscribe();
   }
 
   payWithRazorpay() {
@@ -352,6 +346,7 @@ export class CartPage implements OnInit {
     .subscribe((orderDetails: any) => {
       this.modelService.dismissLoading();
       if (orderDetails.success) {
+       this.cartService.sendSms(this.userData.phone, this.total).subscribe();
        this.cartItemCount = 0;
        this.cartItems = [];
        this.total = 0;

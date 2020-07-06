@@ -91,7 +91,9 @@ export class AdminPage implements OnInit {
     this.newCategories[pos].isChecked = event.target.checked;
     const index =  this.homePageData.showCategorys.category.indexOf(id);
     if (index !== -1) {
-      this.homePageData.showCategorys.category.splice(index, 1);
+      if (!event.target.checked) {
+       this.homePageData.showCategorys.category.splice(index, 1);
+      }
     } else {
       if (event.target.checked) {
         this.homePageData.showCategorys.category.push(id);
@@ -103,7 +105,9 @@ export class AdminPage implements OnInit {
     this.newBrands[pos].isChecked = event.target.checked;
     const index =  this.homePageData.showBrands.brands.indexOf(id);
     if (index !== -1) {
-      this.homePageData.showBrands.brands.splice(index, 1);
+      if (!event.target.checked) {
+        this.homePageData.showBrands.brands.splice(index, 1);
+      }
     } else {
       if (event.target.checked) {
         this.homePageData.showBrands.brands.push(id);
@@ -230,12 +234,19 @@ export class AdminPage implements OnInit {
 
 
   setOrderStatus(orderId: any, status: any, pos: any) {
+    /* this is for virtual scroll update */
+    let newActiveOrders = this.activeOrders;
+    newActiveOrders.splice(pos, 1);
+
     this.modelService.presentLoading('Please wait...');
     this.adminData.setOrderStatus(status, orderId)
         .subscribe((res: any) => {
           this.modelService.dismissLoading();
           if (res.success) {
-            this.activeOrders.splice(pos, 1);
+            this.activeOrders = [];
+            setTimeout(() => {
+              this.activeOrders = newActiveOrders;
+            }, 100);
             this.activeOrdersCount--;
             this.modelService.presentToast(res.msg, 1000, 'success');
           } else {
