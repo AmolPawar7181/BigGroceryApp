@@ -249,14 +249,14 @@ export class CartPage implements OnInit {
     this.modelService.presentLoading('Please wait...');
     this.productData.addToCart(this.userId, product.productId).subscribe((cart: any) => {
       this.modelService.dismissLoading();
-      // console.log('before ', this.cartItems);
+      console.log('before ', this.cartItems);
       // console.log('product ', product);
       if (cart.length > 0) {
         this.cartService.removeSaveForLater(this.userId, product.saveId)
             .subscribe();
         product.count = 1;
         this.cartItems.push(product);
-        // console.log('after ', this.cartItems);
+        console.log('after ', this.cartItems);
         this.cartService.addCartItemCount(this.cartItemCount);
         this.calculateCart(this.cartItems);
         this.savedProducts.splice(pos, 1);
@@ -621,7 +621,7 @@ export class CartPage implements OnInit {
         if (cart.success) {
           // console.log('cartUpdated ', cart);
           this.cartItemCount = cart.length;
-          this.cartItems = cart.data;
+          // this.cartItems = cart.data;
         }
       });
     });

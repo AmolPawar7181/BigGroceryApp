@@ -165,6 +165,7 @@ export class AdminPage implements OnInit {
         if (orders.success) {
           this.activeOrders = orders.data;
           this.activeOrdersCount = orders.data.length;
+          console.log(this.activeOrders);
         } else {
           this.modelService.presentToast(orders.msg, 2000, 'danger');
         }
@@ -246,6 +247,7 @@ export class AdminPage implements OnInit {
             this.activeOrders = [];
             setTimeout(() => {
               this.activeOrders = newActiveOrders;
+              // this.activeOrdersCount = newActiveOrders.length;
             }, 100);
             this.activeOrdersCount--;
             this.modelService.presentToast(res.msg, 1000, 'success');

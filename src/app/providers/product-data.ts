@@ -36,6 +36,20 @@ export class ProductData {
       );
   }
 
+  setHomePage(data: any) {
+    this.storage.set('home', data);
+  }
+
+  getHomePage(): Promise<string> {
+    return this.storage.get('home').then((value) => {
+      return value;
+    });
+  }
+
+  removeHomePage(): Promise<any> {
+    return this.storage.remove('home');
+  }
+
   addBrand(brandData: any) {
     return this.http.post(`${backEnd}/addBrand`, brandData, this.httpHeader)
                 .pipe(map(res => {
@@ -333,7 +347,8 @@ export class ProductData {
           } else {
             // console.log('else');
             cartDetails.success = true;
-            cartDetails.data = newProduct;
+            cartDetails.data = [];
+            cartDetails.data.push(newProduct);
             this.setCart(cartDetails);
           }
       });

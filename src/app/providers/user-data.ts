@@ -56,7 +56,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error||
+          msg: err.error.error ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -119,7 +119,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error||
+          msg: err.error.error ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
