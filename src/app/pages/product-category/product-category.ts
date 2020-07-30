@@ -289,19 +289,23 @@ export class ProductCategoryPage implements OnInit {
   }
 
   searchProduct(value: any) {
-    this.modelService.presentLoading('Please wait...');
-    this.product.getproductBySearch(value).subscribe((response: any) => {
-      this.modelService.dismissLoading();
-      if (response.data.length > 0) {
-        this.products = response.data;
-      } else {
-        if (!response.success) {
-          this.modelService.presentToast(response.msg, 3000, 'danger');
+    if (value.length > 0) {
+      this.modelService.presentLoading('Please wait...');
+      this.product.getproductBySearch(value).subscribe((response: any) => {
+        this.modelService.dismissLoading();
+        if (response.data.length > 0) {
+          this.products = response.data;
         } else {
-          this.modelService.presentToast('No products found', 3000, 'danger');
+          if (!response.success) {
+            this.modelService.presentToast(response.msg, 3000, 'danger');
+          } else {
+            this.modelService.presentToast('No products found', 3000, 'danger');
+          }
         }
-      }
-    });
+      });
+    } else {
+      this.updateSchedule();
+    }
   }
 
   cancelSearch() {

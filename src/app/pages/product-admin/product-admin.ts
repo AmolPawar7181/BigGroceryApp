@@ -49,6 +49,7 @@ export class ProductAdminPage {
     };
     // passed in array of track names that should be excluded (unchecked)
     const productDetails = this.navParams.get('productDetails');
+    console.log('productDetails ', productDetails);
     this.product = productDetails;
     // will check in local storage
     this.productData.getFiltersData().then((filters: any) => {

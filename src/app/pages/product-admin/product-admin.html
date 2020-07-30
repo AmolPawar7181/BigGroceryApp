@@ -16,7 +16,7 @@
     </ion-text> -->
 
     <ion-list>
-      <ion-row>
+      <ion-row *ngIf="product.img">
       <ion-col size="6" *ngFor="let img of product.img; index as pos" text-wrap>
             <ion-img [src]="img"></ion-img>
           </ion-col>

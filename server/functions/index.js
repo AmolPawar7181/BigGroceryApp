@@ -120,6 +120,32 @@ let admin_check = (req, res, next) => {
 }
 
 ////////////////////////
+///// IMPORT DATA from excel
+///////////////////////
+
+app.get("/importProductsFromExcel", admin_check, (req, res) => {
+  const data = require('./data.json');
+
+  const productsQuery = [];
+  data.forEach((item) => {
+    productsQuery.push(
+    db.collection("productTable")
+      .doc()
+      .set({...item,
+        createdAt: admin.firestore.Timestamp.fromDate(new Date())
+      })
+      .then((res) => {    
+        // console.log("Document " + res + " successfully written!");
+      })
+      .catch((error) => {   
+        console.error("Error writing document: ", error);
+      })
+    )  
+  })
+  return Promise.all(productsQuery);
+})
+
+////////////////////////
 ///// UPI DATA
 ///////////////////////
 
@@ -1475,7 +1501,7 @@ app.post("/getProductsByCatBrand", (req, res) => {
         .orderBy("productNo", "desc")
   }
     productRef
-      .limit(2)
+      .limit(15)
       .get()
       .then(snapshot => {
           if(snapshot.empty) {
@@ -1505,6 +1531,7 @@ app.post("/getProductsByCatBrand", (req, res) => {
 
 app.get("/search", (req, res) => {
   const searchString = req.query.searchString;
+  if(searchString !== null || searchString !== undefined || searchString.length > 0){
   db.collection("productTable")
     .get()
     .then((data) => {
@@ -1525,6 +1552,11 @@ app.get("/search", (req, res) => {
       console.error(err);
       return res.json({ error: "somethig went wrong" });
     });
+  } else {
+    res
+        .status(500)
+        .json({ success: false, error: "Something went wrong", err: err });
+  }
 });
 
 app.post("/getProductsBy", (req, res) => {
@@ -1653,7 +1685,7 @@ app.post("/getProductsByNumber", (req, res) => {
     productRef = db.collection("productTable").orderBy("productNo", "desc");
   }
   productRef
-    .limit(5)
+    .limit(15)
     .get()
     .then((data) => {
       let products = [];

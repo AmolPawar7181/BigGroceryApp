@@ -20,7 +20,8 @@
             <img tappable [src]="image ? image : '../assets/img/no_image.jpg'">
           </ion-slide>
         </ion-slides> -->
-        <fiv-gallery #gallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
+        <img [hidden]="product.img.length > 0" src='../assets/img/no_image.jpg' >
+        <fiv-gallery [hidden]="product.img.length === 0" #gallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
         <ion-slides pager="true" [options]="slideOptsOne" #slideWithNav>
           
           <ion-slide *ngFor="let image of product.img; index as pos">
@@ -30,7 +31,8 @@
         </ion-slides>
       </fiv-gallery>
         
-      </ion-col>    
+      </ion-col>
+
     </ion-row>
     <ion-row>
       <ion-col size="12" size-md="6" class="ion-padding-start">
