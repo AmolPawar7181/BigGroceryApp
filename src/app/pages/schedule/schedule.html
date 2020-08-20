@@ -8,7 +8,9 @@
 </ion-header>
  
 <ion-content fullscreen="true">
-  
+  <!-- <ngx-lottie-view path="../assets/lottie/loading.json"
+                 style="width: 200px; height: 200px;">
+</ngx-lottie-view> -->
    <ion-grid *ngIf="homePageData.firstCarousel.img" class="ion-no-padding ion-no-margin firstCarousel">
       <ion-row>
         <ion-col size="12">    
@@ -21,25 +23,184 @@
       </ion-row>
     </ion-grid>
 
+    <ion-grid class="ion-no-padding ion-margin-top best-seller" [hidden]="bestSellers.length === 0">
+      <ion-row class="ion-no-padding">
+        <ion-col class="ion-no-padding">
+          <ion-list class="ion-no-padding ion-no-margin">
+            <!-- <ion-list-header lines="full" > -->
+              <ion-item  lines="none" color="danger" class="ion-text-center">
+                <ion-label class="mont-medium">Best Sellers</ion-label>
+              </ion-item>
+            <!-- </ion-list-header> -->
+              <!-- <ion-item lines="none" class="ion-no-padding"> -->
+                  <ion-slides [options]="slideOpts" class="ion-margin-top ion-padding-bottom">
+                    <ion-slide *ngFor="let product of bestSellers; index as pos" [hidden]="product.isAddedTocart" class="card-margin">
+                        <ion-card class="ion-margin-start ion-margin-end">
+                          <img (click)="presentDetails(product)" [src]="product.img[0] ? product.img[0] : '../assets/img/no_image.jpg'" />
+                          
+                          <ion-card-header class="ion-no-padding ion-no-margin">
+                            <ion-card-title>{{product.name}}</ion-card-title>
+                          </ion-card-header>
+                          <ion-card-content>
+                          <ion-text>{{product.pricePerQuantity}}</ion-text><br/>
+                          <ion-text class="MRPStrike">MRP: <span>{{product.mrp}}</span></ion-text><br/>
+                          <ion-text class="quantity">MRP: {{product.price}}</ion-text><br/>
+                          <ion-button *ngIf="product.available" 
+                                  [hidden]="product.addedTocart"
+                                  size="small"
+                                  slot="end"
+                                  color="danger"
+                                  (click)="addToCart(product, pos)"
+                                  >ADD</ion-button>
+                          <ion-grid slot="end" class="ion-no-padding" *ngIf="product.addedTocart">
+                            <ion-row class="ion-no-padding">
+                              <ion-col  class="ion-align-items-end addMoreButtons">
+                                <ion-row class="ion-no-padding" class="ion-align-items-center">
+                                  <ion-col>
+                                    <ion-button
+                                      size="small"
+                                      color="danger"
+                                      (click)="removeFromCart(product.productId,product.count, pos)"
+                                    >
+                                      <ion-icon name="remove-circle-outline"></ion-icon
+                                    ></ion-button>
+                                  </ion-col> 
+                                  <ion-col>
+                                    <ion-text color="danger">
+                                      <div class="ion-text-center">{{product.count}}</div>
+                                    </ion-text>
+                                  </ion-col>
+                                  <ion-col>
+                                    <ion-button
+                                      size="small"
+                                      color="danger"
+                                      (click)="addToCart(product)"
+                                    >
+                                      <ion-icon name="add-circle-outline"></ion-icon
+                                    ></ion-button>
+                                  </ion-col>
+                                </ion-row>
+                              </ion-col>
+                            </ion-row>
+                          </ion-grid>
+                          <ion-chip color="danger" class="notAvailable" [hidden]="product.available">
+                            <ion-icon name="alert-outline" ></ion-icon>
+                            <ion-label>Not available</ion-label>
+                          </ion-chip>
+  
+                        </ion-card-content>
+                        </ion-card>
+                      </ion-slide>
+                    </ion-slides>
+              <!-- </ion-item> -->
+            </ion-list>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <ion-grid class="ion-no-padding ion-margin-top best-seller" [hidden]="newArrivals.length === 0">
+        <ion-row class="ion-no-padding">
+          <ion-col class="ion-no-padding">
+            <ion-list class="ion-no-padding ion-no-margin">
+              <!-- <ion-list-header lines="full" > -->
+                <ion-item  lines="none" color="secondary" class="ion-text-center">
+                  <ion-label class="mont-medium">New Arrivals</ion-label>
+                </ion-item>
+              <!-- </ion-list-header> -->
+                <!-- <ion-item lines="none" class="ion-no-padding"> -->
+                    <ion-slides [options]="newArrivalSlidesOpts" class="ion-margin-top ion-padding-bottom">
+                      <ion-slide *ngFor="let product of newArrivals; index as pos" [hidden]="product.isAddedTocart" class="card-margin">
+                          <ion-card class="ion-margin-start ion-margin-end">
+                            <img (click)="presentDetails(product)" [src]="product.img[0] ? product.img[0] : '../assets/img/no_image.jpg'" />
+                            
+                            <ion-card-header class="ion-no-padding ion-no-margin">
+                              <ion-card-title>{{product.name}}</ion-card-title>
+                            </ion-card-header>
+                            <ion-card-content>
+                            <ion-text>{{product.pricePerQuantity}}</ion-text><br/>
+                            <ion-text class="MRPStrike">MRP: <span>{{product.mrp}}</span></ion-text><br/>
+                            <ion-text class="quantity">MRP: {{product.price}}</ion-text><br/>
+                            <ion-button *ngIf="product.available" 
+                                    [hidden]="product.addedTocart"
+                                    size="small"
+                                    slot="end"
+                                    color="danger"
+                                    (click)="addToCart(product)"
+                                    >ADD</ion-button>
+                            <ion-grid slot="end" class="ion-no-padding" *ngIf="product.addedTocart">
+                              <ion-row class="ion-no-padding">
+                                <ion-col  class="ion-align-items-end addMoreButtons">
+                                  <ion-row class="ion-no-padding" class="ion-align-items-center">
+                                    <ion-col>
+                                      <ion-button
+                                        size="small"
+                                        color="danger"
+                                        (click)="removeFromCart(product.productId,product.count, pos)"
+                                      >
+                                        <ion-icon name="remove-circle-outline"></ion-icon
+                                      ></ion-button>
+                                    </ion-col> 
+                                    <ion-col>
+                                      <ion-text color="danger">
+                                        <div class="ion-text-center">{{product.count}}</div>
+                                      </ion-text>
+                                    </ion-col>
+                                    <ion-col>
+                                      <ion-button
+                                        size="small"
+                                        color="danger"
+                                        (click)="addToCart(product, pos)"
+                                      >
+                                        <ion-icon name="add-circle-outline"></ion-icon
+                                      ></ion-button>
+                                    </ion-col>
+                                  </ion-row>
+                                </ion-col>
+                              </ion-row>
+                            </ion-grid>
+                            <ion-chip color="danger" class="notAvailable" [hidden]="product.available">
+                              <ion-icon name="alert-outline" ></ion-icon>
+                              <ion-label>Not available</ion-label>
+                            </ion-chip>
     
-    <ion-grid *ngIf="homePageData.showCategorys" class="ion-no-padding ion-no-margin ion-margin-top">
+                          </ion-card-content>
+                          </ion-card>
+                        </ion-slide>
+                      </ion-slides>
+                <!-- </ion-item> -->
+              </ion-list>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+
+     
+    <ion-grid *ngIf="homePageData.showCategorys" class="ion-no-padding ion-no-margin">
       <ion-row>
         <ion-col >
-          <ion-item  lines="none" color="secondary" class="ion-text-center">
+          <ion-item  lines="none" color="danger" class="ion-text-center" (click)="setExtend('catExpanded')">
             <ion-label class="mont-medium">Shop by Category</ion-label>
+            <ion-icon [name]="catExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end"></ion-icon>    
           </ion-item>
         </ion-col>
       </ion-row>
-      <ion-row>
-        <ion-col size="6" *ngFor="let category of homePageData.showCategorys; index as pos">    
-          <ion-card routerLink="/app/tabs/schedule/session/category/{{category.category}}">
+      <ion-row class="ion-margin-top expand-wrapper" [class.collapsed]="!catExpanded">
+        <ion-col size="4" *ngFor="let category of homePageData.showCategorys; index as pos">    
+          <ion-card routerLink="/app/tabs/schedule/session/category/{{category.category}}" class="ion-no-margin cat-card">
             <img [src]="category.img ? category.img : '../assets/img/no_image.jpg'">
             <ion-card-header>
               <ion-card-subtitle color="dark" class="mont-medium">{{category.category}}</ion-card-subtitle>
             </ion-card-header>
           </ion-card>
-        </ion-col>    
+        </ion-col>
       </ion-row>
+      <!-- <ion-row >
+        <ion-col>
+          <ion-item  lines="none" class="ion-text-center" (click)="setExtend()">
+            <ion-label class="mont-medium">{{expanded ? 'collapse': 'View All'}}</ion-label>
+          </ion-item>
+        </ion-col>
+      </ion-row> -->
     </ion-grid>
 
     <ion-grid *ngIf="homePageData.secondCarousel.img" class="ion-no-padding ion-no-margin ion-margin-top">
@@ -58,15 +219,16 @@
     <ion-grid *ngIf="homePageData.showBrands" class="ion-no-padding ion-no-margin ion-margin-top">
       <ion-row>
         <ion-col >
-          <ion-item  lines="none" color="danger" class="ion-text-center">
+          <ion-item  lines="none" color="secondary" class="ion-text-center" (click)="setExtend('brandExpanded')">
             <ion-label class="mont-medium">Shop by Brands</ion-label>
+            <ion-icon [name]="brandExpanded ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end"></ion-icon>  
           </ion-item>
           
         </ion-col>
       </ion-row>
-      <ion-row>
-        <ion-col size="6" *ngFor="let brand of homePageData.showBrands; index as pos">    
-          <ion-card routerLink="/app/tabs/schedule/session/brand/{{brand.brand}}">
+      <ion-row class="ion-margin-top expand-wrapper" [class.collapsed]="!brandExpanded">
+        <ion-col size="4" *ngFor="let brand of homePageData.showBrands; index as pos" >    
+          <ion-card routerLink="/app/tabs/schedule/session/brand/{{brand.brand}}" class="ion-no-margin cat-card">
             <img [src]="brand.img ? brand.img : '../assets/img/no_image.jpg'">
             <ion-card-header>
               <ion-card-subtitle color="dark" class="mont-medium">{{brand.brand}}</ion-card-subtitle>

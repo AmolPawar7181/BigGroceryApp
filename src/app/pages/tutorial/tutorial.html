@@ -1,7 +1,8 @@
   <ion-content fullscreen="true">
     <ion-slides #slides (ionSlideWillChange)="onSlideChangeStart($event)" pager="true">
       <ion-slide class="slide_1">
-        <img src="assets/img/tutorial/shop.png" class="slide-image" />
+        <!-- <img src="assets/img/tutorial/shop.png" class="slide-image" /> -->
+        <ngx-lottie-view path="../assets/lottie/shop.json" class="slide-image" > </ngx-lottie-view>
         <h2 class="slide-title">
           Welcome to <br/><br/>
         </h2>
@@ -17,7 +18,8 @@
       </ion-slide>
   
       <ion-slide class="slide_3">
-        <img src="assets/img/tutorial/scooter-delivery.png" class="slide-image" />
+        <!-- <img src="assets/img/tutorial/scooter-delivery.png" class="slide-image" /> -->
+        <ngx-lottie-view path="../assets/lottie/delivery.json" class="slide-image" > </ngx-lottie-view>
         <h2 class="slide-title ion-padding">When we deliver items at your Door Step</h2><br/>
         <ion-button class="mont-medium" fill="solid" size="large" (click)="startApp()">
           Get started

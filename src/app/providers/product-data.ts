@@ -17,6 +17,24 @@ export class ProductData {
 
   constructor(public storage: Storage, public http: HttpClient) {}
 
+  getBestSeller() {
+    return this.http.get(`${backEnd}/getBestSeller`)
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
   getHomePageData() {
     return this.http
       .get(`${backEnd}/getHomePageData`)
@@ -48,6 +66,53 @@ export class ProductData {
 
   removeHomePage(): Promise<any> {
     return this.storage.remove('home');
+  }
+
+  getBestSellersData() {
+    return this.http
+      .get(`${backEnd}/getBestSeller`)
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.error ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
+  setBestSellers(data: any) {
+    this.storage.set('bestSeller', data);
+  }
+
+  getBestSellers(): Promise<string> {
+    return this.storage.get('bestSeller').then((value) => {
+      return value;
+    });
+  }
+
+  removeBestSellers(): Promise<any> {
+    return this.storage.remove('bestSeller');
+  }
+
+  setNewArrival(data: any) {
+    this.storage.set('newArrival', data);
+  }
+
+  getNewArrival(): Promise<string> {
+    return this.storage.get('newArrival').then((value) => {
+      return value;
+    });
+  }
+
+  removeNewArrival(): Promise<any> {
+    return this.storage.remove('newArrival');
   }
 
   addBrand(brandData: any) {

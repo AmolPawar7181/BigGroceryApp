@@ -7,9 +7,7 @@
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar class="ion-text-center secondary-title">
-    <ion-text class="check-mark">
-      <ion-icon name="checkmark-circle"></ion-icon>
-    </ion-text>
+    <ngx-lottie-view path="../assets/lottie/done-new.json" loop="false" class="done"> </ngx-lottie-view>
 
     <div class="ion-margin-bottom"><ion-text>Order Placed</ion-text></div>
     <div class="ion-margin-bottom"><ion-text>Total Price for {{orderDetails.products.length}} Item{{orderDetails.products.length > 1 ? "'s": ""}} Rs {{orderDetails.total}}</ion-text></div>
@@ -17,7 +15,6 @@
 </ion-header>
 
 <ion-content> 
-
   <ion-card class="ion-no-padding ion-no-margin ion-margin-vertical">
     <ion-card-header >
       <ion-card-title>{{userData.username}}</ion-card-title>
@@ -51,15 +48,14 @@
     </ion-card-header>
     <ion-card-content class="ion-no-padding ion-no-margin">
       <ion-list>
-        <ion-item *ngFor="let product of orderDetails.products">
+        <ion-item *ngFor="let product of orderDetails.products" >
           <ion-thumbnail slot="start">
-            <ion-slides>
+            <img src='../assets/img/no_image.jpg' [hidden]="product.details?.img.length > 0">
+            <ion-slides [hidden]="product.details?.img.length === 0">
                 <ion-row>
-                  <ion-col *ngFor="let image of product.details.img">
+                  <ion-col *ngFor="let image of product.details.img" >
                     <ion-slide>
-                      <img
-                        [src]="image ? image : '../assets/img/no_image.jpg'"
-                      />
+                      <img [src]="image ? image : '../assets/img/no_image.jpg'" />
                     </ion-slide>
                   </ion-col>
                 </ion-row>

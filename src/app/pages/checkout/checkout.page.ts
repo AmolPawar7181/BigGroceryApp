@@ -9,6 +9,7 @@ export class CheckoutPage implements OnInit {
   orderDetails: any;
   userData: any;
   orderId: any;
+  animate = true;
   constructor(private navParams: NavParams, private modalCtrl: ModalController) { }
 
   ngOnInit() {

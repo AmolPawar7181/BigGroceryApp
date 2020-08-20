@@ -9,6 +9,7 @@ import { SchedulePage } from './schedule';
 import { SchedulePageRoutingModule } from './schedule-routing.module';
 // import { ProductAdminPage } from '../product-admin/product-admin';
 import { AdminPageModule } from '../admin/admin.module';
+import { NgxLottieViewModule } from 'ngx-lottie-view';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import { AdminPageModule } from '../admin/admin.module';
     IonicModule,
     SchedulePageRoutingModule,
     FivGalleryModule,
-    AdminPageModule
+    AdminPageModule,
+    NgxLottieViewModule,
   ],
   declarations: [
     SchedulePage,

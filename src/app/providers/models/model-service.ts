@@ -22,10 +22,13 @@ export class ModelService {
       toast.present();
   }
 
-  async presentLoading(msg) {
+  async presentLoading(msg: any) {
+    const loading = '<img src="assets/lottie/loading.gif" />';
     this.isLoading = true;
     return await this.loadingCtrl.create({
-      message: msg
+      spinner: null,
+      message: loading,
+      cssClass: 'loading-spinner',
     }).then((a) => {
       a.present().then(() => {
         if (!this.isLoading) {
@@ -36,8 +39,10 @@ export class ModelService {
   }
 
   async dismissLoading() {
-    this.isLoading = false;
-    return await this.loadingCtrl.dismiss().then(() => console.log('dismissed'));
+    if (this.isLoading) {
+      this.isLoading = false;
+      return await this.loadingCtrl.dismiss().then(() => console.log('dismissed'));
+    }
   }
 
 

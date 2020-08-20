@@ -59,7 +59,8 @@
             <ion-list>
               <ion-item *ngFor="let product of order.products">
                 <ion-thumbnail slot="start">
-                  <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()">
+                  <img class="thumbnail" [hidden]="product.details?.img.length > 0" src='../assets/img/no_image.jpg' />
+                  <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()" [hidden]="product.details?.img.length === 0">
                   <ion-slides>
                       <!-- <ion-row> -->
                         <!-- <ion-col *ngFor="let image of product.details.img"> -->

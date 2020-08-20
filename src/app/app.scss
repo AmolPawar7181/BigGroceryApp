@@ -40,3 +40,35 @@ ion-toolbar {
         color: #eb445a !important;
     }
   }
+
+  .menu-toolbar {
+    max-height: 170px;
+    min-height: 170px;
+  }
+
+  .menu-toolbar .menu-title{
+    position: absolute;
+    bottom: 10px;
+    text-shadow: 0 0 10px #fff;
+    text-align: center;
+    width: 100%;
+    left: 0;
+    font-size: 20px;
+  }
+  
+
+  .loading-spinner {
+      ion-backdrop{
+        background-color: var(--ion-backdrop-color, #fff);
+      }
+    .loading-wrapper {
+        background: transparent;
+        box-shadow: none;
+        padding: unset;
+        width: 100%;
+        --max-width: 350px;
+    }
+    img {
+        width: 100%;
+    }
+  }

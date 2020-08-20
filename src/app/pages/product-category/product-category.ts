@@ -247,27 +247,39 @@ export class ProductCategoryPage implements OnInit {
       // enable infinite scroll
       this.enableInfiniteScroll();
     }
-
-    this.modelService.presentLoading('Please wait...');
-    this.product.getProductsByNumber('0', this.lastProduct).subscribe((data: any) => {
-      this.modelService.dismissLoading();
-      if (event) {
-        event.target.complete();
-      }
-      if (data.success) {
-        if (data.products.length > 0) {
-          this.products = [];
-          this.products = data.products;
-          this.lastProduct = data.last;
-          this.productNo++;
-          this.mapCartDataToProducts();
+    this.product.getNewArrival().then((productsData: any) => {
+        if (productsData && productsData.success) {
+          if (productsData.products.length > 0) {
+            this.products = [];
+            this.products = productsData.products;
+            this.lastProduct = productsData.last;
+            this.productNo++;
+            this.mapCartDataToProducts();
+          }
         } else {
-          this.modelService.presentToast('No products found', 3000, 'danger');
+          this.modelService.presentLoading('Please wait...');
+          this.product.getProductsByNumber('0', this.lastProduct).subscribe((data: any) => {
+           this.modelService.dismissLoading();
+           if (event) {
+              event.target.complete();
+            }
+           if (data.success) {
+              if (data.products.length > 0) {
+                this.products = [];
+                this.products = data.products;
+                this.lastProduct = data.last;
+                this.productNo++;
+                this.mapCartDataToProducts();
+              } else {
+                this.modelService.presentToast('No products found', 3000, 'danger');
+              }
+            } else {
+              this.modelService.presentToast(data.msg, 3000, 'danger');
+          }
+          });
         }
-      } else {
-        this.modelService.presentToast(data.msg, 3000, 'danger');
-    }
     });
+
   }
 
   setAvaibility(product: any) {
@@ -341,6 +353,13 @@ export class ProductCategoryPage implements OnInit {
         /* check in localStorage */
         this.product.getCart()
             .then((cart: any) => {
+              if (cart.msg === 'Cart is empty') {
+                this.products.forEach((product: any) => {
+                  product.addedTocart = false;
+                  product.count = 0;
+                });
+                return;
+              }
               /* if exists localStorage */
               if (cart.data && cart.data.length > 0) {
                   this.cartService.addCartItemCount(cart.data.length);
@@ -600,7 +619,7 @@ export class ProductCategoryPage implements OnInit {
 
     }
   }
- 
+
   async removeFavorite(
     slidingItem: HTMLIonItemSlidingElement,
     sessionData: any,

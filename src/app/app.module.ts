@@ -26,7 +26,7 @@ import { WebIntent } from '@ionic-native/web-intent/ngx';
 import { SmsRetriever } from '@ionic-native/sms-retriever/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
 import { TokenInterceptor } from '../app/providers/token.interceptor';
-
+import { NgxLottieViewModule } from 'ngx-lottie-view';
 
 @NgModule({
   imports: [
@@ -40,7 +40,8 @@ import { TokenInterceptor } from '../app/providers/token.interceptor';
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production
     }),
-    NgOtpInputModule
+    NgOtpInputModule,
+    NgxLottieViewModule
   ],
   declarations: [AppComponent],
   providers: [InAppBrowser, SplashScreen, StatusBar,

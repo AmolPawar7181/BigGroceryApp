@@ -68,8 +68,8 @@ $categories: (
 
 
  ion-card img{
-  min-height: 120px;
-  max-height: 120px;
+  min-height: 80px;
+  max-height: 80px;
   width: 100%;
  }
  .firstCarousel {
@@ -96,4 +96,73 @@ ion-content {
   ion-grid {
     background: #f7f7f7;
   }
+}
+
+
+.best-seller {
+  ion-slides,
+  ion-slide {
+    height: auto;
+    max-height: 300px;
+  }
+  ion-item {
+    padding-inline-start: 0px !important;
+  }
+
+  ion-slide {
+    // margin: 5px;
+    max-width: 150px;
+    ion-card {
+      min-width: 140px;
+      margin: 0px;
+      img {
+        min-height: 100px;
+        max-height: 100px;
+      }
+      ion-card-header {
+        height: 30px;
+        ion-card-title {
+          font-size: 13px;
+        }
+      }
+      ion-card-content {
+        .MRPStrike {
+          span {
+            text-decoration: line-through;
+          }
+        }
+        font-size: 13px;
+        padding: 10px 0px;
+        .notAvailable {
+          font-size: 11px;
+        }
+      }
+    }
+  }
+
+  ion-slide:nth-child(1) {
+    min-width: 150px;
+    ion-card {
+      margin-left:10px;
+    }
+  }
+}
+
+.cat-card {
+  min-height: 130px;
+  border-radius: unset;
+  margin: 1.5px;
+  ion-card-header {
+    padding: 5px;
+  }
+}
+
+.expand-wrapper{
+  transition: max-height 0.4s ease-in-out;
+  overflow: hidden;
+  height: auto;
+}
+
+.collapsed {
+  max-height: 140px !important;
 }

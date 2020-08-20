@@ -119,30 +119,69 @@ let admin_check = (req, res, next) => {
   })
 }
 
+const updateSoldCount = (products) => {
+  console.log()
+  const cartDetails = [];
+   for (let i = 0; i < products.length; i++) {
+        cartDetails.push(
+          
+          db.collection("productTable")
+            .doc(products[i].productId)
+            .set(
+              { sold: firebase.firestore.FieldValue.increment(products[i].count) },
+              { merge: true }
+            )
+            .then(() => {return true})  
+        );
+      }
+  Promise.all(cartDetails); 
+}
+/// add sold property to all products
+const addNewPropProducts = () => {
+   db.collection("productTable")
+      .get()
+      .then((doc) => {
+        let soldQuery = [];
+        doc.forEach((product) => {
+          soldQuery.push(
+          db.collection("productTable")
+            .doc(product.id)
+            .set(
+              { sold: 0 },
+              { merge: true }
+            )
+          )
+        })
+        return Promise.all(soldQuery);  
+      })
+}
+
 ////////////////////////
 ///// IMPORT DATA from excel
 ///////////////////////
 
 app.get("/importProductsFromExcel", admin_check, (req, res) => {
-  const data = require('./data.json');
 
-  const productsQuery = [];
-  data.forEach((item) => {
-    productsQuery.push(
-    db.collection("productTable")
-      .doc()
-      .set({...item,
-        createdAt: admin.firestore.Timestamp.fromDate(new Date())
-      })
-      .then((res) => {    
-        // console.log("Document " + res + " successfully written!");
-      })
-      .catch((error) => {   
-        console.error("Error writing document: ", error);
-      })
-    )  
-  })
-  return Promise.all(productsQuery);
+  // addNewPropProducts();
+  // const data = require('./data.json');
+
+  // const productsQuery = [];
+  // data.forEach((item) => {
+  //   productsQuery.push(
+  //   db.collection("productTable")
+  //     .doc()
+  //     .set({...item,
+  //       createdAt: admin.firestore.Timestamp.fromDate(new Date())
+  //     })
+  //     .then((res) => {    
+  //       // console.log("Document " + res + " successfully written!");
+  //     })
+  //     .catch((error) => {   
+  //       console.error("Error writing document: ", error);
+  //     })
+  //   )  
+  // })
+  // return Promise.all(productsQuery);
 })
 
 ////////////////////////
@@ -356,7 +395,7 @@ app.put("/deleteFromHome", admin_check, (req, res) => {
 ///////////////////////
 
 app.post("/addOrder",auth, (req, res) => {
-  const newOrder = {
+  const orderData = {
     userId: req.body.userId,
     total: req.body.total,
     products: req.body.products,
@@ -368,7 +407,7 @@ app.post("/addOrder",auth, (req, res) => {
     createdAt: admin.firestore.Timestamp.fromDate(new Date()),
   };
   db.collection("orderTable")
-    .add(newOrder)
+    .add(orderData)
     .then((doc) => {
       const orderId = doc.id;
       res.json({
@@ -383,7 +422,7 @@ app.post("/addOrder",auth, (req, res) => {
       // const history = [];
       // for (let i = 0; i < newOrder.products.length; i++) {
       // history.push(
-      db.doc(`/userTable/${newOrder.userId}`)
+      db.doc(`/userTable/${orderData.userId}`)
         .collection("history")
         .doc()
         .create({ orderId: orderId,
@@ -395,12 +434,12 @@ app.post("/addOrder",auth, (req, res) => {
       // }
       // remove items from cart
       const cartDetails = [];
-      console.log("newOrder.products.length ", newOrder.products.length);
-      for (let i = 0; i < newOrder.products.length; i++) {
+      console.log("newOrder.products.length ", orderData.products.length);
+      for (let i = 0; i < orderData.products.length; i++) {
         cartDetails.push(
           db
             .doc(
-              `/userTable/${newOrder.userId}/cart/${newOrder.products[i].productId}`
+              `/userTable/${orderData.userId}/cart/${orderData.products[i].productId}`
             )
             .delete()
             .then((doc) => {
@@ -409,6 +448,25 @@ app.post("/addOrder",auth, (req, res) => {
         );
       }
       return Promise.all(cartDetails);
+    })
+    .then(() => {
+      // update product sold count
+  
+      const cartDetails = [];
+      for (let i = 0; i < orderData.products.length; i++) {
+        console.log('products ', orderData.products[i].productId, orderData.products[i].count);
+        cartDetails.push(
+          
+          db.collection("productTable")
+            .doc(orderData.products[i].productId)
+            .set(
+              { sold: admin.firestore.FieldValue.increment(orderData.products[i].count) },
+              { merge: true }
+            )
+            .catch((err) => console.log('error while adding sold ', JSON.stringify(err)))
+        )
+      }
+    Promise.all(cartDetails); 
     })
     .catch((err) => {
       res
@@ -465,6 +523,7 @@ app.get("/getOrdersByStatus",admin_check, (req, res) => {
   const status = req.query.status;
   db.collection("orderTable")
     .where("status", "==", status)
+    .orderBy("createdAt", "desc")
     .get()
     .then((data) => {
       let orders = [];
@@ -791,11 +850,11 @@ app.post("/addProductImage",auth, (req, res) => {
       .then((file) => {
         const img_url = `https://firebasestorage.googleapis.com/v0/b/${file[0].metadata.bucket}/o/${file[0].id}?alt=media`;
         //res.send(img_url);
-        return res.json({ img_name: file[0].id, img_url: img_url });
+        return res.json({ success: true, img_name: file[0].id, img_url: img_url });
       })
       .catch((err) => {
         console.error(err);
-        return res.json({ error: "somethig went wrong adding images" });
+        return res.json({ success: false, msg: "Somethig went wrong while adding image[s]!!! " });
       });
   });
   busboy.end(req.rawBody);
@@ -1453,6 +1512,35 @@ app.get("/getUserById", (req, res) => {
 ////////////////////////
 ///// PRODUCTS
 ///////////////////////
+
+
+
+app.get("/getBestSeller", (req, res) => {
+  db.collection("productTable")
+    .orderBy('sold', 'desc')
+    .limit(10)
+    .get()
+    .then(snapshot => {
+      if(snapshot.empty) {
+        return res.json({ success: false, msg:"No products found" });
+      }
+
+        let products = [];
+        snapshot.forEach((doc) => {
+          let product = {
+            productId: doc.id,
+            ...doc.data(),
+          };
+          products.push(product);
+        });
+        return res.json({ success: true, products});
+  })
+  .catch((err) => {
+    res
+      .status(500)
+      .json({ success: false, error: "Something went wrong", err: err });
+  });
+})
 
 app.get("/getProductsByBrand", (req, res) => {
   const brand = req.query.brand;

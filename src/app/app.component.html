@@ -4,8 +4,9 @@
     <ion-menu contentId="main-content">
       <ion-content>
         <ion-header *ngIf="profileData">
-          <ion-toolbar color="white">
-          <ion-title class="ion-text-capitalize">Welcome, {{profileData.username}} </ion-title>
+          <ion-toolbar class="menu-toolbar">
+            <img src="../assets/img/speaker-background.png"/>
+          <ion-text class="ion-text-capitalize menu-title ion-text-wrap"> {{profileData.username}} </ion-text>
         </ion-toolbar>
         </ion-header>
         

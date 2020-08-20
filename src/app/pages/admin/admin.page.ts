@@ -67,6 +67,7 @@ export class AdminPage implements OnInit {
   newBrands: { id: string; name: string; isChecked: boolean }[] = [];
   homePageData: HomePageData = { firstCarousel : '', secondCarousel : '', showCategorys : this.newCategories, showBrands: this.newBrands };
   backBtnSub: any;
+  dateIndex = 0;
 
   constructor(private adminData: AdminData, private modelService: ModelService,
               private modalCtrl: ModalController, private routerOutlet: IonRouterOutlet,
@@ -113,6 +114,26 @@ export class AdminPage implements OnInit {
         this.homePageData.showBrands.brands.push(id);
       }
     }
+  }
+
+  myHeaderFn = (record: any, recordIndex: any, records: any) => {
+      const firstSeconds = records[this.dateIndex].orders.order.createdAt._seconds;
+      const date = new Date(firstSeconds * 1000);
+      date.setHours(0, 0, 0, 0);
+      if (recordIndex === 0) {
+        return date.toDateString();
+      }
+
+      const nextSeconds = record.orders.order.createdAt._seconds;
+      const nextDate = new Date(nextSeconds * 1000);
+      nextDate.setHours(0, 0, 0, 0);
+
+      if (date.getTime() !== nextDate.getTime()) {
+        this.dateIndex = recordIndex;
+        return nextDate.toDateString();
+      }
+
+      return null;
   }
 
   makeACall(phoneNo: any) {
