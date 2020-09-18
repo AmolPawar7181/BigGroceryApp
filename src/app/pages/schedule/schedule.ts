@@ -9,6 +9,7 @@ import { CartService } from '../../providers/cart-service';
 import { HomePageData } from '../../interfaces/product-options';
 import { AdminData } from '../../providers/admin-data';
 import { SpeakerListPage } from '../speaker-list/speaker-list';
+import { MapPage } from '../map/map';
 
 @Component({
   selector: 'page-schedule',
@@ -52,6 +53,7 @@ export class SchedulePage implements OnInit {
   newArrivals: any = [];
   catExpanded = false;
   brandExpanded = false;
+  address: any;
 
   constructor(
     public router: Router,
@@ -239,12 +241,36 @@ export class SchedulePage implements OnInit {
     });
   }
 
+  async addAddress() {
+    const modal = await this.modalCtrl.create({
+      component: MapPage,
+      swipeToClose: true,
+      componentProps: {}
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      this.address =  data;
+    }
+  }
+
   getUserData() {
     // console.log('getUserData called');
     this.user.getUserData().then((user: any) => {
       // console.log('getUserData user, ', user);
       if (user) {
         this.userId = user.userId;
+        if (user.deliveryAddress) {
+          this.address = user.deliveryAddress;
+        } else {
+          user.addresses.forEach((address: any, index: number) => {
+            if (address.isDefault) {
+              console.log(address);
+              this.address = address;
+            }
+          });
+        }
 
         /* check in localStorage */
         this.product.getCart()

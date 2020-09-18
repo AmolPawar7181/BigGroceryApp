@@ -56,7 +56,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error ||
+          msg: err.error.msg.error ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -85,7 +85,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error ||
+          msg: err.error.msg.error ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -117,10 +117,11 @@ export class UserData {
         return res;
       }),
       catchError((err) => {
+        console.log('catch error ', err);
         const res = {
           success: false,
-          msg: err.error.error ||
-          'Something went wrong, Please check internet connection',
+          msg: err.error.msg ||
+          'Something went wrong, Please check internet connection'
         };
         return of(res);
       })
@@ -136,7 +137,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err ||
+          msg: err.error.msg ||
           'Something went wrong, Please check internet connection'
         };
         return of(res);
@@ -152,7 +153,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error ||
+          msg: err.error.msg ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -168,7 +169,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error ||
+          msg: err.error.msg ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -184,7 +185,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err ||
+          msg: err.error.msg ||
           'Something went wrong, Please check internet connection'
         };
         return of(res);
@@ -204,7 +205,7 @@ export class UserData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -220,7 +221,7 @@ export class UserData {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error ||
+          msg: err.error.msg ||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -269,12 +270,15 @@ export class UserData {
     return this.userId;
   }
 
-  setUserData(userdata: any, token: any): Promise<any> {
+  setUserData(userdata: any, token?: any): Promise<any> {
+    console.log('userData', userdata);
     return this.storage.set(this.HAS_LOGGED_IN, true).then(() => {
       this.storage.set('userdata', userdata).then(() => {
         this.setUserId(userdata.userId);
         this.setIsAdmin();
-        this.setToken(token);
+        if (token) {
+          this.setToken(token);
+        }
       });
       return window.dispatchEvent(new CustomEvent('user:login'));
     });
@@ -318,7 +322,7 @@ export class UserData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -345,11 +349,35 @@ export class UserData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
       })
     );
   }
+
+  addAddress(address: any, userId: any) {
+    const userData = {
+      userId,
+      address
+    };
+    return this.http
+      .post(`${backEnd}/addAddress`, userData, this.httpHeader)
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+        catchError((err) => {
+          const res = {
+            success: false,
+            msg:
+              err.error.msg ||
+              'Something went wrong, Please check internet connection',
+          };
+          return of(res);
+        })
+      );
+  }
+
 }

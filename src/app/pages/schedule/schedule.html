@@ -3,7 +3,16 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Home </ion-title>
+    <ion-title class="ion-no-padding">
+      <ion-item color="primary" [hidden]="!userId">
+        <ion-label>
+          <h6 class="title">Your location</h6>
+          <h5 class="address">{{address?.address}}</h5>
+        </ion-label>
+        <ion-icon name="pencil" slot="end" (click)="addAddress()"></ion-icon>  
+      </ion-item>
+      <ion-title [hidden]="userId">Home</ion-title>
+    </ion-title>
   </ion-toolbar>
 </ion-header>
  

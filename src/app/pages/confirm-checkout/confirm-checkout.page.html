@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()" class="backBtn">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="ion-text-center secondary-title">
+    <ngx-lottie-view path="../assets/lottie/done-new.json" loop="false" class="done"> </ngx-lottie-view>
+
+    <div class="ion-margin-bottom"><ion-text>Order Placed</ion-text></div>
+    <div class="ion-margin-bottom"><ion-text>Total Price for {{orderDetails.products.length}} Item{{orderDetails.products.length > 1 ? "'s": ""}} Rs {{orderDetails.total}}</ion-text></div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content> 
+  <ion-card class="ion-no-padding ion-no-margin ion-margin-vertical">
+    <ion-card-header >
+      <ion-card-title>{{userData.username}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding">
+      <ion-item lines="none" class="ion-text-wrap">
+        <!-- <ion-icon slot="start" color="danger" name="location-outline"></ion-icon> -->
+        <ion-label class="ion-text-wrap ">
+          <h3 class="address">{{userData.address}}</h3>
+          <h3 class="mont-semibold">Phone Number: {{userData.phone}}</h3>
+        </ion-label>
+      </ion-item>
+
+      <!-- <ion-item lines="none ion-text-wrap" >
+          {{userData.address}}
+          <h3>{{userData.phone}}</h3>
+      </ion-item> -->
+
+
+    </ion-card-content>
+
+  </ion-card>
+
+  <ion-card class="ion-no-padding ion-no-margin ion-margin-vertical">
+    <ion-card-header>
+      <ion-item lines="full" class="ion-no-padding ion-no-margin">
+        <ion-label>
+           Order Details
+        </ion-label>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content class="ion-no-padding ion-no-margin">
+      <ion-list>
+        <ion-item *ngFor="let product of orderDetails.products" >
+          <ion-thumbnail slot="start">
+            <img src='../assets/img/no_image.jpg' [hidden]="product.details?.img.length > 0">
+            <ion-slides [hidden]="product.details?.img.length === 0">
+                <ion-row>
+                  <ion-col *ngFor="let image of product.details.img" >
+                    <ion-slide>
+                      <img [src]="image ? image : '../assets/img/no_image.jpg'" />
+                    </ion-slide>
+                  </ion-col>
+                </ion-row>
+            </ion-slides>
+          </ion-thumbnail>
+          <ion-label>
+            <h3>Product: {{product.details.name}}</h3>
+            <h3>Brand: {{product.details.brand}}</h3>
+            <h3>Quantity: {{product.count}} * Rs: {{product.details.price}}</h3>
+            <h3 class="ion-float-left mont-semibold" color="success">Total: {{product.count * product.details.price}}</h3>
+          </ion-label>
+        </ion-item>
+        <!-- <ion-list-header>
+          <ion-label class="mont-semibold">Order total: {{orderDetails.total}}</ion-label>
+        </ion-list-header>               -->
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

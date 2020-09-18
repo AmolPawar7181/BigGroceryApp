@@ -26,6 +26,7 @@ import { WebIntent } from '@ionic-native/web-intent/ngx';
 import { SmsRetriever } from '@ionic-native/sms-retriever/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
 import { TokenInterceptor } from '../app/providers/token.interceptor';
+import { ErrorInterceptor } from '../app/providers/error.interceptor';
 import { NgxLottieViewModule } from 'ngx-lottie-view';
 
 @NgModule({
@@ -47,7 +48,9 @@ import { NgxLottieViewModule } from 'ngx-lottie-view';
   providers: [InAppBrowser, SplashScreen, StatusBar,
               Camera, File, WebView, FilePath, CallNumber,
               Geolocation, NativeGeocoder, SmsRetriever,
-              HTTP, { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true},
+              HTTP,
+              { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true},
+              { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
               WebIntent
 
             ],

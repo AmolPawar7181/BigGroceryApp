@@ -28,13 +28,13 @@
       <ion-card-title>Ongoing Orders: {{activeOrdersCount}}</ion-card-title>
     </ion-card-header>
     <ion-card-content class="ion-no-padding ion-no-margin card-content">
-      <ion-virtual-scroll [items]="activeOrders" [headerFn]="myHeaderFn">
+      <ion-virtual-scroll [items]="activeOrders">
         
-        <ion-item-divider *virtualHeader="let header" class="my-divider ">
+        <!-- <ion-item-divider *virtualHeader="let header" class="my-divider ">
           <ion-item  lines="none" color="danger" class="ion-text-center mont-medium">
             {{ header }}
         </ion-item>
-        </ion-item-divider>
+        </ion-item-divider> -->
 
         <ion-card class="" *virtualItem="let order; index as pos">
       <!-- <ion-card class="" *ngFor="let order of activeOrders; index as pos"> -->
@@ -77,8 +77,9 @@
             <ion-card-header>
               <ion-item>
                 <ion-label>
-                  <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>{{order.userData.address}}</h3>
-                  <h3 (click)="makeACall(order.userData.phone)"><span class="mont-semibold">Mob no:  </span> <span class="link">{{order.userData.phone}}</span></h3>
+                  <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>
+                    {{order.orders.order.deliveryData?.address}} - {{order.orders.order.deliveryData?.zip}}</h3>
+                  <h3 (click)="makeACall(order.userData.phone)"><span class="mont-semibold">Mob no:  </span> <span class="link">{{order.orders.order.deliveryData?.phone}}</span></h3>
                 </ion-label>
               </ion-item>
               <ion-item>
@@ -224,8 +225,8 @@
                 <ion-card-header>
                   <ion-item>
                     <ion-label>
-                      <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>{{order.userData.address}}</h3>
-                      <h3><span class="mont-semibold">Mob no: </span> {{order.userData.phone}}</h3>
+                      <h3 class="ion-text-wrap"><span class="mont-semibold">Address: </span>{{order.orders.order.deliveryData?.address}}</h3>
+                      <h3><span class="mont-semibold">Mob no: </span> {{order.orders.order.deliveryData?.phone}}</h3>
                     </ion-label>
                   </ion-item>
                 </ion-card-header>

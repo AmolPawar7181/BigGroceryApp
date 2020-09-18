@@ -96,12 +96,21 @@
     <ion-row class="ion-no-padding">
       <ion-col class="ion-no-padding">
         <ion-button class="addButton ion-no-margin" 
-        expand="full"
-        color="dark"
-        [disabled]="product.saveId"
-        (click)="addSaveForLater(product.productId)"
-        >{{product.saveId ? 'SAVED': 'SAVE FOR LATER'}}</ion-button>
+          expand="full"
+          color="dark"
+          [hidden]="product.saveId"
+          (click)="addSaveForLater(product.productId)"
+        >SAVE FOR LATER</ion-button>
+
+        <ion-button class="addButton ion-no-margin" 
+          expand="full"
+          color="dark"
+          [hidden]="!product.saveId"
+          (click)="removeSaveForLater(product.saveId)"
+          >Remove from save
+        </ion-button>
       </ion-col>
+
       <ion-col class="ion-no-padding">
         <ion-button class="addButton ion-no-margin" *ngIf="product.available  " [hidden]="product.addedTocart"
         expand="full"

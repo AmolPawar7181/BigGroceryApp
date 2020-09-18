@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MenuController, ModalController,IonRouterOutlet } from '@ionic/angular';
+import { MenuController, ModalController, IonRouterOutlet } from '@ionic/angular';
 
 import { UserData } from '../../providers/user-data';
 

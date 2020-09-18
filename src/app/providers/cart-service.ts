@@ -44,7 +44,7 @@ export class CartService {
       catchError((err) => {
         const res = {
           success: false,
-          msg: err.error.error||
+          msg: err.error.msg||
           'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -61,7 +61,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -78,7 +78,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -95,7 +95,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -112,7 +112,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -131,7 +131,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -150,7 +150,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -169,7 +169,7 @@ export class CartService {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);

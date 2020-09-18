@@ -60,7 +60,7 @@ let auth = (req, res, next) => {
   let token = req.header('__u_t');
   jwt.verify(token, SECRET, (err, decode)=> {
     if(err) {
-      res.json({ success: false, msg: "Authentication failed, Please login" });
+      res.status(401).json({ success: false, msg: "Authentication failed, Please login" });
         return;
     }
     
@@ -71,7 +71,7 @@ let auth = (req, res, next) => {
     .then((snapshot) => {
       // if username not found
       if (snapshot.empty) {
-        res.json({ success: false, msg: "Authentication failed, Please login" });
+        res.status(401).json({ success: false, msg: "Authentication failed, Please login" });
         return;
       }
       let user = {}
@@ -91,7 +91,7 @@ let admin_check = (req, res, next) => {
   let token = req.header('__u_t');
   jwt.verify(token, SECRET, (err, decode)=> {
     if(err) {
-      res.json({ success: false, msg: "You're not allowed to perform this action" });
+      res.status(401).json({ success: false, msg: "You're not allowed to perform this action" });
         return;
     }
     
@@ -103,7 +103,7 @@ let admin_check = (req, res, next) => {
     .then((snapshot) => {
       // if username not found
       if (snapshot.empty) {
-        res.json({ success: false, msg: "You're not allowed to perform this action" });
+        res.status(401).json({ success: false, msg: "You're not allowed to perform this action" });
         return;
       }
       let user = {}
@@ -156,12 +156,47 @@ const addNewPropProducts = () => {
       })
 }
 
+/// add multiple quantity and product property to all products
+const addNewQuantityProducts = () => {
+  const quantities = ["100 gms", "125 gms", "250 gms", "300 gms", "500 gms"];
+  const prices = [13, 18, 25, 28, 40];
+  
+  db.collection("productTable")
+     .orderBy("productNo", 'desc')
+     .limit(10)
+     .get()     
+     .then((doc) => {
+       let soldQuery = [];
+       doc.forEach((product) => {
+         const arr_ay = [{
+           quantity: quantities[Math.floor(Math.random() * quantities.length)],
+           price: prices[Math.floor(Math.random() * prices.length)]
+         },
+         {
+          quantity: quantities[Math.floor(Math.random() * quantities.length)],
+          price: prices[Math.floor(Math.random() * prices.length)]
+        }
+        ]
+         soldQuery.push(
+         db.collection("productTable")
+           .doc(product.id)
+           .set(
+             { quantities: arr_ay },
+             { merge: true }
+           )
+         )
+       })
+       return Promise.all(soldQuery);  
+     })
+}
+
 ////////////////////////
 ///// IMPORT DATA from excel
 ///////////////////////
 
 app.get("/importProductsFromExcel", admin_check, (req, res) => {
 
+  addNewQuantityProducts();
   // addNewPropProducts();
   // const data = require('./data.json');
 
@@ -208,7 +243,7 @@ app.get("/getPayMethodData", (req, res) => {
       "trRef": ""
     }
   
-  res.json({success: true, upiData, cod: true, deChrg: 40, minTotal: 500});
+  res.json({success: true, upiData, rezData, cod: true, deChrg: 40, minTotal: 500});
 })
 
 app.post("/addUpiData", (req, res) => {
@@ -396,13 +431,7 @@ app.put("/deleteFromHome", admin_check, (req, res) => {
 
 app.post("/addOrder",auth, (req, res) => {
   const orderData = {
-    userId: req.body.userId,
-    total: req.body.total,
-    products: req.body.products,
-    paymentId: req.body.paymentId,
-    paymentMethod: req.body.paymentMethod,
-    productAmount: req.body.productAmount,
-    deChrg: req.body.deChrg,
+    ...req.body,
     status: "active",
     createdAt: admin.firestore.Timestamp.fromDate(new Date()),
   };
@@ -715,7 +744,7 @@ app.get("/removeSaveForLater", auth, (req, res) => {
   db.collection(`userTable/${userId}/saved`)
     .doc(saveId)
     .delete()
-    .then((snapshot) => {
+    .then(() => {
       res.json({ success: true, msg: "Removed from saved list" });    
   })
   .catch((err) => {
@@ -741,8 +770,8 @@ app.get("/addSaveForLater", auth, (req, res) => {
         db.doc(`/userTable/${userId}`)
           .collection("saved")
           .add(product)
-          .then(() => {
-            res.json({status: true, msg: 'Saved for later'})
+          .then((doc) => {
+            res.json({status: true, saveId: doc.id, msg: 'Saved for later'})
           });
           return
       }
@@ -1382,7 +1411,7 @@ app.post("/addUser", (req, res) => {
     password: req.body.password,
     email: req.body.email,
     phone: req.body.phone,
-    address: req.body.address,
+    addresses: [{"address":req.body.address, isDefault: true, "name": req.body.username, "phone": req.body.phone, "zip": req.body.zip}],
     role: 0,
     token: "",
     resetToken: "",
@@ -1415,6 +1444,27 @@ app.post("/addUser", (req, res) => {
     .catch((err) => {
       res.status(500).json({ error: "Something went wrong", err: err });
     });
+});
+
+app.post("/addAddress", (req, res) => {
+  
+    const userId =  req.body.userId;
+    const address = req.body.address;
+    db.collection("userTable")
+    .doc(userId)
+    .update({
+      addresses: admin.firestore.FieldValue.arrayUnion(address)
+    })
+    .then(() => {
+      return res.json({success:true, msg: "Address added successfully!!!"});
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.json({success:false, msg: "somethig went wrong" });
+    });
+
+    
+  
 });
 
 app.post("/login", (req, res) => {

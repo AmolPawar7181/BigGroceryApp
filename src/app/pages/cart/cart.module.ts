@@ -8,6 +8,7 @@ import { CartPageRoutingModule } from './cart-routing.module';
 import { CartPage } from './cart.page';
 import { SpeakerListModule } from '../speaker-list/speaker-list.module';
 import { CheckoutPageModule } from '../checkout/checkout.module';
+import { MapModule } from '../map/map.module';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import { CheckoutPageModule } from '../checkout/checkout.module';
     CartPageRoutingModule,
     FivGalleryModule,
     SpeakerListModule,
-    CheckoutPageModule
+    CheckoutPageModule,
+    MapModule
   ],
   declarations: [CartPage]
 })

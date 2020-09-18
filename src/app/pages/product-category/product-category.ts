@@ -9,7 +9,8 @@ import {
   ToastController,
   Config,
   Platform,
-  IonInfiniteScroll
+  IonInfiniteScroll,
+  ActionSheetController
 } from '@ionic/angular';
 import { FivGallery } from '@fivethree/core';
 
@@ -71,7 +72,8 @@ export class ProductCategoryPage implements OnInit {
     public product: ProductData,
     public modelService: ModelService,
     public cartService: CartService,
-    public platform: Platform
+    public platform: Platform,
+    public actionCtrl: ActionSheetController
   ) {}
 
   ngOnInit() {
@@ -116,6 +118,32 @@ export class ProductCategoryPage implements OnInit {
         }
       }
     });
+  }
+
+  createButtons(product: any) {
+    const buttons = [];
+    // tslint:disable-next-line: forin
+    for (const index in product.quantities) {
+      const button = {
+        text: `${product.quantities[index].quantity} - Rs ${product.quantities[index].price}`,
+        handler: () => {
+          console.log('selected quantity ' + product.quantities[index].quantity);
+          product.price = product.quantities[index].price;
+          product.pricePerQuantity = product.quantities[index].quantity;
+          return true;
+        }
+      };
+      buttons.push(button);
+    }
+    return buttons;
+  }
+
+  async selectQuantity(product: any) {
+    const actionSheet = await this.actionCtrl.create({
+      header: `Available quantities for ${product.name}`,
+      buttons: this.createButtons(product)
+    });
+    await actionSheet.present();
   }
 
   addToCart(product: any, pos: any) {

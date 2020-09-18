@@ -170,12 +170,13 @@ export class AppComponent implements OnInit {
     });
 
     window.addEventListener('user:logout', () => {
-      // console.log('event listener on app user logout');
+      console.log('event listener on app user logout');
       this.productData.removeCart();
       this.cartService.addCartItemCount(0);
       this.userData.setUserId(null);
       this.updateLoggedInStatus(false);
       this.setProfileData();
+      this.router.navigateByUrl('/app/tabs/schedule', {});
     });
   }
 

@@ -27,7 +27,7 @@ export class AdminData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -46,7 +46,7 @@ export class AdminData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -65,7 +65,7 @@ export class AdminData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -84,7 +84,7 @@ export class AdminData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -121,7 +121,7 @@ export class AdminData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -140,7 +140,7 @@ getPayMethodData(): any {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -159,7 +159,7 @@ getPayMethodData(): any {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -178,7 +178,7 @@ getPayMethodData(): any {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -197,7 +197,7 @@ getPayMethodData(): any {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -216,7 +216,7 @@ getPayMethodData(): any {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -237,7 +237,7 @@ getPayMethodData(): any {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);

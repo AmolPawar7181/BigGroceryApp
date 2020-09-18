@@ -117,6 +117,7 @@ export class AdminPage implements OnInit {
   }
 
   myHeaderFn = (record: any, recordIndex: any, records: any) => {
+      console.log('records ', records);
       const firstSeconds = records[this.dateIndex].orders.order.createdAt._seconds;
       const date = new Date(firstSeconds * 1000);
       date.setHours(0, 0, 0, 0);
@@ -259,17 +260,20 @@ export class AdminPage implements OnInit {
     /* this is for virtual scroll update */
     let newActiveOrders = this.activeOrders;
     newActiveOrders.splice(pos, 1);
+    console.log(this.activeOrders);
+    console.log(newActiveOrders);
 
     this.modelService.presentLoading('Please wait...');
     this.adminData.setOrderStatus(status, orderId)
         .subscribe((res: any) => {
           this.modelService.dismissLoading();
           if (res.success) {
-            this.activeOrders = [];
+            this.activeOrders = [];// .length = 0;
             setTimeout(() => {
+              console.log('settimeot ', this.activeOrders, newActiveOrders);
               this.activeOrders = newActiveOrders;
               // this.activeOrdersCount = newActiveOrders.length;
-            }, 100);
+            }, 200);
             this.activeOrdersCount--;
             this.modelService.presentToast(res.msg, 1000, 'success');
           } else {

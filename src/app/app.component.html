@@ -3,10 +3,10 @@
  
     <ion-menu contentId="main-content">
       <ion-content>
-        <ion-header *ngIf="profileData">
+        <ion-header>
           <ion-toolbar class="menu-toolbar">
             <img src="../assets/img/speaker-background.png"/>
-          <ion-text class="ion-text-capitalize menu-title ion-text-wrap"> {{profileData.username}} </ion-text>
+          <ion-text *ngIf="profileData" class="ion-text-capitalize menu-title ion-text-wrap"> {{profileData.username}} </ion-text>
         </ion-toolbar>
         </ion-header>
         

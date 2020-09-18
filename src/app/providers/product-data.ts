@@ -27,7 +27,7 @@ export class ProductData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -46,7 +46,7 @@ export class ProductData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -79,7 +79,7 @@ export class ProductData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -123,7 +123,7 @@ export class ProductData {
                 catchError(err => {
                   const res = {
                     success: false,
-                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                    msg: err.error.msg || 'Something went wrong, Please check internet connection'
                   };
                   return of(res);
                 })
@@ -138,7 +138,7 @@ export class ProductData {
                 catchError(err => {
                   const res = {
                     success: false,
-                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                    msg: err.error.msg || 'Something went wrong, Please check internet connection'
                   };
                   return of(res);
                 })
@@ -153,7 +153,7 @@ export class ProductData {
                 catchError(err => {
                   const res = {
                     success: false,
-                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                    msg: err.error.msg || 'Something went wrong, Please check internet connection'
                   };
                   return of(res);
                 })
@@ -168,7 +168,7 @@ export class ProductData {
                 catchError(err => {
                   const res = {
                     success: false,
-                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                    msg: err.error.msg || 'Something went wrong, Please check internet connection'
                   };
                   return of(res);
                 })
@@ -183,7 +183,7 @@ export class ProductData {
                 catchError(err => {
                   const res = {
                     success: false,
-                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                    msg: err.error.msg || 'Something went wrong, Please check internet connection'
                   };
                   return of(res);
                 })
@@ -202,7 +202,7 @@ export class ProductData {
                 catchError(err => {
                   const res = {
                     success: false,
-                    msg: err.error.error || 'Something went wrong, Please check internet connection'
+                    msg: err.error.msg || 'Something went wrong, Please check internet connection'
                   };
                   return of(res);
                 })
@@ -219,7 +219,7 @@ export class ProductData {
                     const res = {
                       success: false,
                       msg:
-                        err.error.error ||
+                        err.error.msg ||
                         'Something went wrong, Please check internet connection',
                     };
                     return of(res);
@@ -242,7 +242,7 @@ export class ProductData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -259,7 +259,7 @@ export class ProductData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -280,7 +280,7 @@ export class ProductData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -297,7 +297,7 @@ export class ProductData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -320,7 +320,7 @@ export class ProductData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);
@@ -337,7 +337,7 @@ export class ProductData {
         const res = {
           success: false,
           msg:
-            err.error.error ||
+            err.error.msg ||
             'Something went wrong, Please check internet connection',
         };
         return of(res);
@@ -367,7 +367,7 @@ export class ProductData {
           const res = {
             success: false,
             msg:
-              err.error.error ||
+              err.error.msg ||
               'Something went wrong, Please check internet connection',
           };
           return of(res);

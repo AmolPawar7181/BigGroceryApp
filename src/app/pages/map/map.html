@@ -1,36 +1,113 @@
-<ion-header>
-  <!-- <ion-toolbar color="primary">
-    <ion-searchbar [(ngModel)]="autocomplete.input" (ionInput)="UpdateSearchResults()" placeholder="Search for a place"  (ionClear)="ClearAutocomplete()"></ion-searchbar>
-  </ion-toolbar> -->
-  <!-- <ion-list [hidden]="autocompleteItems.length == 0">
-    <ion-item *ngFor="let item of autocompleteItems" tappable (click)="SelectSearchResult(item)">
-      {{ item.description }}
-    </ion-item>
-  </ion-list> -->
-  <ion-row>    
-    <ion-col size="6">
-      <ion-text>Google & Ionic Map</ion-text>
-    </ion-col>
-    <ion-col  size="6">
-      <ion-button (click)="loadMap()" shape="round" fill="outline">
-        <ion-icon slot="start" name="locate"></ion-icon>
-          Where I Am
-        </ion-button>
-    </ion-col>
-  </ion-row>  
+<ion-header >
+  <ion-toolbar [hidden]="isAddAddress">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title><span>Choose Delivery Address</span> </ion-title>
+  </ion-toolbar>
+  <ion-toolbar [hidden]="!isAddAddress">
+    <ion-buttons slot="start">
+      <ion-button (click)="isAddAddress = false">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title><span>Add new address</span> </ion-title>
+  </ion-toolbar>
 </ion-header>
+ 
 <ion-content> 
-  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-    <ion-fab-button (click)="ShowCords()" ion-fab color="tertiary">
-      <ion-icon name="information-circle-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-  <div class="map-wrapper" style="height: 60%;">      
-    <div id="map_center">
-      <ion-icon name="pin" size="large" color="danger"></ion-icon>      
-    </div>
-    <div #map id="map"  style="height: 100%;"></div>
-  </div>   
-  <ion-text>Address: {{address}}</ion-text>
+  <ion-grid [hidden]="isAddAddress">
+    <ion-row>
+      <ion-col class="ion-align-items-center" style="display: flex;"> 
+        <ion-note>SAVED ADDRESSES</ion-note>
+      </ion-col>
+      <ion-col>
+        <ion-chip outline color="primary" (click)="isAddAddress = true">
+          <ion-icon name="add-outline"></ion-icon>
+          <ion-label>ADD ADDRESS</ion-label>
+        </ion-chip>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- <ion-text>Address: {{address | json}}</ion-text> -->
+  <ion-grid [hidden]="isAddAddress">
+    <ion-row>
+      <ion-list>
+        <ion-radio-group [value]="'radio-'+isDefault" (ionChange)="selectAddress($event)" allowEmptySelection="true">
+        <ion-item *ngFor="let address of addresses;index as pos">
+          <ion-label class="ion-text-wrap">{{address.address}}</ion-label>
+          <ion-radio slot="start" name="{{address.address}}" value="{{'radio-'+pos}}" ></ion-radio>
+        </ion-item>
+        
+      </ion-radio-group>
+      </ion-list>
+    </ion-row>
+  </ion-grid>
+  
+
+    <ion-list [hidden]="!isAddAddress" class="ion-text-center">
+      <!-- <ion-item  lines="none"> -->
+        <ion-button slot="start" fill="outline" color="medium" (click)="getLocation()">
+          Choose current location
+          <ion-icon name="locate" slot="start"></ion-icon>
+        </ion-button>
+      <!-- </ion-item> -->
+      <form #submitForm="ngForm" novalidate (ngSubmit)="addNewAddress(submitForm)">
+        <ion-list>
+          <ion-item>
+            <ion-label position="stacked" color="primary">PIN code</ion-label>
+            <ion-input (ionBlur)="checkPinCode($event)" [(ngModel)]="addNew.zip" name="zip"
+             type="number" #zip="ngModel" minlength="6" required>
+            </ion-input>
+          </ion-item>
+          <ion-text color="danger">
+            <p [hidden]="zip.valid || submitted == false" class="ion-padding-start">
+              PIN code is required
+            </p>
+          </ion-text>
+
+          <ion-item> 
+            <ion-label position="stacked" color="primary">Address</ion-label>
+            <ion-textarea [(ngModel)]="addNew.address" name="addressText" rows="6" #addressText="ngModel" required>
+            </ion-textarea>
+          </ion-item>
+          <ion-text color="danger">
+            <p [hidden]="addressText.valid || submitted === false" class="ion-padding-start">
+              Address is required
+            </p>
+          </ion-text>
+
+          <ion-item>
+            <ion-label position="stacked" color="primary">Name</ion-label>
+            <ion-input [(ngModel)]="addNew.name" name="username" type="text" #username="ngModel" required>
+            </ion-input>
+          </ion-item>
+          <ion-text color="danger">
+            <p [hidden]="username.valid || submitted == false" class="ion-padding-start">
+              Username is required
+            </p>
+          </ion-text>
+
+          <ion-item>
+            <ion-label position="stacked" color="primary">Enter Phone number</ion-label>
+            <ion-input [(ngModel)]="addNew.phone" name="phone" type="number"  #phone="ngModel" required>
+            </ion-input>
+          </ion-item>          
+          <ion-text color="danger">
+            <p [hidden]="phone.valid || submitted == false" class="ion-padding-start">
+              Valid Number Required
+            </p>
+          </ion-text>
+        
+          <ion-button class="ion-margin singup" shape="round" expand="block" type="submit" expand="block">Add</ion-button>
+        </ion-list>
+        </form>
+      </ion-list>
+   
+      
+   
 
 </ion-content>

@@ -1,147 +1,181 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
-import { Platform } from '@ionic/angular';
-import { DOCUMENT} from '@angular/common';
-
+import { Platform, ModalController } from '@ionic/angular';
+import { NgForm } from '@angular/forms';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
 
-import { darkStyle } from './map-dark-style';
-
-declare var google;
+import { UserData } from '../../providers/user-data';
+import { ModelService } from '../../providers/models/model-service';
 
 @Component({
   selector: 'page-map',
   templateUrl: 'map.html',
   styleUrls: ['./map.scss']
 })
-export class MapPage implements OnInit {
+export class MapPage {
   @ViewChild('map',  {static: false}) mapElement: ElementRef;
   map: any;
-  address: string;
-  lat: string;
-  long: string;
+  addNew: {address: string, zip: any, name: string, phone: number, isDefault: boolean} =
+    { address: '', zip: null, name: '', phone: null, isDefault: false};
+  lat: any;
+  long: any;
   autocomplete: { input: '' };
   autocompleteItems: any[];
   location: any;
   placeid: any;
   GoogleAutocomplete: any;
+  user: any;
+  addresses: { address: string; isDefault: boolean }[] = [];
+  isDefault: any = 0;
+  newAddress: any;
+  validAddress: false;
+  isAddAddress: false;
+  submitted = false;
+  deliveryAddress: any;
+  zipCodes: any = [];
 
   constructor(
     private geolocation: Geolocation,
     private nativeGeocoder: NativeGeocoder,
     public zone: NgZone,
-    public platform: Platform
-    ) {
-      this.platform.ready().then(() => {
-        if (google) {
-          if (google.maps.places) {
-          this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
-          this.autocomplete = { input: '' };
-          this.autocompleteItems = [];
-          }
-        }
-      });
+    public platform: Platform,
+    public userData: UserData,
+    public modalCtrl: ModalController,
+    public modelService: ModelService
+    ) {  }
+
+    ionViewWillEnter() {
+      this.userData.getUserData()
+          .then((user: any) => {
+            if (user) {
+              this.user = user;
+              user.addresses.forEach((value, index) => {
+                if (value.isDefault) {
+                  this.isDefault = index + 0;
+                }
+              });
+              this.addresses = user.addresses;
+            }
+          });
+
+      this.userData.getAllowedZipCodes()
+          .then((res: any) => {
+            if (res.success) {
+              this.zipCodes = res.data.codes;
+            }
+          });
     }
 
-    ngOnInit() {
-      this.platform.ready().then(() => {
-        this.loadMap();
-      });
-    }
-
-    loadMap() {
+    getLocation() {
       const options = {
         enableHighAccuracy: true
       };
-      // FIRST GET THE LOCATION FROM THE DEVICE.
       this.geolocation.getCurrentPosition(options).then((resp) => {
-        console.log('resp ', resp);
-        const latLng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
-        const mapOptions = {
-          center: latLng,
-          zoom: 15,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-
-        // LOAD THE MAP WITH THE PREVIOUS VALUES AS PARAMETERS.
-        this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude);
-        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-        this.map.addListener('tilesloaded', () => {
-          console.log('accuracy', this.map, this.map.center.lat());
-          this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng());
-          this.lat = this.map.center.lat();
-          this.long = this.map.center.lng();
-        });
-      }).catch((error) => {
-        console.log('Error getting location', error);
+        this.lat = resp.coords.latitude;
+        this.long = resp.coords.longitude;
+        this.getAddressFromCoords(this.lat, this.long);
+      })
+      .catch((error) => {
+        this.modelService.presentToast(error.message, 2000, 'danger');
       });
     }
 
+    checkPinCode(event: any) {
+      if (event.target.value.length < 6) {
+          this.modelService.presentToast('Please enter valid PIN code', 2000, 'danger');
+          return;
+      }
+      // tslint:disable-next-line: radix
+      const zip = parseInt(event.target.value);
+      if (!this.areaAvailable(zip)) {
+        this.modelService.presentToast('Oh ho, Currently we are not delivering in your area. Sorry for inconvenience', 3000, 'danger');
+      }
+    }
 
-    getAddressFromCoords(lattitude, longitude) {
-      console.log('getAddressFromCoords ' + lattitude + ' ' + longitude);
+    areaAvailable(zip: any) {
+      const index =  this.zipCodes.indexOf(zip);
+      return index !== -1 ? true : false;
+    }
+
+    private mobileValidator(num: number) {
+      const numBer = num.toString();
+      const n7 =  /^7[0-9].*$/;
+      const n8 =  /^8[0-9].*$/;
+      const n9 =  /^9[0-9].*$/;
+      if (numBer.length === 10 && ( n7.test(numBer) || n8.test(numBer) || n9.test(numBer))) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    getAddressFromCoords(lattitude: any, longitude: any) {
       const options: NativeGeocoderOptions = {
         useLocale: true,
         maxResults: 5
       };
       this.nativeGeocoder.reverseGeocode(lattitude, longitude, options)
         .then((result: NativeGeocoderResult[]) => {
-          console.log('result ', result);
-          this.address = '';
-          const responseAddress = [];
-          for (const [key, value] of Object.entries(result[0])) {
-            if (value.length > 0) {
-            responseAddress.push(value);
-            }
-          }
-          responseAddress.reverse();
-          for (const value of responseAddress) {
-            this.address += value + ', ';
-          }
-          this.address = this.address.slice(0, -2);
+          const cuAddress = `${result[0].areasOfInterest}, ${result[0].subThoroughfare}, ${result[0].subLocality}, ${result[0].locality}, ${result[0].subAdministrativeArea}, ${result[0].postalCode}`;
+          this.addNew.zip = result[0].postalCode;
+          this.addNew.address = cuAddress;
         })
         .catch((error: any) => {
-          this.address = 'Address Not Available!';
+          this.modelService.presentToast(error, 2000, 'danger');
         });
+
     }
 
-  // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP
-  ShowCords() {
-    alert('lat' + this.lat + ', long' + this.long );
-  }
-
-   // AUTOCOMPLETE, SIMPLY LOAD THE PLACE USING GOOGLE PREDICTIONS AND RETURNING THE ARRAY.
-   UpdateSearchResults(){
-    if (this.autocomplete.input == '') {
-      this.autocompleteItems = [];
-      return;
+    addNewAddress(form: NgForm) {
+     this.submitted = true;
+     if (form.valid) {
+      console.log(form.valid, this.addNew);
+      if (this.areaAvailable(this.addNew.zip)) {
+        if (this.mobileValidator(this.addNew.phone)) {
+          this.modelService.presentLoading('');
+          this.userData
+              .addAddress(this.addNew, this.user.userId)
+              .subscribe((res: any) => {
+                this.modelService.dismissLoading();
+                if (res.success) {
+                  const newAddress = JSON.parse(JSON.stringify(this.addNew));
+                  this.user.addresses.push(newAddress);
+                  console.log(this.user);
+                  this.userData.setUserData(this.user).then(() => {
+                    this.isAddAddress = false;
+                    this.modelService.presentToast(res.msg, 2000, 'success');
+                    form.resetForm();
+                    this.submitted = false;
+                  });
+                } else {
+                  this.modelService.presentToast(res.msg, 2000, 'danger');
+                }
+              });
+        } else {
+          this.modelService.presentToast('Please enter valid phone number', 3000, 'danger');
+        }
+      } else {
+          this.modelService.presentToast('Oh ho, Currently we are not delivering in your area. Sorry for inconvenience', 3000, 'danger');
+        }
+     }
     }
-    this.GoogleAutocomplete.getPlacePredictions({ input: this.autocomplete.input },
-    (predictions, status) => {
-      this.autocompleteItems = [];
-      this.zone.run(() => {
-        predictions.forEach((prediction) => {
-          this.autocompleteItems.push(prediction);
+
+    selectAddress(event: any) {
+      if (event.target.value) {
+        const value = (event.target.value).match(/(\d+)/);
+        this.deliveryAddress = this.addresses[value[0]];
+        this.user.deliveryAddress = this.addresses[value[0]];
+        this.userData.setUserData(this.user).then(() => {
+          this.dismiss();
         });
-      });
-    });
-  }
-  // wE CALL THIS FROM EACH ITEM.
-  SelectSearchResult(item: any) {
-    /// WE CAN CONFIGURE MORE COMPLEX FUNCTIONS SUCH AS UPLOAD DATA TO FIRESTORE OR LINK IT TO SOMETHING
-    alert(JSON.stringify(item));
-    this.placeid = item.place_id;
-  }
+      }
+    }
 
-  // lET'S BE CLEAN! THIS WILL JUST CLEAN THE LIST WHEN WE CLOSE THE SEARCH BAR.
-  ClearAutocomplete() {
-    this.autocompleteItems = [];
-    this.autocomplete.input = '';
-  }
 
-  // sIMPLE EXAMPLE TO OPEN AN URL WITH THE PLACEID AS PARAMETER.
-  GoTo() {
-    return window.location.href = 'https://www.google.com/maps/search/?api=1&query=Google&query_place_id=' + this.placeid;
+  dismiss(data?: any) {
+    // using the injected ModalController this page
+    // can "dismiss" itself and pass back data
+    this.modalCtrl.dismiss(this.user.deliveryAddress);
   }
 
 }

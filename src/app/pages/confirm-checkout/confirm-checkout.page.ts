@@ -1,18 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { NavParams, ModalController } from '@ionic/angular';
-import { Router } from '@angular/router';
-
 @Component({
-  selector: 'app-checkout',
-  templateUrl: './checkout.page.html',
-  styleUrls: ['./checkout.page.scss'],
+  selector: 'app-confirm-checkout',
+  templateUrl: './confirm-checkout.page.html',
+  styleUrls: ['./confirm-checkout.page.scss'],
 })
-export class CheckoutPage implements OnInit {
+export class ConfirmCheckoutPage implements OnInit {
   orderDetails: any;
   userData: any;
   orderId: any;
   animate = true;
-  constructor(private navParams: NavParams, private modalCtrl: ModalController, public router: Router) { }
+  constructor(private navParams: NavParams, private modalCtrl: ModalController) { }
 
   ngOnInit() {
     this.orderId = this.navParams.get('orderId');
@@ -25,8 +23,7 @@ export class CheckoutPage implements OnInit {
   }
 
   dismiss() {
-    this.modalCtrl.dismiss({dismissed: true});
-    // this.router.navigateByUrl('/app/tabs/schedule', { replaceUrl: true });
+    this.modalCtrl.dismiss();
   }
 
 }

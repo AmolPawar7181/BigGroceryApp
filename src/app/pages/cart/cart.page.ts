@@ -11,7 +11,7 @@ import { AdminData } from '../../providers/admin-data';
 import { SpeakerListPage } from '../speaker-list/speaker-list';
 import { WebIntent } from '@ionic-native/web-intent/ngx';
 import { CheckoutPage } from '../checkout/checkout.page';
-
+import { MapPage } from '../map/map';
 declare var RazorpayCheckout: any;
 
 @Component({
@@ -47,6 +47,7 @@ export class CartPage implements OnInit {
   slideOpts = {
     slidesPerView: 2,
   };
+  isCheckout = false;
 
   constructor(public user: UserData, public cartService: CartService,
               public modelService: ModelService, public router: Router,
@@ -61,116 +62,120 @@ export class CartPage implements OnInit {
     this.setUserId();
     this.getUserData();
     this.setPayData();
-    // this.cartService.getCartItemsByProductId()
-    //     .subscribe((res: any) => {
-    //       console.log('res ', res);
-    //     });
   }
 
   // this will check payment method
   // and will trigger the function accordingly
 
-  payWith() {
-    this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
-        .then(res => {
-          if (res === 'ok') {
-            if (this.payementMethod === 'upi') {
-              // console.log('this.codAvailable ', this.codAvailable);
-              // if cash on delivery available
-              if (this.codAvailable) {
-                this.selectCODorUPI('UPI - Google pay, PhonePe...', 'upi');
-              } else {
-                this.payWithUpi();
-              }
-            } else if (this.payementMethod === 'rez') {
-              // if cash on delivery available
-              if (this.codAvailable) {
-                this.selectCODorUPI('Net banking, Debit Card...', 'rez');
-              } else {
-                this.payWithRazorpay();
-              }
-            }
-          }
-        });
-  }
+  // payWith() {
+  //   if (this.payementMethod === 'upi') {
+  //     // console.log('this.codAvailable ', this.codAvailable);
+  //     // if cash on delivery available
+  //     if (this.codAvailable) {
+  //       this.selectCODorUPI('UPI - Google pay, PhonePe...', 'upi');
+  //     } else {
+  //       this.payWithUpi();
+  //     }
+  //   } else if (this.payementMethod === 'rez') {
+  //     // if cash on delivery available
+  //     if (this.codAvailable) {
+  //       this.selectCODorUPI('Net banking, Debit Card...', 'rez');
+  //     } else {
+  //       this.payWithRazorpay();
+  //     }
+  //   }
+  // }
 
-  async selectCODorUPI(otherMethod: any, method: any) {
-    const actionSheet = await this.actionCtrl.create({
-      header: 'Select payment method',
-      cssClass: 'cart-action-sheet',
-      buttons: [{
+  createButtons() {
+    const buttons = [];
+    // tslint:disable-next-line: forin
+    // for (const index in product.quantities) {
+
+    if (this.codAvailable) {
+      const button = {
         text: 'COD - Cash on delivery',
         icon: 'cash-outline',
         handler: () => {
           this.payWithCOD();
         }
-      }, {
-        text: otherMethod,
+      };
+      buttons.push(button);
+    }
+
+    if (this.upiData) {
+      const button = {
+        text: 'UPI - Google pay, PhonePe...',
         icon: 'phone-portrait-outline',
         handler: () => {
-          if (method === 'upi') {
-            this.payWithUpi();
-          } else if (method === 'rez') {
-            this.payWithRazorpay();
-          }
+          this.payWithUpi();
         }
-      }]
+      };
+      buttons.push(button);
+    }
+
+    if (this.razorData) {
+      const button = {
+        text: 'Net Banking, Debit Card...',
+        icon: 'card-outline',
+        handler: () => {
+          this.payWithRazorpay();
+        }
+      };
+      buttons.push(button);
+    }
+
+    return buttons;
+  }
+
+  async makePayment() {
+    const actionSheet = await this.actionCtrl.create({
+      header: 'Select payment method',
+      cssClass: 'cart-action-sheet',
+      buttons: this.createButtons()
     });
     await actionSheet.present();
   }
 
   payWithCOD() {
-    // this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
-    //     .then(res => {
-    //       if (res === 'ok') {
-            this.checkOut('COD', 'COD');
-        //   }
-        // }); 
-
+    this.checkOut('COD', 'COD');
   }
 
   payWithUpi() {
-    // this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
-    //     .then(res => {
-    //       if (res === 'ok') {
+    this.upiData.amount = this.total;
+    this.upiData.tranId =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+    this.upiData.trRef =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
 
-          this.upiData.amount = this.total;
-          this.upiData.tranId =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
-          this.upiData.trRef =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8);
+    const options = {
+      action: this.webIntent.ACTION_VIEW,
+      url: `upi://pay?pa=${this.upiData.payeeVPA}&pn=${this.upiData.payeeName}&tid=${this.upiData.tranId}&am=${this.upiData.amount}&cu=${this.upiData.currency}&tn=${this.upiData.tranNote}&tr=${this.upiData.trRef}`
+    };
 
-          const options = {
-            action: this.webIntent.ACTION_VIEW,
-            url: `upi://pay?pa=${this.upiData.payeeVPA}&pn=${this.upiData.payeeName}&tid=${this.upiData.tranId}&am=${this.upiData.amount}&cu=${this.upiData.currency}&tn=${this.upiData.tranNote}&tr=${this.upiData.trRef}`
-          };
-
-          this.webIntent.startActivityForResult(options)
-              .then((success: any) => {
-                this.upiResponse = success;
-                if (success.extras.Status === 'SUCCESS' || success.extras.Status === 'Success') {
-                  this.modelService.presentToast(`Success ${success})`, 3000, 'success');
-                  this.addUpiSuccess(success);
-                  this.checkOut(success.extras.txnRef, this.payementMethod);
-                } else if (success.extras.Status === 'SUBMITTED') {
-                  this.addUpiSuccess(success);
-                  this.checkOut(success.extras.txnRef, this.payementMethod);
-                  this.modelService.presentToast(`Success ${success})`, 3000, 'success');
-                } else if (success.extras.Status === 'Failed' || success.extras.Status === 'FAILURE') {
-                  this.addUpiSuccess(success);
-                  this.modelService.presentToast(`(Error ${success.extras.Status})`, 3000, 'danger');
-                } else {
-                  this.addUpiSuccess(success);
-                  this.modelService.presentToast(`(Error ${success.extras.Status})`, 3000, 'danger');
-                }
-              }, (rejected: any) => {
-                this.upiResponse = rejected;
-                this.addUpiSuccess(rejected);
-                this.modelService.presentToast(`(Rejected ${rejected})`, 3000, 'danger');
-              })
-              .catch((error: any) => {
-                alert('Error in webintent');
-              });
-    //   }
-    // });
+    this.webIntent.startActivityForResult(options)
+        .then((success: any) => {
+          this.upiResponse = success;
+          if (success.extras.Status === 'SUCCESS' || success.extras.Status === 'Success') {
+            this.modelService.presentToast(`Success ${success})`, 3000, 'success');
+            this.addUpiSuccess(success);
+            this.checkOut(success.extras.txnRef, this.payementMethod);
+          } else if (success.extras.Status === 'SUBMITTED') {
+            this.addUpiSuccess(success);
+            this.checkOut(success.extras.txnRef, this.payementMethod);
+            this.modelService.presentToast(`Success ${success})`, 3000, 'success');
+          } else if (success.extras.Status === 'Failed' || success.extras.Status === 'FAILURE') {
+            this.addUpiSuccess(success);
+            this.modelService.presentToast(`(Error ${success.extras.Status})`, 3000, 'danger');
+          } else {
+            this.addUpiSuccess(success);
+            this.modelService.presentToast(`(Error ${success.extras.Status})`, 3000, 'danger');
+          }
+        }, (rejected: any) => {
+          this.upiResponse = rejected;
+          this.addUpiSuccess(rejected);
+          this.modelService.presentToast(`(Rejected ${rejected})`, 3000, 'danger');
+        })
+        .catch((error: any) => {
+          alert('Error in webintent');
+        });
   }
 
   addUpiSuccess(res: any) {
@@ -207,12 +212,7 @@ export class CartPage implements OnInit {
       // console.log('error cancelCallBack', error);
     };
 
-    // this.modelService.presentConfirm('Are you sure?', `You have added all the items needed?`, 'add items', 'make payment')
-    //     .then(res => {
-    //       if (res === 'ok') {
     RazorpayCheckout.open(options, successCallback, cancelCallback);
-        //   }
-        // });
   }
 
   addToCart(product: any, pos: any) {
@@ -302,6 +302,7 @@ export class CartPage implements OnInit {
   }
 
   getCartDetails() {
+    console.log('getCartDetails ');
     this.modelService.presentLoading('Please wait...');
     this.user.getUserData()
     .then((user: any) => {
@@ -310,7 +311,7 @@ export class CartPage implements OnInit {
       this.cartService.getCartDetails(this.userId)
       .subscribe((cartDetails: any) => {
          this.modelService.dismissLoading();
-         // console.log('cartDetails.data ', cartDetails);
+         console.log('cartDetails.data ', cartDetails);
          this.getSavedForLater();
          if (cartDetails.data && cartDetails.data.length > 0) {
           this.cartItemCount = cartDetails.data.length;
@@ -339,6 +340,7 @@ export class CartPage implements OnInit {
       paymentMethod,
       productAmount: this.productAmount,
       deChrg: this.isFreeDelivery ? 0 : this.deChrg,
+      deliveryData: this.userData.deliveryAddress
     };
     // console.log('order ', order);
     this.modelService.presentLoading('Confirming order, Please wait...');
@@ -378,8 +380,9 @@ export class CartPage implements OnInit {
     await modal.present();
 
     const { data } = await modal.onWillDismiss();
-
-    // Close any open sliding items when the schedule updates
+    if (data) {
+        this.setIsCheckout();
+    }
   }
 
   async presentAddressPage() {
@@ -421,9 +424,27 @@ export class CartPage implements OnInit {
   getUserData() {
     this.user.getUserData()
         .then((user: any) => {
-          this.userData = user;
-          // console.log(this.userData);
+          if (user) {
+            this.userData = user;
+            if (!user.deliveryAddress) {
+              user.addresses.forEach((value: any) => {
+                if (value.isDefault) {
+                  this.userData.deliveryAddress = value;
+                  return;
+                }
+              });
+            }
+          }
+          console.log('getuserdata ', this.userData);
         });
+  }
+
+  setIsCheckout() {
+    this.modelService.presentLoading('');
+    setTimeout(() => {
+      this.isCheckout = !this.isCheckout;
+      this.modelService.dismissLoading();
+    }, 1000);
   }
 
   setPayData() {
@@ -462,13 +483,29 @@ export class CartPage implements OnInit {
                       this.savedProducts[i].isAddedTocart = false;
                     }
                 }
+              } else {
+                this.savedProducts = [];
               }
             });
           }
       });
   }
 
-  async presentDetails(productDetails: any) {
+  async addAddress() {
+    const modal = await this.modalCtrl.create({
+      component: MapPage,
+      swipeToClose: true,
+      componentProps: {}
+    });
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      this.getUserData();
+    }
+  }
+
+  async presentDetails(productDetails: any, pos: any) {
     const userId = this.userId;
     const newProductDetails = {
       productId: productDetails.productId,
@@ -481,23 +518,29 @@ export class CartPage implements OnInit {
       componentProps: { productDetails: newProductDetails, userId },
     });
     await modal.present();
+
+    const {data} = await modal.onWillDismiss();
+    if (data.isRemoved) {
+      this.savedProducts.splice(pos, 1);
+    }
   }
 
   setPaymentMethod(payData: any) {
     // console.log('setPaymentMethod ', payData);
-    if (payData.upiData) {
+    //if (payData.upiData) {
       this.upiData = payData.upiData;
+      this.razorData = payData.rezData;
       this.payementMethod = 'upi';
       this.codAvailable = payData.cod;
       this.deChrg = payData.deChrg;
       this.minTotal = payData.minTotal;
-    } else if (payData.rezData) {
-      this.razorData = payData.rezData;
-      this.payementMethod = 'rez';
-      this.codAvailable = payData.cod;
-      this.deChrg = payData.deChrg;
-      this.minTotal = payData.minTotal;
-    }
+    //} else if (payData.rezData) {
+      
+      // this.payementMethod = 'rez';
+      // this.codAvailable = payData.cod;
+      // this.deChrg = payData.deChrg;
+      // this.minTotal = payData.minTotal;
+    // }
   }
 
  setProductsById(cartDetails: any) {

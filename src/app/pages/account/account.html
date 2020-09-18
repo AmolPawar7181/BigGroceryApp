@@ -24,7 +24,8 @@
         </ion-item>
         <ion-item >
           <ion-icon slot="start" color="danger" name="location-outline"></ion-icon>
-          <ion-label class="ion-text-wrap"><h3>{{userProfileData.address}}</h3></ion-label>
+          <ion-label class="ion-text-wrap"><h3>{{address?.address}}</h3></ion-label>
+          <ion-icon class="ion-no-margin" (click)="addAddress()" slot="end" color="danger" name="create-outline"></ion-icon>
         </ion-item>
       </ion-list>
     </ion-card-content>
@@ -48,16 +49,16 @@
                   <ion-icon slot="end" name="airplane" color="success"></ion-icon>
                 </div>
                               
-                <ion-note>Ordered On: {{order.createdAt._seconds * 1000 | date:'medium' }}</ion-note><br/>
+                <ion-note>Ordered On: {{order.createdAt._seconds * 1000 | date:'short' }}</ion-note><br/>
                 <ion-icon *ngIf="order.deliveredAt" slot="start" name="checkmark-circle" color="success"></ion-icon>
-                <ion-note *ngIf="order.deliveredAt">Delivered: {{order.deliveredAt?._seconds * 1000 | date:'medium' }}</ion-note>              
+                <ion-note *ngIf="order.deliveredAt">Delivered: {{order.deliveredAt?._seconds * 1000 | date:'short' }}</ion-note>              
                 
               </ion-label>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-no-padding ion-no-margin">
             <ion-list>
-              <ion-item *ngFor="let product of order.products">
+              <ion-item *ngFor="let product of order?.products">
                 <ion-thumbnail slot="start">
                   <img class="thumbnail" [hidden]="product.details?.img.length > 0" src='../assets/img/no_image.jpg' />
                   <fiv-gallery #fivGallery (didOpen)="onImageOpen()" (didClose)="onImageClose()" [hidden]="product.details?.img.length === 0">

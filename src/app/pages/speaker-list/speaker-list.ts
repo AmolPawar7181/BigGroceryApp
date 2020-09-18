@@ -128,6 +128,7 @@ export class SpeakerListPage {
         this.modelService.dismissLoading();
         if (product.success) {
          // console.log('res ', product);
+         this.product.saveId = product.saveId;
          this.modelService.presentToast(product.msg, 2000, 'success');
         } else {
           this.modelService.presentToast(product.msg, 2000, 'danger');
@@ -142,9 +143,32 @@ export class SpeakerListPage {
      }
   }
 
+  removeSaveForLater(saveId: any) {
+    if (this.userId) {
+      this.modelService.presentLoading('Please wait...');
+      this.cartService.removeSaveForLater(this.userId, saveId).subscribe((product: any) => {
+        this.modelService.dismissLoading();
+        if (product.success) {
+         // console.log('res ', product);
+         this.product.saveId = null;
+         this.product.isRemoved = true;
+         this.modelService.presentToast(product.msg, 2000, 'success');
+        } else {
+          this.modelService.presentToast(product.msg, 2000, 'danger');
+        }
+      });
+     } else {
+       this.modelService.presentToast('Please login to remove item from save', 2000, 'danger');
+       setTimeout(() => {
+        this.dismiss();
+        this.router.navigate(['login']);
+       }, 2000);
+     }
+  }
+
   dismiss(data?: any) {
     // using the injected ModalController this page
     // can "dismiss" itself and pass back data
-    this.modalCtrl.dismiss();
+    this.modalCtrl.dismiss(this.product);
   }
 }
