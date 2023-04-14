@@ -38,6 +38,7 @@ after build apk, keystore/
 server/
 src
 Application production build process.txt
+after_build_apk_keystore
 
 .DS_Store
 Thumbs.db
