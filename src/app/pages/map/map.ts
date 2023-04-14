@@ -28,8 +28,8 @@ export class MapPage {
   addresses: { address: string; isDefault: boolean }[] = [];
   isDefault: any = 0;
   newAddress: any;
-  validAddress: false;
-  isAddAddress: false;
+  validAddress = false;
+  isAddAddress = false;
   submitted = false;
   deliveryAddress: any;
   zipCodes: any = [];
