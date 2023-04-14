@@ -4,7 +4,7 @@ $ ionic cordova build android --prod --aot --minifyjs --minifycss --optimizejs -
 Signing an APK
 
 $ keytool -genkey -v -keystore ambeshwar.keystore -alias ambeshwar -keyalg RSA -keysize 2048 -validity 10000
-Keytool password = amol143@
+Keytool password = 
 
 WARNING: Save this file and keep it somewhere safe. If it is lost the Google Play Store will not accept updates for this app!
 
