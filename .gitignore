@@ -35,7 +35,7 @@ resources/
 server/functions/node_modules
 after build apk, keystore/
 .history
-server*
+server/
 src
 Application production build process.txt
 
